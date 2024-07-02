@@ -1,3 +1,5 @@
 api_openai.sh
 *.faiss
 *.pkl
+
+**/.DS_Store
