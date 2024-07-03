@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "op-chat-brains"
+version = "0.1.0"
+description = ""
+authors = ["José Ribeiro <jose@bleu.studio>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pandas = "^2.2.2"
+langchain-openai = "^0.1.14"
+langchain-core = "^0.2.11"
+langchain-text-splitters = "^0.2.2"
+langchain-community = "^0.2.6"
+weave = "^0.50.7"
+faiss-cpu = "^1.8.0.post1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
