@@ -1,36 +1,39 @@
-"use client";
-import { Chat } from "@/components/chat/chat";
-import Image from "next/image";
-import {
-	type PartialReablocksTheme,
-	ThemeProvider,
-	extendTheme,
-	theme,
-} from "reablocks";
+import { ChatLayout } from "@/components/chat/chat-layout";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { GitHubLogoIcon } from "@radix-ui/react-icons";
+import { cookies } from "next/headers";
+import Link from "next/link";
 
-const customTheme: PartialReablocksTheme = {
-	components: {
-		button: {
-			base: "bg-lime-600 text-gray-300",
-			variants: {
-				filled: "bg-lime-600 hover:bg-lime-700",
-				outline: "bg-transparent border-lime-600 border",
-				text: "bg-transparent border-0",
-			},
-			sizes: {
-				small: "p-2",
-				medium: "p-3",
-				large: "p-4",
-			},
-		},
-	},
-};
 export default function Home() {
-	return (
-		<main className="flex min-h-screen flex-col items-center justify-between p-24">
-			<ThemeProvider theme={extendTheme(theme, customTheme)}>
-				<Chat isMobile={false} />
-			</ThemeProvider>
-		</main>
-	);
+  const layout = cookies().get("react-resizable-panels:layout");
+  const defaultLayout = layout ? JSON.parse(layout.value) : undefined;
+
+  return (
+    <main className="flex h-[calc(100dvh)] flex-col items-center justify-center p-4 md:px-24 py-32 gap-4">
+      <div className="flex justify-between max-w-5xl w-full items-center">
+        <Link
+          href="#"
+          className="text-4xl font-bold text-black underline decoration-optimism"
+        >
+          Optimism GovGPT
+        </Link>
+        <Link
+          href="https://github.com/jakobhoeg/shadcn-chat"
+          className={cn(
+            buttonVariants({ variant: "ghost", size: "icon" }),
+            "h-10 w-10",
+          )}
+        >
+          <GitHubLogoIcon className="w-7 h-7 text-muted-foreground" />
+        </Link>
+      </div>
+
+      <div className="z-10 border rounded-lg max-w-5xl w-full h-full text-sm lg:flex bg-white">
+        <ChatLayout defaultLayout={defaultLayout} navCollapsedSize={8} />
+      </div>
+
+      <div className="flex justify-between max-w-5xl w-full items-start text-xs md:text-sm text-muted-foreground " />
+    </main>
+  );
 }
