@@ -11,4 +11,4 @@ This dataset is comprised of two files, both generated when runniing the script 
 
 ## Reproducing and regenerating this dataset
 
-This dataset cannot be reproduced _exactly_ because our script to generate completely tdisregards timestamps. We simply scrape all the data from the forum. Thus you'll get the most up to date version of this dateset when you run the script in [op-9-create-optimism-forum-dataset](scripts/op-9-create-optimism-forum-dataset).
+This dataset cannot be reproduced _exactly_ because our script to generate the dataset completely disregards timestamps. We simply scrape all the data from the forum. Thus you'll get the most up to date version of this dateset when you run the script in [op-9-create-optimism-forum-dataset](scripts/op-9-create-optimism-forum-dataset).
