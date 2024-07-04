@@ -1,4 +1,4 @@
-from typing import List, Dict, Any, Callable
+from typing import List, Dict, Any, Callable, Tuple
 
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
@@ -10,7 +10,7 @@ import weave
 class DatabaseLoader:
     @staticmethod
     def load_db(
-        dbs: List[str], model_embeddings: str, vectorstore: str = "faiss"
+        dbs: Tuple[str, ...], model_embeddings: str, vectorstore: str = "faiss"
     ) -> FAISS:
         embeddings = OpenAIEmbeddings(model=model_embeddings)
         if vectorstore == "faiss":
@@ -51,6 +51,7 @@ class RetrieverBuilder:
             return db.as_retriever(**retriever_pars)
         raise ValueError(f"Unsupported vectorstore: {vectorstore}")
 
+
 class RAGModel:
     class SimpleOpenAI(weave.Model):
         structure: str = "openai-simple"
@@ -64,7 +65,10 @@ class RAGModel:
         @weave.op()
         def predict(self, question: str) -> Dict[str, Any]:
             retriever = RetrieverBuilder.build_retriever(
-                self.dbs_name, self.embeddings_name, self.vectorstore, self.retriever_pars
+                self.dbs_name,
+                self.embeddings_name,
+                self.vectorstore,
+                self.retriever_pars,
             )
             chain, _ = ChatBuilder.build_chat(self.chat_pars, self.prompt_template)
 
@@ -73,54 +77,72 @@ class RAGModel:
 
             return {"context": context, "answer": response.content}
 
-
     class SimpleClaude(weave.Model):
-        structure : str = "claude-simple" # just a retriever and a llm
+        structure: str = "claude-simple"  # just a retriever and a llm
 
-        dbs_name : List[str]
-        embeddings_name : str
+        dbs_name: List[str]
+        embeddings_name: str
 
-        vectorstore : str
-        retriever_pars : Dict[str, Any]
+        vectorstore: str
+        retriever_pars: Dict[str, Any]
 
-        prompt_builder : Callable
-        chat_pars : Dict[str, Any]
+        prompt_builder: Callable
+        chat_pars: Dict[str, Any]
 
         @weave.op()
         def predict(self, question: str):
-            retriever = RetrieverBuilder.build_retriever(self.dbs_name, self.embeddings_name, self.vectorstore, self.retriever_pars)
+            retriever = RetrieverBuilder.build_retriever(
+                self.dbs_name,
+                self.embeddings_name,
+                self.vectorstore,
+                self.retriever_pars,
+            )
             llm = ChatAnthropic(**self.chat_pars)
 
-            if self.vectorstore == 'faiss':
+            if self.vectorstore == "faiss":
                 context = retriever.invoke(question)
 
-            response = llm.invoke(self.prompt_builder(context=context, question=question))
-            
+            response = llm.invoke(
+                self.prompt_builder(context=context, question=question)
+            )
+
             return {"context": str(context), "answer": response.content}
-        
 
     class ExpanderClaude(weave.Model):
-        structure : str = "claude-expander"
+        structure: str = "claude-expander"
 
-        dbs_name : List[str]
-        embeddings_name : str
+        dbs_name: List[str]
+        embeddings_name: str
 
-        vectorstore : str
-        retriever_pars : Dict[str, Any]
+        vectorstore: str
+        retriever_pars: Dict[str, Any]
 
-        prompt_builder_expander : Callable
-        prompt_builder : Callable
-        chat_pars : Dict[str, Any]
+        prompt_builder_expander: Callable
+        prompt_builder: Callable
+        chat_pars: Dict[str, Any]
 
         @weave.op()
         def predict(self, question: str):
-            retriever = RetrieverBuilder.build_retriever(self.dbs_name, self.embeddings_name, self.vectorstore, self.retriever_pars)
+            retriever = RetrieverBuilder.build_retriever(
+                self.dbs_name,
+                self.embeddings_name,
+                self.vectorstore,
+                self.retriever_pars,
+            )
             llm = ChatAnthropic(**self.chat_pars)
 
-            expanded_question = llm.invoke(self.prompt_builder_expander(question)).content
-            if self.vectorstore == 'faiss':
+            expanded_question = llm.invoke(
+                self.prompt_builder_expander(question)
+            ).content
+            if self.vectorstore == "faiss":
                 context = retriever.invoke(expanded_question)
 
-            response = llm.invoke(self.prompt_builder(context=context, question=question, expanded_question=expanded_question))
-            
+            response = llm.invoke(
+                self.prompt_builder(
+                    context=context,
+                    question=question,
+                    expanded_question=expanded_question,
+                )
+            )
+
             return {"context": str(context), "answer": response.content}
