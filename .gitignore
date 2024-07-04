@@ -1,4 +1,6 @@
 api_openai.sh
+export_apis.sh
+
 *.faiss
 *.pkl
 
