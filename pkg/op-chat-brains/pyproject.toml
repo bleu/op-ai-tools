@@ -14,7 +14,12 @@ langchain-text-splitters = "^0.2.2"
 langchain-community = "^0.2.6"
 weave = "^0.50.7"
 faiss-cpu = "^1.8.0.post1"
+flask = "^3.0.3"
+click = "^8.1.7"
 
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.5.0"
 
 [build-system]
 requires = ["poetry-core"]
