@@ -1,15 +1,7 @@
 import { type Message, loggedInUserData } from "@/app/data";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  FileImage,
-  Mic,
-  Paperclip,
-  PlusCircle,
-  SendHorizontal,
-  Smile,
-  ThumbsUp,
-} from "lucide-react";
+import { SendHorizontal } from "lucide-react";
 import Link from "next/link";
 import type React from "react";
 import { useRef, useState } from "react";
@@ -19,13 +11,13 @@ import { Textarea } from "../ui/textarea";
 interface ChatBottombarProps {
   sendMessage: (newMessage: Message) => void;
   isMobile: boolean;
+  isStreaming: boolean;
 }
-
-export const BottombarIcons = [{ icon: FileImage }, { icon: Paperclip }];
 
 export default function ChatBottombar({
   sendMessage,
   isMobile,
+  isStreaming,
 }: ChatBottombarProps) {
   const [message, setMessage] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -35,9 +27,9 @@ export default function ChatBottombar({
   };
 
   const handleSend = () => {
-    if (message.trim()) {
+    if (message.trim() && !isStreaming) {
       const newMessage: Message = {
-        id: message.length + 1,
+        id: Date.now(),
         name: loggedInUserData.name,
         message: message.trim(),
       };
@@ -88,10 +80,10 @@ export default function ChatBottombar({
             onChange={handleInputChange}
             name="message"
             placeholder="Aa"
-            className=" w-full border rounded-full flex items-center h-9 resize-none overflow-hidden bg-background"
+            className="w-full border rounded-full flex items-center h-9 resize-none overflow-hidden bg-background"
+            disabled={isStreaming}
           />
         </motion.div>
-        (
         <Link
           href="#"
           className={cn(
@@ -99,14 +91,13 @@ export default function ChatBottombar({
             "h-9 w-9",
             "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white shrink-0",
             {
-              "opacity-40": !message.trim(),
-            },
+              "opacity-40": !message.trim() || isStreaming,
+            }
           )}
           onClick={handleSend}
         >
           <SendHorizontal size={20} className="text-muted-foreground" />
         </Link>
-        )
       </AnimatePresence>
     </div>
   );

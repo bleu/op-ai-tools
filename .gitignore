@@ -1,3 +1,9 @@
 api_openai.sh
+export_apis.sh
+
+*.faiss
+*.pkl
 
 **/.DS_Store
+
+__pycache__

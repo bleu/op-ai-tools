@@ -1,5 +1,5 @@
 import type { Message, UserData } from "@/app/data";
-import React from "react";
+import React, { useState, useCallback } from "react";
 import { ChatList } from "./chat-list";
 import ChatTopbar from "./chat-topbar";
 
@@ -10,23 +10,85 @@ interface ChatProps {
 }
 
 export function Chat({ messages, selectedUser, isMobile }: ChatProps) {
-  const [messagesState, setMessages] = React.useState<Message[]>(
-    messages ?? [],
-  );
+  const [messagesState, setMessages] = useState<Message[]>(messages ?? []);
+  const [isStreaming, setIsStreaming] = useState(false);
 
-  const sendMessage = (newMessage: Message) => {
-    setMessages([...messagesState, newMessage]);
-  };
+  const sendMessage = useCallback(
+    async (newMessage: Message) => {
+      setMessages((prev) => [...prev, newMessage]);
+      setIsStreaming(true);
+
+      try {
+        const response = await fetch(
+          process.env.NEXT_PUBLIC_CHAT_STREAMING_API_URL,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ question: newMessage.message }),
+          }
+        );
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+
+        if (reader) {
+          let assistantMessage = "";
+          const assistantMessageId = Date.now() + 1;
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: assistantMessageId,
+              name: selectedUser.name,
+              message: "",
+              avatar: selectedUser.avatar,
+            },
+          ]);
+
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value);
+            const lines = chunk.split("\n");
+            for (const line of lines) {
+              if (line.trim() === "[DONE]") {
+                setIsStreaming(false);
+                break;
+              }
+              if (line.startsWith("error:")) {
+                console.error("Error from server:", line.slice(6));
+                setIsStreaming(false);
+                break;
+              }
+              assistantMessage += line;
+              setMessages((prev) =>
+                prev.map((msg) =>
+                  msg.id === assistantMessageId
+                    ? { ...msg, message: assistantMessage }
+                    : msg
+                )
+              );
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        setIsStreaming(false);
+      }
+    },
+    [selectedUser]
+  );
 
   return (
     <div className="flex flex-col justify-between w-full h-full">
       <ChatTopbar selectedUser={selectedUser} />
-
       <ChatList
         messages={messagesState}
         selectedUser={selectedUser}
         sendMessage={sendMessage}
         isMobile={isMobile}
+        isStreaming={isStreaming}
       />
     </div>
   );
