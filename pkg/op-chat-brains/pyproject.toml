@@ -17,6 +17,7 @@ faiss-cpu = "^1.8.0.post1"
 flask = "^3.0.3"
 click = "^8.1.7"
 flask-cors = "^4.0.1"
+gunicorn = "^22.0.0"
 
 
 [tool.poetry.group.dev.dependencies]
