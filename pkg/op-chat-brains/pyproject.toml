@@ -19,6 +19,7 @@ click = "^8.1.7"
 flask-cors = "^4.0.1"
 gunicorn = "^22.0.0"
 flask-limiter = "^3.7.0"
+langchain-anthropic = "^0.1.19"
 
 
 [tool.poetry.group.dev.dependencies]
