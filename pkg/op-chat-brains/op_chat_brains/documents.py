@@ -1,3 +1,4 @@
+import os
 import re
 import json
 
@@ -7,6 +8,7 @@ from langchain_text_splitters import MarkdownHeaderTextSplitter
 from langchain_community.vectorstores import FAISS
 
 from op_chat_brains.config import (
+    DB_STORAGE_PATH,
     EMBEDDING_MODEL,
 )
 
@@ -55,7 +57,11 @@ class DocumentLoader:
 
         embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
         db = FAISS.from_documents(fragments_docs, embeddings)
-        db.save_local(f"dbs/fragments_docs_db/faiss/{EMBEDDING_MODEL}")
+        db_path = os.path.join(
+            DB_STORAGE_PATH, f"fragments_docs_db/faiss/{EMBEDDING_MODEL}"
+        )
+        os.makedirs(os.path.dirname(db_path), exist_ok=True)
+        db.save_local(db_path)
 
     @staticmethod
     def load_forum_posts(file_path: str):
@@ -131,4 +137,8 @@ class DocumentLoader:
 
         embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
         db = FAISS.from_documents(posts_forum, embeddings)
-        db.save_local(f"dbs/posts_forum_db/faiss/{EMBEDDING_MODEL}")
+        db_path = os.path.join(
+            DB_STORAGE_PATH, f"posts_forum_db/faiss/{EMBEDDING_MODEL}"
+        )
+        os.makedirs(os.path.dirname(db_path), exist_ok=True)
+        db.save_local(db_path)

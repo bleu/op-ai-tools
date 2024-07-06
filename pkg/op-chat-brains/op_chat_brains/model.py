@@ -1,10 +1,13 @@
 from typing import Iterator, List, Dict, Any, Callable, Tuple
+import os
 
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.vectorstores import FAISS
 from langchain_anthropic import ChatAnthropic
 import weave
+
+from op_chat_brains.config import DB_STORAGE_PATH
 
 
 class DatabaseLoader:
@@ -14,7 +17,10 @@ class DatabaseLoader:
     ) -> FAISS:
         embeddings = OpenAIEmbeddings(model=model_embeddings)
         if vectorstore == "faiss":
-            db_paths = [f"dbs/{name}_db/faiss/{model_embeddings}" for name in dbs]
+            db_paths = [
+                os.path.join(DB_STORAGE_PATH, f"{name}_db/faiss/{model_embeddings}")
+                for name in dbs
+            ]
             loaded_dbs = [
                 FAISS.load_local(
                     db_path, embeddings, allow_dangerous_deserialization=True
