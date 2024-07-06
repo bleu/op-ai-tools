@@ -1,4 +1,4 @@
-from typing import List, Dict, Any, Callable, Tuple
+from typing import Iterator, List, Dict, Any, Callable, Tuple
 
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
@@ -77,6 +77,20 @@ class RAGModel:
 
             return {"context": context, "answer": response.content}
 
+        @weave.op()
+        def stream(self, question: str) -> Iterator[Dict[str, Any]]:
+            retriever = RetrieverBuilder.build_retriever(
+                self.dbs_name,
+                self.embeddings_name,
+                self.vectorstore,
+                self.retriever_pars,
+            )
+            chain, _ = ChatBuilder.build_chat(self.chat_pars, self.prompt_template)
+
+            context = retriever.invoke(question)
+            for chunk in chain.stream({"context": context, "question": question}):
+                yield {"content": chunk.content}
+
     class SimpleClaude(weave.Model):
         structure: str = "claude-simple"  # just a retriever and a llm
 
@@ -107,6 +121,22 @@ class RAGModel:
             )
 
             return {"context": str(context), "answer": response.content}
+
+        @weave.op()
+        def stream(self, question: str) -> Iterator[Dict[str, Any]]:
+            retriever = RetrieverBuilder.build_retriever(
+                self.dbs_name,
+                self.embeddings_name,
+                self.vectorstore,
+                self.retriever_pars,
+            )
+            llm = ChatAnthropic(**self.chat_pars)
+
+            context = retriever.invoke(question)
+            for chunk in llm.stream(
+                self.prompt_builder(context=context, question=question)
+            ):
+                yield {"content": chunk.content}
 
     class ExpanderClaude(weave.Model):
         structure: str = "claude-expander"
@@ -146,3 +176,26 @@ class RAGModel:
             )
 
             return {"context": str(context), "answer": response.content}
+
+        @weave.op()
+        def stream(self, question: str) -> Iterator[Dict[str, Any]]:
+            retriever = RetrieverBuilder.build_retriever(
+                self.dbs_name,
+                self.embeddings_name,
+                self.vectorstore,
+                self.retriever_pars,
+            )
+            llm = ChatAnthropic(**self.chat_pars)
+
+            expanded_question = llm.invoke(
+                self.prompt_builder_expander(question)
+            ).content
+            context = retriever.invoke(expanded_question)
+            for chunk in llm.stream(
+                self.prompt_builder(
+                    context=context,
+                    question=question,
+                    expanded_question=expanded_question,
+                )
+            ):
+                yield {"content": chunk.content}

@@ -2,7 +2,7 @@ def PROMPT_BUILDER(context, question, expanded_question=None):
     return [
         (
             "system",
-            f"You are a helpful assistant that provides information about the Optimism Collective. Offer polite and informative answers. Be assertive. Avoid jargon and explain technical terms. Use the following context to answer the question:\n\n{context}",
+            f"You are a helpful assistant that provides information about the Optimism Collective. Offer polite and informative answers. Be assertive. Avoid jargon and explain technical terms. Respond ensuring you follow Markdown format. Use the following context to answer the question:\n\n{context}",
         ),
         ("human", question),
     ]

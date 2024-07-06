@@ -1,11 +1,9 @@
-from functools import lru_cache
-from typing import Dict, Any
+from typing import Dict, Any, Iterator
 from op_chat_brains.model import RAGModel
 from op_chat_brains.exceptions import UnsupportedVectorstoreError, OpChatBrainsException
 from op_chat_brains.structured_logger import StructuredLogger
 
 
-@lru_cache(maxsize=None)
 def get_rag_model(
     rag_structure,
     dbs_name,
@@ -78,4 +76,57 @@ def process_question(
         return {
             "answer": None,
             "error": "An unexpected error occurred during prediction",
+        }
+
+
+def process_question_stream(
+    question: str, rag_structure: str, logger: StructuredLogger, config: Dict[str, Any]
+) -> Iterator[Dict[str, Any]]:
+    """
+    Process a question using the specified RAG model and stream the results.
+
+    :param question: The input question
+    :param rag_structure: The RAG structure to use
+    :param logger: The logger instance
+    :param config: A dictionary containing configuration parameters
+    :yield: Dictionaries containing streamed answer chunks and any error information
+    """
+    try:
+        rag = get_rag_model(
+            rag_structure=rag_structure,
+            dbs_name=tuple(config["DEFAULT_DBS"]),
+            embeddings_name=config["EMBEDDING_MODEL"],
+            retriever_pars={"search_kwargs": {"k": config["K_RETRIEVER"]}},
+            vectorstore=config["VECTORSTORE"],
+            prompt_builder=config["PROMPT_BUILDER"],
+            prompt_builder_expander=config["PROMPT_BUILDER_EXPANDER"],
+            chat_pars={
+                "model": config["CHAT_MODEL_CLAUDE"]
+                if "claude" in rag_structure
+                else config["CHAT_MODEL_OPENAI"],
+                "temperature": config["CHAT_TEMPERATURE"],
+                "max_retries": config["MAX_RETRIES"],
+                "streaming": True,
+            },
+        )
+
+        complete_answer = ""
+        for chunk in rag.stream(question):
+            complete_answer += chunk["content"]
+            yield {"answer": chunk["content"], "error": None}
+
+        # Log the complete answer after streaming
+        logger.log_query(question, {"answer": complete_answer, "context": ""})
+
+    except UnsupportedVectorstoreError as e:
+        logger.logger.error(f"Invalid RAG structure: {str(e)}")
+        yield {"answer": None, "error": f"Invalid RAG structure: {str(e)}"}
+    except OpChatBrainsException as e:
+        logger.logger.error(f"OpChatBrains error during prediction: {str(e)}")
+        yield {"answer": None, "error": str(e)}
+    except Exception as e:
+        logger.logger.error(f"Unexpected error during prediction: {str(e)}")
+        yield {
+            "answer": None,
+            "error": f"An unexpected error occurred during prediction: {str(e)}",
         }
