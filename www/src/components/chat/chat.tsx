@@ -20,7 +20,7 @@ export function Chat({ messages, selectedUser, isMobile }: ChatProps) {
 
       try {
         const response = await fetch(
-          process.env.NEXT_PUBLIC_CHAT_STREAMING_API_URL,
+          process.env.NEXT_PUBLIC_CHAT_STREAMING_API_URL!,
           {
             method: "POST",
             headers: {

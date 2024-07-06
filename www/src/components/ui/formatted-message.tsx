@@ -31,6 +31,7 @@ export const FormattedMessage: React.FC<FormattedMessageProps> = ({
         a: ({ node, ...props }) => (
           <a className="text-blue-500 hover:underline" {...props} />
         ),
+        // @ts-expect-error
         code: ({ node, inline, ...props }) =>
           inline ? (
             <code className="bg-gray-100 rounded px-1" {...props} />
