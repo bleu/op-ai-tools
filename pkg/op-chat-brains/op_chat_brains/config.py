@@ -1,6 +1,6 @@
 import os
 
-BASE_PATH = os.getenv("OP_CHAT_BASE_PATH", os.path.expanduser("~/.op_chat_brains"))
+BASE_PATH = os.getenv("OP_CHAT_BASE_PATH", os.path.expanduser("../../data"))
 
 DOCS_PATH = os.path.join(BASE_PATH, "001-initial-dataset-governance-docs/file.txt")
 FORUM_PATH = os.path.join(
