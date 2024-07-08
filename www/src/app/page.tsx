@@ -19,10 +19,10 @@ export default function Home() {
           Optimism GovGPT
         </Link>
         <Link
-          href="https://github.com/jakobhoeg/shadcn-chat"
+          href="https://github.com/bleu/op-ai-tools"
           className={cn(
             buttonVariants({ variant: "ghost", size: "icon" }),
-            "h-10 w-10",
+            "h-10 w-10"
           )}
         >
           <GitHubLogoIcon className="w-7 h-7 text-muted-foreground" />
