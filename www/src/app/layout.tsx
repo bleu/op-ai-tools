@@ -14,6 +14,10 @@ export const viewport = {
   userScalable: 1,
 };
 
+if (process.env.NEXT_PUBLIC_API_MOCKING === "enabled") {
+  require("../mocks");
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{

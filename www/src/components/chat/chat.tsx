@@ -21,6 +21,7 @@ export function Chat({ messages, selectedUser, isMobile }: ChatProps) {
       try {
         const response = await fetch(
           process.env.NEXT_PUBLIC_CHAT_STREAMING_API_URL!,
+          // "http://localhost:9090/predict_stream",
           {
             method: "POST",
             headers: {
@@ -50,26 +51,24 @@ export function Chat({ messages, selectedUser, isMobile }: ChatProps) {
             const { value, done } = await reader.read();
             if (done) break;
             const chunk = decoder.decode(value);
-            const lines = chunk.split("\n");
-            for (const line of lines) {
-              if (line.trim() === "[DONE]") {
-                setIsStreaming(false);
-                break;
-              }
-              if (line.startsWith("error:")) {
-                console.error("Error from server:", line.slice(6));
-                setIsStreaming(false);
-                break;
-              }
-              assistantMessage += line;
-              setMessages((prev) =>
-                prev.map((msg) =>
-                  msg.id === assistantMessageId
-                    ? { ...msg, message: assistantMessage }
-                    : msg
-                )
-              );
+            assistantMessage += chunk;
+            if (chunk.trim() === "[DONE]") {
+              setIsStreaming(false);
+              break;
             }
+            if (chunk.startsWith("error:")) {
+              console.error("Error from server:", chunk.slice(6));
+              setIsStreaming(false);
+              break;
+            }
+
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === assistantMessageId
+                  ? { ...msg, message: assistantMessage }
+                  : msg
+              )
+            );
           }
         }
       } catch (error) {

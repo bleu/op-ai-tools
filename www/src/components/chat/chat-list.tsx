@@ -28,23 +28,30 @@ export function ChatList({
       messagesContainerRef.current.scrollHeight;
   }, [messages]);
 
-  const renderMessage = (message: string, isStreaming: boolean) => {
-    if (!message && isStreaming) {
-      return <span className="animate-pulse">...</span>;
-    }
+  // const renderMessage = (message: string, isStreaming: boolean) => {
+  //   if (!message && isStreaming) {
+  //     return <span className="animate-pulse">...</span>;
+  //   }
 
-    const words = message.split(" ");
-    return words.map((word, index) => (
-      <React.Fragment key={index}>
-        {word}
-        {index < words.length - 1 && " "}
-        {index === words.length - 1 && isStreaming && (
-          <span className="animate-pulse ml-1">▋</span>
-        )}
-      </React.Fragment>
-    ));
+  //   const lines = message.split("\n");
+  //   return lines.map((line, lineIndex) => (
+  //     <React.Fragment key={lineIndex}>
+  //       {line.split(" ").map((word, wordIndex, wordArray) => (
+  //         <React.Fragment key={`${lineIndex}-${wordIndex}`}>
+  //           {word}
+  //           {wordIndex < wordArray.length - 1 && " "}
+  //         </React.Fragment>
+  //       ))}
+  //       {lineIndex < lines.length - 1 && <br />}
+  //       {lineIndex === lines.length - 1 && isStreaming && (
+  //         <span className="animate-pulse ml-1">▋</span>
+  //       )}
+  //     </React.Fragment>
+  //   ));
+  // };
+  const deduplicateLineBreaks = (message: string) => {
+    return message.replace(/\n{3,}/g, "\n\n");
   };
-
   return (
     <div className="w-full overflow-y-auto overflow-x-hidden h-full flex flex-col">
       <div
@@ -76,10 +83,9 @@ export function ChatList({
                 </Avatar>
               )}
               <div className="bg-accent p-3 rounded-md max-w-md overflow-hidden">
-                {renderMessage(
-                  message.message,
-                  index === messages.length - 1 && isStreaming
-                )}
+                <FormattedMessage
+                  content={deduplicateLineBreaks(message.message)}
+                />{" "}
               </div>
               {message.name !== selectedUser.name && (
                 <Avatar className="flex justify-center items-center mt-1">

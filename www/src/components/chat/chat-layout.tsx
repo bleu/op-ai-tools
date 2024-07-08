@@ -48,12 +48,12 @@ export function ChatLayout({
       direction="horizontal"
       onLayout={(sizes: number[]) => {
         document.cookie = `react-resizable-panels:layout=${JSON.stringify(
-          sizes,
+          sizes
         )}`;
       }}
       className="h-full items-stretch"
     >
-      <ResizablePanel
+      {/* <ResizablePanel
         defaultSize={defaultLayout[0]}
         collapsedSize={navCollapsedSize}
         collapsible={true}
@@ -87,7 +87,7 @@ export function ChatLayout({
           isMobile={isMobile}
         />
       </ResizablePanel>
-      <ResizableHandle withHandle />
+      <ResizableHandle withHandle /> */}
       <ResizablePanel defaultSize={defaultLayout[1]} minSize={30}>
         <Chat
           messages={selectedUser.messages}
