@@ -6,23 +6,23 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import {
+  type ChatData,
+  addNewChat,
+  getChatName,
+  getValidTimestamp,
+  loadChatsFromLocalStorage,
+  saveChatsToLocalStorage,
+} from "@/lib/chat-utils";
 import { cn } from "@/lib/utils";
 import React, { useEffect, useState, useCallback } from "react";
 import { Sidebar } from "../sidebar";
 import { Chat } from "./chat";
-import {
-  type ChatData,
-  getChatName,
-  getValidTimestamp,
-  saveChatsToLocalStorage,
-  loadChatsFromLocalStorage,
-  addNewChat,
-} from "@/lib/chat-utils";
 
 interface ChatLayoutProps {
-  defaultLayout: number[] | undefined;
+  defaultLayout?: number[] | undefined;
   defaultCollapsed?: boolean;
-  navCollapsedSize: number;
+  navCollapsedSize?: number;
 }
 
 export function ChatLayout({
@@ -128,7 +128,7 @@ export function ChatLayout({
         maxSize={isMobile ? 8 : 30}
         onCollapse={() => {
           setIsCollapsed(true);
-          document.cookie = `react-resizable-panels:collapsed=true`;
+          document.cookie = "react-resizable-panels:collapsed=true";
         }}
         onExpand={() => {
           setIsCollapsed(false);

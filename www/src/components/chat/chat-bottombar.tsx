@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { SendHorizontal } from "lucide-react";
 import Link from "next/link";
 import type React from "react";
-import { useRef, useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { buttonVariants } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 
@@ -25,6 +25,7 @@ export default function ChatBottombar({
 }: ChatBottombarProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
@@ -37,10 +38,12 @@ export default function ChatBottombar({
 
   const handleSend = () => {
     if (inputMessage.trim() && !isStreaming) {
+      const now = Date.now();
       const newMessage: Message = {
-        id: Date.now(),
+        id: now,
         name: loggedInUserData.name,
         message: inputMessage.trim(),
+        timestamp: now,
       };
       sendMessage(newMessage);
       setInputMessage("");
@@ -101,7 +104,7 @@ export default function ChatBottombar({
             "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white shrink-0",
             {
               "opacity-40": !inputMessage.trim() || isStreaming,
-            }
+            },
           )}
           onClick={handleSend}
         >

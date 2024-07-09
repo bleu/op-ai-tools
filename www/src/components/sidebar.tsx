@@ -1,8 +1,8 @@
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { PlusCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { PlusCircle } from "lucide-react";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -32,7 +32,7 @@ export function Sidebar({
           variant="outline"
           className={cn(
             "w-full justify-start",
-            isCollapsed && "h-10 w-10 p-0 justify-center"
+            isCollapsed && "h-10 w-10 p-0 justify-center",
           )}
           onClick={onNewChat}
         >
@@ -49,7 +49,7 @@ export function Sidebar({
               "w-full justify-start",
               isCollapsed
                 ? "h-10 w-10 p-0 justify-center"
-                : "flex-col items-start h-auto py-2"
+                : "flex-col items-start h-auto py-2",
             )}
             onClick={() => onSelectChat(link.id)}
           >

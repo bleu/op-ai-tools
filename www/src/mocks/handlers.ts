@@ -9,7 +9,7 @@ const randomDelay = (min: number, max: number) =>
 
 const streamText = async (
   text: string,
-  controller: ReadableStreamDefaultController
+  controller: ReadableStreamDefaultController,
 ) => {
   const words = text.split(" ");
   for (const word of words) {

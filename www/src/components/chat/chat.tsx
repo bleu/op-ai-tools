@@ -1,10 +1,10 @@
-import { FileText, Vote, HelpCircle, PieChart } from "lucide-react";
 import type { Message, User } from "@/app/data";
+import { FileText, HelpCircle, PieChart, Vote } from "lucide-react";
 import React, { useState, useCallback } from "react";
+import ChatBottombar from "./chat-bottombar";
+import { ChatEmptyState } from "./chat-emptystate";
 import { ChatList } from "./chat-list";
 import ChatTopbar from "./chat-topbar";
-import { ChatEmptyState } from "./chat-emptystate";
-import ChatBottombar from "./chat-bottombar";
 
 interface ChatProps {
   selectedChat: User;
@@ -50,7 +50,7 @@ export function Chat({
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ question: newMessage.message }),
-          }
+          },
         );
 
         const reader = response.body?.getReader();
@@ -103,7 +103,25 @@ export function Chat({
         onUpdateMessages([...updatedMessages]);
       }
     },
-    [messages, onUpdateMessages]
+    [messages, onUpdateMessages],
+  );
+
+  const handleRegenerateMessage = useCallback(
+    (messageId: number) => {
+      const messageIndex = messages.findIndex((m) => m.id === messageId);
+      if (messageIndex === -1) return;
+
+      // Remove all messages after the selected message
+      const updatedMessages = messages.slice(0, messageIndex);
+      onUpdateMessages(updatedMessages);
+
+      // Resend the user message that preceded the AI message
+      const userMessage = messages[messageIndex - 1];
+      if (userMessage) {
+        sendMessage(userMessage);
+      }
+    },
+    [messages, onUpdateMessages, sendMessage],
   );
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -116,7 +134,7 @@ export function Chat({
       text: "Explain recent proposal",
       onClick: () =>
         handleSuggestionClick(
-          "Can you explain the most recent Optimism governance proposal?"
+          "Can you explain the most recent Optimism governance proposal?",
         ),
     },
     {
@@ -124,7 +142,7 @@ export function Chat({
       text: "How to vote",
       onClick: () =>
         handleSuggestionClick(
-          "How can I participate in voting on Optimism governance proposals?"
+          "How can I participate in voting on Optimism governance proposals?",
         ),
     },
     {
@@ -132,7 +150,7 @@ export function Chat({
       text: "OP token distribution",
       onClick: () =>
         handleSuggestionClick(
-          "Can you give me an overview of the OP token distribution?"
+          "Can you give me an overview of the OP token distribution?",
         ),
     },
     {
@@ -140,7 +158,7 @@ export function Chat({
       text: "Optimism Collective",
       onClick: () =>
         handleSuggestionClick(
-          "What is the Optimism Collective and how does it work?"
+          "What is the Optimism Collective and how does it work?",
         ),
     },
   ];
@@ -159,6 +177,7 @@ export function Chat({
             selectedUser={selectedChat}
             isMobile={isMobile}
             isStreaming={isStreaming}
+            onRegenerateMessage={handleRegenerateMessage}
           />
         )}
       </div>

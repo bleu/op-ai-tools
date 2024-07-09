@@ -1,6 +1,6 @@
+import { InfoCircledIcon } from "@radix-ui/react-icons";
 import type React from "react";
 import { Button } from "../ui/button";
-import { InfoCircledIcon } from "@radix-ui/react-icons";
 
 interface Suggestion {
   icon: React.ReactNode;
