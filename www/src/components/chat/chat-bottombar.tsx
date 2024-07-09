@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { SendHorizontal } from "lucide-react";
 import Link from "next/link";
 import type React from "react";
-import { useRef, useState } from "react";
+import { useRef, useEffect } from "react";
 import { buttonVariants } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 
@@ -12,29 +12,38 @@ interface ChatBottombarProps {
   sendMessage: (newMessage: Message) => void;
   isMobile: boolean;
   isStreaming: boolean;
+  inputMessage: string;
+  setInputMessage: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export default function ChatBottombar({
   sendMessage,
   isMobile,
   isStreaming,
+  inputMessage,
+  setInputMessage,
 }: ChatBottombarProps) {
-  const [message, setMessage] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [inputMessage]);
+
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setMessage(event.target.value);
+    setInputMessage(event.target.value);
   };
 
   const handleSend = () => {
-    if (message.trim() && !isStreaming) {
+    if (inputMessage.trim() && !isStreaming) {
       const newMessage: Message = {
         id: Date.now(),
         name: loggedInUserData.name,
-        message: message.trim(),
+        message: inputMessage.trim(),
       };
       sendMessage(newMessage);
-      setMessage("");
+      setInputMessage("");
 
       if (inputRef.current) {
         inputRef.current.focus();
@@ -50,7 +59,7 @@ export default function ChatBottombar({
 
     if (event.key === "Enter" && event.shiftKey) {
       event.preventDefault();
-      setMessage((prev) => `${prev}\n`);
+      setInputMessage((prev) => `${prev}\n`);
     }
   };
 
@@ -74,12 +83,12 @@ export default function ChatBottombar({
         >
           <Textarea
             autoComplete="off"
-            value={message}
+            value={inputMessage}
             ref={inputRef}
             onKeyDown={handleKeyPress}
             onChange={handleInputChange}
             name="message"
-            placeholder="Aa"
+            placeholder="Message GovGPT"
             className="w-full border rounded-full flex items-center h-9 resize-none overflow-hidden bg-background"
             disabled={isStreaming}
           />
@@ -91,7 +100,7 @@ export default function ChatBottombar({
             "h-9 w-9",
             "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white shrink-0",
             {
-              "opacity-40": !message.trim() || isStreaming,
+              "opacity-40": !inputMessage.trim() || isStreaming,
             }
           )}
           onClick={handleSend}

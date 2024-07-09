@@ -1,7 +1,6 @@
 export const userData = [
   {
     id: 1,
-    avatar: "/op-logo.png",
     messages: [],
     name: "Optimism GovGPT",
   },
@@ -19,8 +18,6 @@ export const userData = [
   // },
 ];
 
-export type UserData = (typeof userData)[number];
-
 export const loggedInUserData = {
   id: 5,
   name: "rpunkt.eth",
@@ -30,14 +27,14 @@ export type LoggedInUserData = typeof loggedInUserData;
 
 export interface Message {
   id: number;
-  avatar?: string;
   name: string;
   message: string;
+  timestamp: number;
+  isLoading?: boolean;
 }
 
 export interface User {
   id: number;
-  avatar: string;
   messages: Message[];
   name: string;
 }

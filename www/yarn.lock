@@ -5710,6 +5710,7 @@ __metadata:
     class-variance-authority: "npm:^0.7.0"
     clsx: "npm:^2.1.1"
     cors: "npm:^2.8.5"
+    date-fns: "npm:^3.6.0"
     eslint: "npm:^9"
     eslint-config-next: "npm:14.2.4"
     express: "npm:^4.19.2"
