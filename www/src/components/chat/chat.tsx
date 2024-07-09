@@ -5,7 +5,6 @@ import { ChatList } from "./chat-list";
 import ChatTopbar from "./chat-topbar";
 import { ChatEmptyState } from "./chat-emptystate";
 import ChatBottombar from "./chat-bottombar";
-import { timeStamp } from "console";
 
 interface ChatProps {
   selectedChat: User;
