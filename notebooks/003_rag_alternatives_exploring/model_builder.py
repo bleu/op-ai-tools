@@ -32,56 +32,85 @@ def build_chat(chat_pars, prompt_template):
     return chain, llm
     
 @weave.op()
-def build_retriever(dbs_name, embeddings_name, vectorstore = 'faiss', retriever_pars = {}):
-    db = load_db(dbs_name, embeddings_name, vectorstore)
-    if vectorstore == 'faiss':
-        retriever = db.as_retriever(**retriever_pars)
+def build_retriever(dbs_name, embeddings_name, retriever_pars = {}):
+    db = load_db(dbs_name, embeddings_name)
+
+    retriever = db.as_retriever(**retriever_pars)
 
     return retriever
+
 
 def RAG_model(structure_name:str, **kwargs):
     structures = structure_name.split('-')
     if "openai" in structures:
         class RAGModel(weave.Model):
-            structure : str = structure_name
+            structure_str : str = structure_name
 
             dbs_name : List
             embeddings_name : str
-
-            vectorstore : str
 
             prompt_template : str
             chat_pars : Dict[str, Any]
             
             retriever_pars : Dict|List
 
+            # placeholders
+            chain : Any = None
+            llm : Any = None
+            structures : List = None
+
+            def __init__(self, **kwargs):
+                super().__init__(**kwargs)
+
+                if "openai" in structures:
+                    chain, llm = build_chat(self.chat_pars, self.prompt_template)
+                    self.chain = chain
+                elif "claude" in structures:
+                    llm = ChatAnthropic(**self.chat_pars)
+                self.llm = llm
+            
+            def single_retriever(self, question: str):
+                retriever = build_retriever(self.dbs_name, self.embeddings_name, self.retriever_pars)
+                if "contextual_compression" in structures:
+                    context = self.contextual_compression(retriever, question)
+                else:
+                    context = retriever.invoke(question)
+
+                return context
+                
+            def multi_retriever(self, question: str):
+                retrievers = {}
+                for name, retriever_pars in self.retriever_pars.items():
+                    retriever = build_retriever([name], self.embeddings_name, retriever_pars)
+                    retrievers[name] = retriever
+
+                context = {}
+                for name, retriever in retrievers.items():
+                    if "contextual_compression" in structures:
+                        context[name] = self.contextual_compression(retriever, question)
+                    else:
+                        context[name] = retriever.invoke(question)
+
+                
+                return context
+            
+            def contextual_compression(self, retriever, question: str):
+                compressor = LLMChainExtractor.from_llm(self.llm)
+                compression_retriever = ContextualCompressionRetriever(
+                    base_compressor=compressor, base_retriever=retriever
+                )
+                context = compression_retriever.invoke(question)
+
+                return context
+
             @weave.op()
             def predict(self, question: str):
                 if "multi_retriever" in structures:
-                    retrievers = {}
-                    for name, retriever_pars in self.retriever_pars.items():
-                        retriever = build_retriever([name], self.embeddings_name, self.vectorstore, retriever_pars)
-                        retrievers[name] = retriever
+                    context = self.multi_retriever(question)
                 else:
-                    retriever = build_retriever(self.dbs_name, self.embeddings_name, self.vectorstore, self.retriever_pars)
+                    context = self.single_retriever(question)
 
-                chain, llm = build_chat(self.chat_pars, self.prompt_template)
-
-                if self.vectorstore == 'faiss':
-                    if "multi_retriever" in structures:
-                        context = {}
-                        for name, retriever in retrievers.items():
-                            context[name] = retriever.invoke(question)
-                    elif "contextual_compression" in structures:
-                        compressor = LLMChainExtractor.from_llm(llm)
-                        compression_retriever = ContextualCompressionRetriever(
-                            base_compressor=compressor, base_retriever=retriever
-                        )
-                        context = compression_retriever.invoke(question)
-                    else:
-                        context = retriever.invoke(question)
-
-                response = chain.invoke(
+                response = self.chain.invoke(
                     {
                         "context": context,
                         "question": question,
@@ -96,7 +125,6 @@ def RAG_model(structure_name:str, **kwargs):
             dbs_name : list
             embeddings_name : str
 
-            vectorstore : str
             retriever_pars : dict
 
             prompt_template : Callable
@@ -104,19 +132,17 @@ def RAG_model(structure_name:str, **kwargs):
 
             @weave.op()
             def predict(self, question: str):
-                prompt_expander = kwargs.get("prompt_expander", None)
-                retriever = build_retriever(self.dbs_name, self.embeddings_name, self.vectorstore, self.retriever_pars)
+                retriever = build_retriever(self.dbs_name, self.embeddings_name, self.retriever_pars)
                 llm = ChatAnthropic(**self.chat_pars)
 
                 if "query_expansion" in structures:
+                    prompt_expander = kwargs.get("prompt_expander", None)
                     expanded_question = llm.invoke(prompt_expander(question)).content
                     print(f"Expanded question: {expanded_question}")
 
-                    if self.vectorstore == 'faiss':
-                        context = retriever.invoke(expanded_question)
+                    context = retriever.invoke(expanded_question)
                 else:
-                    if self.vectorstore == 'faiss':
-                        context = retriever.invoke(question)
+                    context = retriever.invoke(question)
 
                 response = llm.invoke(self.prompt_template(context=context, question=question))
                 

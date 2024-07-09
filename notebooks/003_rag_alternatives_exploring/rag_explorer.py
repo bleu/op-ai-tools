@@ -51,11 +51,8 @@ dbs = st.sidebar.multiselect("Select databases", dbs, default=["fragments_docs",
 embedding_models = ["text-embedding-3-small", "text-embedding-3-large", "text-embedding-ada-002"] # we are going to test the open ai api for embeddings
 embedding_model = st.sidebar.selectbox("Select embedding model", embedding_models, index=2)
 
-vectorstores = ['faiss']
-vectorstore = st.sidebar.selectbox("Select vectorstore", vectorstores)
-
 chat_models_openai = ["gpt-3.5-turbo-0125", "gpt-4o"]
-chat_models_anthropic = ["claude-3-sonnet-20240229"]
+chat_models_anthropic = ["claude-3-sonnet-20240229", "claude-3-haiku-20240307", "claude-3-opus-20240229", "claude-3-5-sonnet-20240620"]
 
 temperature = st.sidebar.number_input("Chat Temperature", 0.0, 1.0, 0.0, 0.1)
 max_retries = st.sidebar.number_input("Chat Max Retries", 0, 20, 2)
@@ -74,7 +71,7 @@ for i, tab in enumerate(tabs):
     with tab:
         kwargs = {}
         structures = arch.split('-')
-        
+
         if "multi_retriever" in structures:
             retriever_pars = {db: {"search_kwargs" : {} } for db in dbs}
             for db in dbs:
@@ -135,7 +132,6 @@ for i, tab in enumerate(tabs):
             },
             prompt_template = prompt_template,
             retriever_pars = retriever_pars,
-            vectorstore = vectorstore,
         )
 
         st.write("## Single Prediction Test")
