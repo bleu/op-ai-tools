@@ -1,6 +1,7 @@
 from flask import Flask, Response, stream_with_context, request, jsonify
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from op_chat_brains.exceptions import UnsupportedVectorstoreError
 from op_chat_brains.structured_logger import StructuredLogger
 from op_chat_brains.config import (
     API_RATE_LIMIT,
@@ -22,6 +23,14 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 app.config["SECRET_KEY"] = API_SECRET_KEY
+
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    if isinstance(e, UnsupportedVectorstoreError):
+        return jsonify({"error": str(e)}), 400
+    return jsonify({"error": "An unexpected error occurred during prediction"}), 500
+
 
 limiter = Limiter(
     get_remote_address,

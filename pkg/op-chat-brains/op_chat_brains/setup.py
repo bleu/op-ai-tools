@@ -1,45 +1,46 @@
 import os
 
 from op_chat_brains.config import (
-    DOCS_PATH,
-    FORUM_PATH,
+    BASE_PATH,
     DB_STORAGE_PATH,
     EMBEDDING_MODEL,
-    BASE_PATH,
 )
-from op_chat_brains.documents import DocumentLoader
+from op_chat_brains.documents import (
+    DocumentLoader,
+)
+from op_chat_brains.documents.optimism import OptimismDocumentProcessorFactory
 
 
-def create_directory_structure():
+def create_directory_structure(factory):
+    document_types = factory.get_document_types()
     directories = [
-        os.path.dirname(DOCS_PATH),
-        os.path.dirname(FORUM_PATH),
-        DB_STORAGE_PATH,
+        os.path.dirname(os.path.join(BASE_PATH, path))
+        for path in document_types.values()
     ]
+    directories.append(DB_STORAGE_PATH)
     for directory in directories:
         os.makedirs(directory, exist_ok=True)
 
 
 def main():
-    create_directory_structure()
+    # You can easily switch to a different factory for other clients
+    factory = OptimismDocumentProcessorFactory()
+    create_directory_structure(factory)
 
-    fragments_db_path = os.path.join(
-        DB_STORAGE_PATH, f"fragments_docs_db/faiss/{EMBEDDING_MODEL}"
-    )
-    posts_db_path = os.path.join(
-        DB_STORAGE_PATH, f"posts_forum_db/faiss/{EMBEDDING_MODEL}"
-    )
+    loader = DocumentLoader(factory)
+    document_types = factory.get_document_types()
 
-    if not os.path.exists(fragments_db_path):
-        print(
-            "Loading documentation... (This might take some minutes but will happen only once)"
+    for doc_type, relative_path in document_types.items():
+        file_path = os.path.join(BASE_PATH, relative_path)
+        db_path = os.path.join(
+            DB_STORAGE_PATH, f"{doc_type}_db/faiss/{EMBEDDING_MODEL}"
         )
-        DocumentLoader.load_fragments(DOCS_PATH)
-    if not os.path.exists(posts_db_path):
-        print(
-            "Loading forum posts... (This might take some minutes but will happen only once)"
-        )
-        DocumentLoader.load_forum_posts(FORUM_PATH)
+
+        if not os.path.exists(db_path):
+            print(
+                f"Loading {doc_type}... (This might take some minutes but will happen only once)"
+            )
+            loader.load_documents(doc_type, file_path)
 
     print(f"Setup complete. Data stored in {BASE_PATH}")
 

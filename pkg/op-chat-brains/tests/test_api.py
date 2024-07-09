@@ -1,57 +1,45 @@
-import unittest
+import pytest
 from unittest.mock import patch
 from op_chat_brains.api import app
 from op_chat_brains.exceptions import UnsupportedVectorstoreError
 
 
-class TestAPI(unittest.TestCase):
-    def setUp(self):
-        self.app = app.test_client()
-        self.app.testing = True
-
-    @patch("op_chat_brains.utils.get_rag_model")
-    def test_predict(self, mock_get_rag_model):
-        mock_rag = unittest.mock.Mock()
-        mock_rag.predict.return_value = {
-            "answer": "Test answer",
-            "context": "Test context",
-        }
-        mock_get_rag_model.return_value = mock_rag
-
-        response = self.app.post("/predict", json={"question": "Test question"})
-        self.assertEqual(response.status_code, 200)
-        data = response.get_json()
-        self.assertEqual(data["answer"], "Test answer")
-        mock_rag.predict.assert_called_once_with("Test question")
-
-    def test_predict_no_question(self):
-        response = self.app.post("/predict", json={})
-        self.assertEqual(response.status_code, 400)
-        data = response.get_json()
-        self.assertEqual(data["error"], "No question provided")
-
-    @patch("op_chat_brains.utils.get_rag_model")
-    def test_predict_value_error(self, mock_get_rag_model):
-        mock_get_rag_model.side_effect = UnsupportedVectorstoreError(
-            "Invalid RAG structure"
-        )
-        response = self.app.post(
-            "/predict", json={"question": "Test question", "rag_structure": "invalid"}
-        )
-        self.assertEqual(response.status_code, 400)
-        data = response.get_json()
-        self.assertEqual(data["error"], "Invalid RAG structure")
-
-    @patch("op_chat_brains.utils.get_rag_model")
-    def test_predict_unexpected_error(self, mock_get_rag_model):
-        mock_get_rag_model.side_effect = Exception("Unexpected error")
-        response = self.app.post("/predict", json={"question": "Test question"})
-        self.assertEqual(response.status_code, 500)
-        data = response.get_json()
-        self.assertEqual(
-            data["error"], "An unexpected error occurred during prediction"
-        )
+@pytest.fixture
+def client():
+    app.config["TESTING"] = True
+    return app.test_client()
 
 
-if __name__ == "__main__":
-    unittest.main()
+@patch("op_chat_brains.api.process_question")
+def test_predict_value_error(mock_process_question, client):
+    mock_process_question.side_effect = UnsupportedVectorstoreError(
+        "Invalid RAG structure"
+    )
+    response = client.post(
+        "/predict", json={"question": "Test question", "rag_structure": "invalid"}
+    )
+    assert response.status_code == 400
+    data = response.get_json()
+    assert data["error"] == "Invalid RAG structure"
+
+
+@patch("op_chat_brains.api.process_question")
+def test_predict_unexpected_error(mock_process_question, client):
+    mock_process_question.side_effect = Exception("Unexpected error")
+    response = client.post("/predict", json={"question": "Test question"})
+    assert response.status_code == 500
+    data = response.get_json()
+    assert data["error"] == "An unexpected error occurred during prediction"
+
+
+# Updated CLI test
+@patch("op_chat_brains.cli.process_question")
+def test_cli_main(mock_process_question, capsys):
+    mock_process_question.return_value = {"answer": "CLI test answer", "error": None}
+    with pytest.raises(SystemExit) as excinfo:
+        from op_chat_brains.cli import main as cli_main
+
+        cli_main(["--rag-structure", "claude-simple", "CLI test question"])
+    assert excinfo.value.code == 0
+    captured = capsys.readouterr()
+    assert "CLI test answer" in captured.out

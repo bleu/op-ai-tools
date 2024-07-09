@@ -70,7 +70,7 @@ def process_question(
         return {"answer": output["answer"], "error": None}
     except OpChatBrainsException as e:
         logger.logger.error(f"OpChatBrains error during prediction: {str(e)}")
-        return {"answer": None, "error": e}
+        return {"answer": None, "error": str(e)}
     except Exception as e:
         logger.logger.error(f"Unexpected error during prediction: {str(e)}")
         return {
@@ -82,15 +82,6 @@ def process_question(
 def process_question_stream(
     question: str, rag_structure: str, logger: StructuredLogger, config: Dict[str, Any]
 ) -> Iterator[Dict[str, Any]]:
-    """
-    Process a question using the specified RAG model and stream the results.
-
-    :param question: The input question
-    :param rag_structure: The RAG structure to use
-    :param logger: The logger instance
-    :param config: A dictionary containing configuration parameters
-    :yield: Dictionaries containing streamed answer chunks and any error information
-    """
     try:
         rag = get_rag_model(
             rag_structure=rag_structure,
@@ -128,5 +119,5 @@ def process_question_stream(
         logger.logger.error(f"Unexpected error during prediction: {str(e)}")
         yield {
             "answer": None,
-            "error": f"An unexpected error occurred during prediction: {str(e)}",
+            "error": "An unexpected error occurred during prediction",
         }

@@ -1,22 +1,19 @@
-import os
 import re
 import json
+from typing import Dict, List
 
-from langchain_openai import OpenAIEmbeddings
 from langchain_core.documents.base import Document
 from langchain_text_splitters import MarkdownHeaderTextSplitter
-from langchain_community.vectorstores import FAISS
 
-from op_chat_brains.config import (
-    DB_STORAGE_PATH,
-    EMBEDDING_MODEL,
+from op_chat_brains.documents import (
+    DocumentProcessingStrategy,
+    DocumentProcessorFactory,
 )
 
 
-class DocumentLoader:
-    @staticmethod
-    def load_fragments(docs_path: str):
-        with open(docs_path, "r") as f:
+class FragmentsProcessingStrategy(DocumentProcessingStrategy):
+    def process_document(self, file_path: str) -> List[Document]:
+        with open(file_path, "r") as f:
             docs_read = f.read()
 
         docs_read = re.split(r"==> | <==", docs_read)
@@ -55,16 +52,14 @@ class DocumentLoader:
                 fragment.metadata["document_name"] = d["document_name"]
                 fragments_docs.append(fragment)
 
-        embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
-        db = FAISS.from_documents(fragments_docs, embeddings)
-        db_path = os.path.join(
-            DB_STORAGE_PATH, f"fragments_docs_db/faiss/{EMBEDDING_MODEL}"
-        )
-        os.makedirs(os.path.dirname(db_path), exist_ok=True)
-        db.save_local(db_path)
+        return fragments_docs
 
-    @staticmethod
-    def load_forum_posts(file_path: str):
+    def get_db_name(self) -> str:
+        return "fragments_docs_db"
+
+
+class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
+    def process_document(self, file_path: str) -> List[Document]:
         with open(file_path, "r") as file:
             boards, threads, posts = {}, {}, {}
             for line in file:
@@ -135,10 +130,23 @@ class DocumentLoader:
             for id, d in posts.items()
         ]
 
-        embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
-        db = FAISS.from_documents(posts_forum, embeddings)
-        db_path = os.path.join(
-            DB_STORAGE_PATH, f"posts_forum_db/faiss/{EMBEDDING_MODEL}"
-        )
-        os.makedirs(os.path.dirname(db_path), exist_ok=True)
-        db.save_local(db_path)
+        return posts_forum
+
+    def get_db_name(self) -> str:
+        return "posts_forum_db"
+
+
+class OptimismDocumentProcessorFactory(DocumentProcessorFactory):
+    def create_processor(self, doc_type: str) -> DocumentProcessingStrategy:
+        if doc_type == "fragments":
+            return FragmentsProcessingStrategy()
+        elif doc_type == "forum_posts":
+            return ForumPostsProcessingStrategy()
+        else:
+            raise ValueError(f"Unsupported document type: {doc_type}")
+
+    def get_document_types(self) -> Dict[str, str]:
+        return {
+            "fragments": "001-initial-dataset-governance-docs/file.txt",
+            "forum_posts": "002-governance-forum-202406014/dataset/_out.jsonl",
+        }
