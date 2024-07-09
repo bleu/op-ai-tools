@@ -86,16 +86,6 @@ yarn dev
 
 Visit [http://localhost:3000](http://localhost:3000) in your browser to interact with the chat interface.
 
-## Development
-
-### Testing
-
-We use `pytest` for testing the Python components of the project. To run the test suite:
-
-```bash
-pytest
-```
-
 ## Contact
 
 For any questions or issues, please open an issue on GitHub or contact the project maintainers.
