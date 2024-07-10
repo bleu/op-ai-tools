@@ -180,12 +180,16 @@ export function ChatList({
                             </div>
                             <div className="flex items-center space-x-2">
                               <RadioGroupItem
-                                value="inappropriate"
-                                id="inappropriate"
+                                value="unrelated"
+                                id="unrelated"
                               />
-                              <Label htmlFor="inappropriate">
-                                Inappropriate
+                              <Label htmlFor="unrelated">
+                                Not related to the question
                               </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="outdated" id="outdated" />
+                              <Label htmlFor="outdated">Outdated</Label>
                             </div>
                             <div className="flex items-center space-x-2">
                               <RadioGroupItem value="other" id="other" />
