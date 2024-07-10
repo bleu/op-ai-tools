@@ -88,7 +88,7 @@ export default function ChatBottombar({
           "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white shrink-0",
           {
             "opacity-40": !inputMessage.trim() || isStreaming,
-          }
+          },
         )}
         onClick={handleSend}
       >

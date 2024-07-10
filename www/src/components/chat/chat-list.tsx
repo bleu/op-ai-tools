@@ -7,6 +7,7 @@ import { Avatar, AvatarImage, BoringAvatar } from "../ui/avatar";
 import { Button } from "../ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -196,9 +197,11 @@ export function ChatList({
                             value={feedbackDetails}
                             onChange={(e) => setFeedbackDetails(e.target.value)}
                           />
-                          <Button onClick={handleFeedbackSubmit}>
-                            Submit Feedback
-                          </Button>
+                          <DialogClose asChild>
+                            <Button onClick={handleFeedbackSubmit}>
+                              Submit Feedback
+                            </Button>
+                          </DialogClose>
                         </DialogContent>
                       </Dialog>
                     </div>
