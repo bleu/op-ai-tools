@@ -87,9 +87,9 @@ export function ChatList({
       ref={messagesContainerRef}
       className="w-full overflow-y-auto overflow-x-hidden h-full flex flex-col"
     >
-      {messages?.map((message, index) => (
+      {messages?.map((message) => (
         <div
-          key={message.id}
+          key={message.timestamp}
           className={cn(
             "flex flex-col gap-2 p-4",
             message.name !== "Optimism GovGPT" ? "items-end" : "items-start",
@@ -124,8 +124,8 @@ export function ChatList({
                   <FormattedMessage
                     content={deduplicateLineBreaks(message.message)}
                   />
-                  {message.name === "Optimism GovGPT" && (
-                    <div className="mt-2 flex gap-3">
+                  {!isStreaming && message.name === "Optimism GovGPT" && (
+                    <div className="mt-2 flex gap-3 ">
                       <Button
                         variant="ghost"
                         className="px-0"

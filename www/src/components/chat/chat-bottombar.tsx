@@ -13,7 +13,7 @@ interface ChatBottombarProps {
   isMobile: boolean;
   isStreaming: boolean;
   inputMessage: string;
-  setInputMessage: React.Dispatch<React.SetStateAction<string>>;
+  setInputMessage: (message: string | ((prev: string) => string)) => void;
 }
 
 export default function ChatBottombar({

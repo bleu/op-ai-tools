@@ -1,6 +1,5 @@
 "use client";
-
-import { type Message, userData } from "@/app/data";
+import type { Message } from "@/app/data";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -27,16 +26,21 @@ interface ChatLayoutProps {
 
 export function ChatLayout({
   defaultLayout = [320, 480],
-  defaultCollapsed = false,
+  defaultCollapsed = true,
   navCollapsedSize,
 }: ChatLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const [selectedChat, setSelectedChat] = useState<ChatData | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [chats, setChats] = useState<ChatData[]>([]);
+  const [showSidebar, setShowSidebar] = useState(!isMobile);
 
   useEffect(() => {
-    const checkScreenWidth = () => setIsMobile(window.innerWidth <= 768);
+    const checkScreenWidth = () => {
+      const newIsMobile = window.innerWidth <= 768;
+      setIsMobile(newIsMobile);
+      setShowSidebar(!newIsMobile);
+    };
     checkScreenWidth();
     window.addEventListener("resize", checkScreenWidth);
     return () => window.removeEventListener("resize", checkScreenWidth);
@@ -65,14 +69,23 @@ export function ChatLayout({
       return updatedChats;
     });
     setSelectedChat(newChat);
-  }, []);
+    if (isMobile) {
+      setShowSidebar(false);
+    }
+  }, [isMobile]);
 
   const handleSelectChat = useCallback(
     (id: number) => {
       const selected = chats.find((chat) => chat.id === id);
-      if (selected) setSelectedChat(selected);
+      if (selected) {
+        setSelectedChat(selected);
+
+        if (isMobile) {
+          setShowSidebar(false);
+        }
+      }
     },
-    [chats]
+    [chats, isMobile],
   );
 
   const handleUpdateMessages = useCallback(
@@ -87,10 +100,10 @@ export function ChatLayout({
                 messages: newMessages,
                 name: getChatName(newMessages),
                 timestamp: getValidTimestamp(
-                  newMessages[newMessages.length - 1]?.timestamp
+                  newMessages[newMessages.length - 1]?.timestamp,
                 ),
               }
-            : chat
+            : chat,
         );
         saveChatsToLocalStorage(updatedChats);
         return updatedChats;
@@ -102,63 +115,72 @@ export function ChatLayout({
           messages: newMessages,
           name: getChatName(newMessages),
           timestamp: getValidTimestamp(
-            newMessages[newMessages.length - 1]?.timestamp
+            newMessages[newMessages.length - 1]?.timestamp,
           ),
         };
       });
     },
-    [selectedChat]
+    [selectedChat],
   );
+
+  const toggleSidebar = useCallback(() => {
+    setShowSidebar((prev) => !prev);
+  }, []);
 
   return (
     <ResizablePanelGroup
       direction="horizontal"
       onLayout={(sizes: number[]) => {
         document.cookie = `react-resizable-panels:layout=${JSON.stringify(
-          sizes
+          sizes,
         )}`;
       }}
       className="h-full items-stretch"
     >
-      <ResizablePanel
-        defaultSize={defaultLayout[0]}
-        collapsedSize={navCollapsedSize}
-        collapsible={true}
-        minSize={isMobile ? 0 : 24}
-        maxSize={isMobile ? 8 : 30}
-        onCollapse={() => {
-          setIsCollapsed(true);
-          document.cookie = "react-resizable-panels:collapsed=true";
-        }}
-        onExpand={() => {
-          setIsCollapsed(false);
-          document.cookie = "react-resizable-panels:collapsed=false";
-        }}
-        className={cn(
-          isCollapsed &&
-            "min-w-[50px] md:min-w-[70px] transition-all duration-300 ease-in-out"
-        )}
-      >
-        <Sidebar
-          isCollapsed={isCollapsed || isMobile}
-          links={chats.map((chat) => ({
-            id: chat.id,
-            name: chat.name,
-            timestamp: chat.timestamp,
-            variant: selectedChat?.id === chat.id ? "default" : "ghost",
-          }))}
-          onSelectChat={handleSelectChat}
-          onNewChat={handleNewChat}
-        />
-      </ResizablePanel>
-      <ResizableHandle withHandle />
+      {(showSidebar || !isMobile) && (
+        <ResizablePanel
+          defaultSize={defaultLayout[0]}
+          collapsedSize={navCollapsedSize}
+          collapsible={!isMobile}
+          minSize={isMobile ? 100 : 24}
+          maxSize={isMobile ? 100 : 30}
+          onCollapse={() => {
+            setIsCollapsed(true);
+            document.cookie = "react-resizable-panels:collapsed=true";
+          }}
+          onExpand={() => {
+            setIsCollapsed(false);
+            document.cookie = "react-resizable-panels:collapsed=false";
+          }}
+          className={cn(
+            isCollapsed &&
+              "min-w-[50px] md:min-w-[70px] transition-all duration-300 ease-in-out",
+            isMobile && "absolute z-10 h-full bg-background",
+          )}
+        >
+          <Sidebar
+            isCollapsed={isCollapsed && !isMobile}
+            links={chats.map((chat) => ({
+              id: chat.id,
+              messages: chat.messages,
+              name: chat.name,
+              timestamp: chat.timestamp,
+              variant: selectedChat?.id === chat.id ? "default" : "ghost",
+            }))}
+            onSelectChat={handleSelectChat}
+            onNewChat={handleNewChat}
+            isMobile={isMobile}
+          />
+        </ResizablePanel>
+      )}
+      {!isMobile && <ResizableHandle withHandle />}
       <ResizablePanel defaultSize={defaultLayout[1]} minSize={30}>
         {selectedChat ? (
           <Chat
             selectedChat={selectedChat}
-            messages={selectedChat.messages}
             isMobile={isMobile}
             onUpdateMessages={handleUpdateMessages}
+            onToggleSidebar={toggleSidebar}
           />
         ) : (
           <div className="flex items-center justify-center h-full">

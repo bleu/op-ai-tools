@@ -1,4 +1,5 @@
 import type { Message } from "@/app/data";
+import { format, isValid } from "date-fns";
 
 export interface ChatData {
   id: number;
@@ -61,4 +62,12 @@ export const addNewChat = (chats: ChatData[]): ChatData[] => {
     timestamp: Date.now(),
   };
   return [newChat, ...chats];
+};
+
+export const formatDate = (timestamp: number) => {
+  const date = new Date(timestamp);
+  if (isValid(date)) {
+    return format(date, "MMM d, yyyy h:mm a");
+  }
+  return "Invalid date";
 };

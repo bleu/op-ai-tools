@@ -1,6 +1,6 @@
 import type { Message, User } from "@/app/data";
 import { FileText, HelpCircle, PieChart, Vote } from "lucide-react";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import ChatBottombar from "./chat-bottombar";
 import { ChatEmptyState } from "./chat-emptystate";
 import { ChatList } from "./chat-list";
@@ -8,29 +8,34 @@ import ChatTopbar from "./chat-topbar";
 
 interface ChatProps {
   selectedChat: User;
-  messages: Message[];
   isMobile: boolean;
   onUpdateMessages: (newMessages: Message[]) => void;
+  onToggleSidebar: () => void;
 }
 
 export function Chat({
   selectedChat,
-  messages,
   isMobile,
   onUpdateMessages,
+  onToggleSidebar,
 }: ChatProps) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
+
+  useEffect(() => {
+    setCurrentMessages(selectedChat.messages || []);
+  }, [selectedChat]);
 
   const sendMessage = useCallback(
     async (newMessage: Message) => {
-      const updatedMessages = [...messages, newMessage];
+      const updatedMessages = [...currentMessages, newMessage];
+      setCurrentMessages(updatedMessages);
       onUpdateMessages(updatedMessages);
       setIsStreaming(true);
       setIsTyping(true);
 
-      // Add a loading message immediately
       const loadingMessageId = Date.now();
       updatedMessages.push({
         id: loadingMessageId,
@@ -39,6 +44,7 @@ export function Chat({
         isLoading: true,
         timestamp: loadingMessageId,
       });
+      setCurrentMessages([...updatedMessages]);
       onUpdateMessages([...updatedMessages]);
 
       try {
@@ -86,6 +92,7 @@ export function Chat({
 
             updatedMessages[updatedMessages.length - 1].message =
               assistantMessage;
+            setCurrentMessages([...updatedMessages]);
             onUpdateMessages([...updatedMessages]);
           }
         }
@@ -100,28 +107,30 @@ export function Chat({
           message: "Sorry, an error occurred while processing your request.",
           timestamp: Date.now(),
         };
+        setCurrentMessages([...updatedMessages]);
         onUpdateMessages([...updatedMessages]);
       }
     },
-    [messages, onUpdateMessages],
+    [currentMessages, onUpdateMessages],
   );
 
   const handleRegenerateMessage = useCallback(
     (messageId: number) => {
-      const messageIndex = messages.findIndex((m) => m.id === messageId);
+      const messageIndex = currentMessages.findIndex((m) => m.id === messageId);
       if (messageIndex === -1) return;
 
       // Remove all messages after the selected message
-      const updatedMessages = messages.slice(0, messageIndex);
+      const updatedMessages = currentMessages.slice(0, messageIndex);
+      setCurrentMessages(updatedMessages);
       onUpdateMessages(updatedMessages);
 
       // Resend the user message that preceded the AI message
-      const userMessage = messages[messageIndex - 1];
+      const userMessage = currentMessages[messageIndex - 1];
       if (userMessage) {
         sendMessage(userMessage);
       }
     },
-    [messages, onUpdateMessages, sendMessage],
+    [currentMessages, onUpdateMessages, sendMessage],
   );
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -165,15 +174,19 @@ export function Chat({
 
   return (
     <div className="flex flex-col w-full h-full">
-      <ChatTopbar isTyping={isTyping} />
+      <ChatTopbar
+        isTyping={isTyping}
+        onToggleSidebar={onToggleSidebar}
+        isMobile={isMobile}
+      />
       <div className="flex-grow overflow-hidden relative">
-        {messages.length === 0 ? (
+        {selectedChat.messages.length === 0 ? (
           <div className="absolute inset-0 flex items-center justify-center">
             <ChatEmptyState suggestions={suggestions} />
           </div>
         ) : (
           <ChatList
-            messages={messages}
+            messages={selectedChat.messages}
             selectedUser={selectedChat}
             isMobile={isMobile}
             isStreaming={isStreaming}

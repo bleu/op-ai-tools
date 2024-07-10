@@ -1,17 +1,30 @@
+import { Menu } from "lucide-react";
 import React from "react";
-import { Avatar, AvatarImage, BoringAvatar } from "../ui/avatar";
+import { Avatar, AvatarImage } from "../ui/avatar";
+import { Button } from "../ui/button";
 
 interface ChatTopbarProps {
   isTyping: boolean;
+  onToggleSidebar: () => void;
+  isMobile: boolean;
 }
 
-export default function ChatTopbar({ isTyping }: ChatTopbarProps) {
+export default function ChatTopbar({
+  isTyping,
+  onToggleSidebar,
+  isMobile,
+}: ChatTopbarProps) {
   return (
-    <div className="w-full h-20 flex flex-col p-4 justify-center border-b">
+    <div className="w-full h-20 flex items-center p-4 justify-between border-b">
       <div className="flex items-center gap-2">
+        {isMobile && (
+          <Button variant="ghost" size="icon" onClick={onToggleSidebar}>
+            <Menu className="h-5 w-5" />
+          </Button>
+        )}
         <Avatar className="flex justify-center items-center">
           <AvatarImage
-            src="/op-logo.png" // Make sure to add the Optimism logo to your public folder
+            src="/op-logo.png"
             alt="Optimism GovGPT"
             width={6}
             height={6}
