@@ -93,6 +93,8 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
                             "creation_time": data_line["item"]["creation_time"],
                             "path": data_line["item"]["path"],
                             "download_time": data_line["download_time"],
+                            "reply_to_post_number": data_line["item"]["data"]["reply_to_post_number"],
+                            "post_number": data_line["item"]["data"]["post_number"],
                         }
                 except KeyError:
                     pass
@@ -153,14 +155,16 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
             try:
                 str_thread = f"OPTIMISM FORUM \n board: {posts_thread['board_name'].iloc[0]}\n thread: {posts_thread['thread_title'].iloc[0]}\n\n"
                 for i, post in posts_thread.iterrows():
-                    str_thread += f"---\n\nPOST \n user: {post['username']}" 
+                    str_thread += f"---\n\nPOST #{post['post_number']} \n user: {post['username']}" 
                     if post['moderator']:
                         str_thread += " (moderator)"
                     if post['admin']:
                         str_thread += " (admin)"
                     if post['staff']:
                         str_thread += " (staff)"
-                    str_thread += f"\n created_at: {post['created_at']} \n trust_level (0-4): {post['trust_level']} \n\n"
+                    str_thread += f"\n created_at: {post['created_at']} \n trust_level (0-4): {post['trust_level']}\n\n"
+                    if post['reply_to_post_number'] != None:
+                        str_thread += f"(reply to post number {post['reply_to_post_number']})\n"
                     str_thread += f"{post['content']}\n\n"
             except:
                 None
@@ -171,6 +175,7 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
                 "board_name": board,
                 "url": url,
                 "num_posts": len(posts_thread),
+                "users": list(posts_thread['username'].unique()),
             }
             threads.append([str_thread, metadata])
 
