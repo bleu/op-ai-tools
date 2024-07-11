@@ -40,14 +40,17 @@ chat_models_anthropic = ["claude-3-sonnet-20240229", "claude-3-haiku-20240307", 
 chat_models = chat_models_openai + chat_models_anthropic
 model_name = st.multiselect("Model Name", chat_models, default=["gpt-4o", "claude-3-sonnet-20240229"])
 
-chain_type = st.multiselect("Chain Type", ["stuff", "map_reduce", "refine"], default=["stuff"])
+#chain_type = st.multiselect("Chain Type", ["stuff", "map_reduce", "refine"], default=["stuff"])
+chain_type = ["stuff"]
 
-if st.button("Summarize Threads"):    
+if st.button("Summarize Threads"):   
+    str_out = "## Summarized Threads\n"
     st.write("## Summarized Threads")
     for thread in threads:
         st.write("----")
         st.write(thread.metadata)
         st.write(thread.metadata["url"])
+        str_out += f"----\n### Thread: {thread.metadata['url']}\n {thread.metadata}\n"
         for m in model_name:
             for c in chain_type:
                 st.write(f"### Model: {m}, Chain: {c}")
@@ -56,4 +59,12 @@ if st.button("Summarize Threads"):
                 end = time.time()
                 st.write(result['output_text'])
                 st.write(f"(Time taken: {end-start}s)")
+                str_out += f"#### Model: {m}, Chain: {c}\n{result['output_text']}\n(Time taken: {end-start}s)\n"
 
+    st.download_button(
+        label="Download Summarized Threads",
+        data=str_out,
+        file_name="summarized_threads.md",
+        mime="text/markdown"
+    )
+        
