@@ -27,7 +27,7 @@ app = Flask(__name__)
 CORS(app)
 app.config["SECRET_KEY"] = API_SECRET_KEY
 
-posthog = Posthog(POSTHOG_API_KEY, host="https://us.i.posthog.com")
+posthog = Posthog(POSTHOG_API_KEY, host="https://us.i.posthog.com", sync_mode=True)
 
 limiter = Limiter(
     get_remote_address,
@@ -87,7 +87,6 @@ def predict(question, rag_structure):
     result = process_question(question, rag_structure, logger, get_config())
 
     user_token = request.headers.get("x-user-id")
-    print("user token", user_token)
     posthog.capture(
         user_token,
         "MODEL_PREDICTED_ANSWER",
@@ -99,6 +98,7 @@ def predict(question, rag_structure):
             "rag_structure": rag_structure,
         },
     )
+    posthog.shutdown()
 
     return jsonify(result)
 
@@ -123,7 +123,6 @@ def predict_stream(question, rag_structure):
         yield "[DONE]\n"
 
         user_token = request.headers.get("x-user-id")
-        print("user token", user_token)
         posthog.capture(
             user_token,
             "MODEL_PREDICTED_ANSWER",
@@ -135,6 +134,7 @@ def predict_stream(question, rag_structure):
                 "rag_structure": rag_structure,
             },
         )
+        posthog.shutdown()
 
     return Response(stream_with_context(generate()), content_type="text/plain")
 
