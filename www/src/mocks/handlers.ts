@@ -9,11 +9,11 @@ const randomDelay = (min: number, max: number) =>
 
 const streamText = async (
   text: string,
-  controller: ReadableStreamDefaultController,
+  controller: ReadableStreamDefaultController
 ) => {
   const words = text.split(" ");
   for (const word of words) {
-    await randomDelay(50, 200); // Simulate variable typing speed
+    await randomDelay(10, 50); // Simulate variable typing speed
     controller.enqueue(encoder.encode(`${word} `));
   }
 };
@@ -23,12 +23,12 @@ export const handlers = [
     // @ts-expect-error
     const { shouldError } = await request.json();
 
-    await delay(3_000);
+    await delay(1_000);
 
     const stream = new ReadableStream({
       async start(controller) {
         if (shouldError) {
-          await delay(1000);
+          await delay(50);
           controller.error(new Error("Simulated error in stream"));
           return;
         }
@@ -49,7 +49,7 @@ In summary, Optimism is an Ethereum Layer 2 focused on scalability through optim
 
         await streamText(content, controller);
 
-        await randomDelay(500, 1000);
+        await randomDelay(10, 100);
         controller.enqueue(encoder.encode("[DONE]\n"));
         controller.close();
       },

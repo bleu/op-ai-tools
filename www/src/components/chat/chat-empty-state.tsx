@@ -1,18 +1,13 @@
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import type React from "react";
 import { Button } from "../ui/button";
+import { suggestions } from "./chat-suggestions";
 
-interface Suggestion {
-  icon: React.ReactNode;
-  text: string;
-  onClick: () => void;
-}
-
-interface ChatEmptyStateProps {
-  suggestions: Suggestion[];
-}
-
-export function ChatEmptyState({ suggestions }: ChatEmptyStateProps) {
+export function ChatEmptyState({
+  onSuggestionClick,
+}: {
+  onSuggestionClick: (suggestion: string) => void;
+}) {
   return (
     <div className="flex flex-col items-center justify-center h-full p-4">
       <div className="mb-8">
@@ -22,15 +17,15 @@ export function ChatEmptyState({ suggestions }: ChatEmptyStateProps) {
         How can I help you today?
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl">
-        {suggestions.map((suggestion, index) => (
+        {suggestions.map((suggestion) => (
           <Button
-            key={suggestion.text}
+            key={suggestion.label}
             variant="outline"
             className="flex items-center justify-start gap-2 h-auto py-3 px-4 text-sm md:text-base"
-            onClick={suggestion.onClick}
+            onClick={() => onSuggestionClick(suggestion.value)}
           >
             {suggestion.icon}
-            <span>{suggestion.text}</span>
+            <span>{suggestion.label}</span>
           </Button>
         ))}
       </div>
