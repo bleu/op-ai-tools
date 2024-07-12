@@ -1,6 +1,7 @@
 import type { Message, User } from "@/app/data";
 import { FileText, HelpCircle, PieChart, Vote } from "lucide-react";
 import React, { useState, useCallback, useEffect } from "react";
+import { usePostHog } from "posthog-js/react";
 import ChatBottombar from "./chat-bottombar";
 import { ChatEmptyState } from "./chat-emptystate";
 import { ChatList } from "./chat-list";
@@ -23,6 +24,7 @@ export function Chat({
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
+  const posthog = usePostHog();
 
   useEffect(() => {
     setCurrentMessages(selectedChat.messages || []);
@@ -54,9 +56,12 @@ export function Chat({
           process.env.NEXT_PUBLIC_CHAT_STREAMING_API_URL,
           {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              "X-User-ID": posthog.get_distinct_id(),
+            },
             body: JSON.stringify({ question: newMessage.message }),
-          },
+          }
         );
 
         const reader = response.body?.getReader();
@@ -111,7 +116,7 @@ export function Chat({
         onUpdateMessages([...updatedMessages]);
       }
     },
-    [currentMessages, onUpdateMessages],
+    [currentMessages, onUpdateMessages, posthog]
   );
 
   const handleRegenerateMessage = useCallback(
@@ -130,7 +135,7 @@ export function Chat({
         sendMessage(userMessage);
       }
     },
-    [currentMessages, onUpdateMessages, sendMessage],
+    [currentMessages, onUpdateMessages, sendMessage]
   );
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -143,7 +148,7 @@ export function Chat({
       text: "Explain recent proposal",
       onClick: () =>
         handleSuggestionClick(
-          "Can you explain the most recent Optimism governance proposal?",
+          "Can you explain the most recent Optimism governance proposal?"
         ),
     },
     {
@@ -151,7 +156,7 @@ export function Chat({
       text: "How to vote",
       onClick: () =>
         handleSuggestionClick(
-          "How can I participate in voting on Optimism governance proposals?",
+          "How can I participate in voting on Optimism governance proposals?"
         ),
     },
     {
@@ -159,7 +164,7 @@ export function Chat({
       text: "OP token distribution",
       onClick: () =>
         handleSuggestionClick(
-          "Can you give me an overview of the OP token distribution?",
+          "Can you give me an overview of the OP token distribution?"
         ),
     },
     {
@@ -167,7 +172,7 @@ export function Chat({
       text: "Optimism Collective",
       onClick: () =>
         handleSuggestionClick(
-          "What is the Optimism Collective and how does it work?",
+          "What is the Optimism Collective and how does it work?"
         ),
     },
   ];
