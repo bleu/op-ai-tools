@@ -53,7 +53,7 @@ export function ChatList({
   };
 
   const handleNegativeReaction = (message: Message) => {
-    posthog.capture("NEGATIVE_REACTION_TO_MESSAGE", {
+    posthog.capture("USER_REACTED_NEGATIVELY_TO_MESSAGE", {
       messageId: message.id,
       messages: messages,
     });
@@ -62,7 +62,7 @@ export function ChatList({
   };
 
   const handleFeedbackSubmit = () => {
-    posthog.capture("USER_FEEDBACK_SUBMITTED", {
+    posthog.capture("USER_SENT_FEEDBACK", {
       messageId: feedbackMessage?.id,
       messages: messages,
       reason: feedbackReason,
@@ -93,7 +93,7 @@ export function ChatList({
           key={message.timestamp}
           className={cn(
             "flex flex-col gap-2 p-4",
-            message.name !== "Optimism GovGPT" ? "items-end" : "items-start",
+            message.name !== "Optimism GovGPT" ? "items-end" : "items-start"
           )}
         >
           <div className="flex gap-3 items-start">
@@ -111,7 +111,7 @@ export function ChatList({
             <div
               className={cn(
                 "p-3 rounded-md max-w-md overflow-hidden",
-                "bg-accent",
+                "bg-accent"
               )}
             >
               {message.isLoading ? (
