@@ -1,4 +1,5 @@
-import { type Message, loggedInUserData } from "@/app/data";
+import type { Message } from "@/app/data";
+import { type ChatData, generateMessageParams } from "@/lib/chat-utils";
 import { cn } from "@/lib/utils";
 import { SendHorizontal } from "lucide-react";
 import Link from "next/link";
@@ -12,6 +13,7 @@ interface ChatBottombarProps {
   isMobile: boolean;
   isStreaming: boolean;
   inputMessage: string;
+  selectedChat: ChatData;
   setInputMessage: (message: string | ((prev: string) => string)) => void;
 }
 
@@ -21,6 +23,7 @@ export default function ChatBottombar({
   isStreaming,
   inputMessage,
   setInputMessage,
+  selectedChat,
 }: ChatBottombarProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -37,13 +40,11 @@ export default function ChatBottombar({
 
   const handleSend = () => {
     if (inputMessage.trim() && !isStreaming) {
-      const now = Date.now();
-      const newMessage: Message = {
-        id: now,
-        name: loggedInUserData.name,
-        message: inputMessage.trim(),
-        timestamp: now,
-      };
+      const newMessage: Message = generateMessageParams(
+        selectedChat.id,
+        inputMessage.trim(),
+      );
+
       sendMessage(newMessage);
       setInputMessage("");
 

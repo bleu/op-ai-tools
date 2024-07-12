@@ -2,7 +2,7 @@ import type { Message } from "@/app/data";
 import { format, isValid } from "date-fns";
 
 export interface ChatData {
-  id: number;
+  id: string;
   name: string;
   messages: Message[];
   timestamp: number;
@@ -44,7 +44,7 @@ export const loadChatsFromLocalStorage = (): ChatData[] => {
     const parsedHistory = JSON.parse(savedHistory);
     return Object.entries(parsedHistory)
       .map(([name, messages]) => ({
-        id: Number.parseInt(name.split("-")[1]),
+        id: name,
         name: getChatName(messages as Message[]),
         messages: messages as Message[],
         timestamp: getValidTimestamp((messages as Message[])[0]?.timestamp),
@@ -54,13 +54,33 @@ export const loadChatsFromLocalStorage = (): ChatData[] => {
   return [];
 };
 
-export const addNewChat = (chats: ChatData[]): ChatData[] => {
-  const newChat: ChatData = {
-    id: Date.now(),
+export function generateChatParams(prefix: string): ChatData {
+  const now = Date.now();
+
+  return {
+    id: `${prefix}-${Date.now()}`,
     name: "New Chat",
     messages: [],
-    timestamp: Date.now(),
+    timestamp: now,
   };
+}
+export function generateMessageParams(
+  chatId: string,
+  message: string,
+  name = "anonymous",
+): Message {
+  const now = Date.now();
+
+  return {
+    id: `${chatId}-message-${name}-${now}`,
+    name,
+    message,
+    timestamp: now,
+  };
+}
+
+export const addNewChat = (chats: ChatData[]): ChatData[] => {
+  const newChat = generateChatParams("chat");
   return [newChat, ...chats];
 };
 

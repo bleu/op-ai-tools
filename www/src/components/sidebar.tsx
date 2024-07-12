@@ -17,7 +17,7 @@ import { ScrollArea } from "./ui/scroll-area";
 interface SidebarProps {
   isCollapsed: boolean;
   links: {
-    id: number;
+    id: string;
     name: string;
     messages: Message[];
     variant: "grey" | "ghost" | "default";
@@ -25,7 +25,7 @@ interface SidebarProps {
   }[];
   onClick?: () => void;
   isMobile: boolean;
-  onSelectChat: (index: number) => void;
+  onSelectChat: (id: string) => void;
   onNewChat: () => void;
 }
 

@@ -8,6 +8,7 @@ import {
 import {
   type ChatData,
   addNewChat,
+  generateChatParams,
   getChatName,
   getValidTimestamp,
   loadChatsFromLocalStorage,
@@ -57,14 +58,10 @@ export function ChatLayout({
   }, []);
 
   const handleNewChat = useCallback(() => {
-    const newChat: ChatData = {
-      id: Date.now(),
-      name: "New Chat",
-      messages: [],
-      timestamp: Date.now(),
-    };
+    const newChat = generateChatParams("chat");
+
     setChats((prevChats) => {
-      const updatedChats = [newChat, ...prevChats];
+      const updatedChats = addNewChat(prevChats);
       saveChatsToLocalStorage(updatedChats);
       return updatedChats;
     });
@@ -75,7 +72,7 @@ export function ChatLayout({
   }, [isMobile]);
 
   const handleSelectChat = useCallback(
-    (id: number) => {
+    (id: string) => {
       const selected = chats.find((chat) => chat.id === id);
       if (selected) {
         setSelectedChat(selected);

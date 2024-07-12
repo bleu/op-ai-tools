@@ -1,15 +1,17 @@
-import { useState, useCallback, useEffect } from "react";
-import type { Message, User } from "@/app/data";
+import type { Message } from "@/app/data";
+import { type ChatData, generateMessageParams } from "@/lib/chat-utils";
+import { useCallback, useEffect, useState } from "react";
 import { useChatApi } from "./useChatApi";
 
 export function useChatState(
-  selectedChat: User,
-  onUpdateMessages: (newMessages: Message[]) => void
+  selectedChat: ChatData,
+  onUpdateMessages: (newMessages: Message[]) => void,
 ) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
+  const [loadingMessageId, setLoadingMessageId] = useState<string | null>(null);
 
   const { sendMessage: sendMessageApi } = useChatApi();
 
@@ -25,13 +27,14 @@ export function useChatState(
       setIsStreaming(true);
       setIsTyping(true);
 
-      const assistantMessageId = Date.now();
-      updatedMessages.push({
-        id: assistantMessageId,
-        name: "Optimism GovGPT",
-        message: "",
-        timestamp: assistantMessageId,
-      });
+      const assistantMessage = generateMessageParams(
+        selectedChat.id,
+        "",
+        "Optimism GovGPT",
+      );
+
+      setLoadingMessageId(assistantMessage.id);
+      updatedMessages.push(assistantMessage);
       setCurrentMessages([...updatedMessages]);
       onUpdateMessages([...updatedMessages]);
 
@@ -39,6 +42,7 @@ export function useChatState(
         const reader = await sendMessageApi(newMessage.message);
         const decoder = new TextDecoder();
 
+        setLoadingMessageId(null);
         while (true) {
           const { value, done } = await reader.read();
           if (done) break;
@@ -63,22 +67,23 @@ export function useChatState(
         console.error("Error:", error);
         setIsStreaming(false);
         setIsTyping(false);
+        setLoadingMessageId(null);
 
-        updatedMessages[updatedMessages.length - 1] = {
-          id: Date.now(),
-          name: "Optimism GovGPT",
-          message: "Sorry, an error occurred while processing your request.",
-          timestamp: Date.now(),
-        };
+        updatedMessages[updatedMessages.length - 1] = generateMessageParams(
+          selectedChat.id,
+          "Sorry, an error occurred while processing your request.",
+          "Optimism GovGPT",
+        );
+
         setCurrentMessages([...updatedMessages]);
         onUpdateMessages([...updatedMessages]);
       }
     },
-    [currentMessages, onUpdateMessages, sendMessageApi]
+    [currentMessages, onUpdateMessages, sendMessageApi, selectedChat.id],
   );
 
   const handleRegenerateMessage = useCallback(
-    (messageId: number) => {
+    (messageId: string) => {
       const messageIndex = currentMessages.findIndex((m) => m.id === messageId);
       if (messageIndex === -1) return;
 
@@ -91,7 +96,7 @@ export function useChatState(
         sendMessage(userMessage);
       }
     },
-    [currentMessages, onUpdateMessages, sendMessage]
+    [currentMessages, onUpdateMessages, sendMessage],
   );
 
   return {
@@ -102,5 +107,6 @@ export function useChatState(
     currentMessages,
     sendMessage,
     handleRegenerateMessage,
+    loadingMessageId,
   };
 }

@@ -1,6 +1,6 @@
-import { useCallback } from "react";
-import { usePostHog } from "posthog-js/react";
 import type { Message } from "@/app/data";
+import { usePostHog } from "posthog-js/react";
+import { useCallback } from "react";
 
 export function useChatApi() {
   const posthog = usePostHog();
@@ -17,10 +17,10 @@ export function useChatApi() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-User-ID": posthog.get_distinct_id(),
+            "X-Chat-ID": posthog.get_distinct_id(),
           },
           body: JSON.stringify({ question: message }),
-        }
+        },
       );
 
       if (!response.body) {
@@ -29,7 +29,7 @@ export function useChatApi() {
 
       return response.body.getReader();
     },
-    [posthog]
+    [posthog],
   );
 
   return { sendMessage };

@@ -1,4 +1,5 @@
-import type { Message, User } from "@/app/data";
+import type { Message } from "@/app/data";
+import type { ChatData } from "@/lib/chat-utils";
 import React from "react";
 import ChatBottombar from "./chat-bottombar";
 import { ChatEmptyState } from "./chat-empty-state";
@@ -7,7 +8,7 @@ import ChatTopbar from "./chat-topbar";
 import { useChatState } from "./useChatState";
 
 interface ChatProps {
-  selectedChat: User;
+  selectedChat: ChatData;
   isMobile: boolean;
   onUpdateMessages: (newMessages: Message[]) => void;
   onToggleSidebar: () => void;
@@ -27,6 +28,7 @@ export function Chat({
     currentMessages,
     sendMessage,
     handleRegenerateMessage,
+    loadingMessageId,
   } = useChatState(selectedChat, onUpdateMessages);
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -48,14 +50,16 @@ export function Chat({
         ) : (
           <ChatList
             messages={currentMessages}
-            selectedUser={selectedChat}
+            selectedChat={selectedChat}
             isMobile={isMobile}
             isStreaming={isStreaming}
             onRegenerateMessage={handleRegenerateMessage}
+            loadingMessageId={loadingMessageId}
           />
         )}
       </div>
       <ChatBottombar
+        selectedChat={selectedChat}
         sendMessage={sendMessage}
         isMobile={isMobile}
         isStreaming={isStreaming}

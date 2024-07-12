@@ -1,4 +1,5 @@
-import type { Message, User } from "@/app/data";
+import type { Message } from "@/app/data";
+import type { ChatData } from "@/lib/chat-utils";
 import { cn } from "@/lib/utils";
 import { Clipboard, RotateCcw, ThumbsDown } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
@@ -21,18 +22,20 @@ import { Textarea } from "../ui/textarea";
 
 interface ChatListProps {
   messages?: Message[];
-  selectedUser: User;
+  selectedChat: ChatData;
   isMobile: boolean;
   isStreaming: boolean;
-  onRegenerateMessage: (messageId: number) => void;
+  onRegenerateMessage: (messageId: string) => void;
+  loadingMessageId: string | null;
 }
 
 export function ChatList({
   messages,
-  selectedUser,
+  selectedChat,
   isMobile,
   isStreaming,
   onRegenerateMessage,
+  loadingMessageId,
 }: ChatListProps) {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<Message | null>(null);
@@ -41,12 +44,12 @@ export function ChatList({
   const { toast } = useToast();
   const posthog = usePostHog();
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     if (!messagesContainerRef.current) return;
+
     messagesContainerRef.current.scrollTop =
       messagesContainerRef.current.scrollHeight;
-  }, [messages]);
+  }, []);
 
   const deduplicateLineBreaks = (message: string) => {
     return message.replace(/\n{3,}/g, "\n\n");
@@ -114,7 +117,7 @@ export function ChatList({
                 "bg-accent"
               )}
             >
-              {message.isLoading ? (
+              {loadingMessageId === message.id ? (
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse" />
                   <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse delay-75" />
