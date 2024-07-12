@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import type { Message, User } from "@/app/data";
-import { usePostHog } from "posthog-js/react";
+import { useChatApi } from "./useChatApi";
 
 export function useChatState(
   selectedChat: User,
@@ -10,7 +10,8 @@ export function useChatState(
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
-  const posthog = usePostHog();
+
+  const { sendMessage: sendMessageApi } = useChatApi();
 
   useEffect(() => {
     setCurrentMessages(selectedChat.messages || []);
@@ -35,44 +36,28 @@ export function useChatState(
       onUpdateMessages([...updatedMessages]);
 
       try {
-        if (!process.env.NEXT_PUBLIC_CHAT_STREAMING_API_URL) return;
-
-        const response = await fetch(
-          process.env.NEXT_PUBLIC_CHAT_STREAMING_API_URL,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-User-ID": posthog.get_distinct_id(),
-            },
-            body: JSON.stringify({ question: newMessage.message }),
-          }
-        );
-
-        const reader = response.body?.getReader();
+        const reader = await sendMessageApi(newMessage.message);
         const decoder = new TextDecoder();
 
-        if (reader) {
-          while (true) {
-            const { value, done } = await reader.read();
-            if (done) break;
-            const chunk = decoder.decode(value);
-            if (chunk.trim() === "[DONE]") {
-              setIsStreaming(false);
-              setIsTyping(false);
-              break;
-            }
-            if (chunk.startsWith("error:")) {
-              console.error("Error from server:", chunk.slice(6));
-              setIsStreaming(false);
-              setIsTyping(false);
-              break;
-            }
-
-            updatedMessages[updatedMessages.length - 1].message += chunk;
-            setCurrentMessages([...updatedMessages]);
-            onUpdateMessages([...updatedMessages]);
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value);
+          if (chunk.trim() === "[DONE]") {
+            setIsStreaming(false);
+            setIsTyping(false);
+            break;
           }
+          if (chunk.startsWith("error:")) {
+            console.error("Error from server:", chunk.slice(6));
+            setIsStreaming(false);
+            setIsTyping(false);
+            break;
+          }
+
+          updatedMessages[updatedMessages.length - 1].message += chunk;
+          setCurrentMessages([...updatedMessages]);
+          onUpdateMessages([...updatedMessages]);
         }
       } catch (error) {
         console.error("Error:", error);
@@ -89,7 +74,7 @@ export function useChatState(
         onUpdateMessages([...updatedMessages]);
       }
     },
-    [currentMessages, onUpdateMessages, posthog]
+    [currentMessages, onUpdateMessages, sendMessageApi]
   );
 
   const handleRegenerateMessage = useCallback(
