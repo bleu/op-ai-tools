@@ -1,4 +1,3 @@
-import type { Message } from "@/app/data";
 import { usePostHog } from "posthog-js/react";
 import { useCallback } from "react";
 
