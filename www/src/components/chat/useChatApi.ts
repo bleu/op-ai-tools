@@ -16,7 +16,7 @@ export function useChatApi() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-User-ID": posthog.get_distinct_id(),
+            "x-user-id": posthog.get_distinct_id(),
           },
           body: JSON.stringify({ question: message }),
         }

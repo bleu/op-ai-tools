@@ -74,7 +74,7 @@ def handle_question(func):
 
 
 def capture_posthog_event(event_name, properties):
-    user_token = request.headers.get("X-User-ID")
+    user_token = request.headers.get("x-user-id")
     if user_token:
         posthog.capture(
             distinct_id=user_token,
