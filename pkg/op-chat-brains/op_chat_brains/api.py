@@ -73,14 +73,6 @@ def handle_question(func):
     return wrapper
 
 
-def capture_posthog_event(user_token, event_name, properties):
-    posthog.capture(
-        distinct_id=user_token,
-        event=event_name,
-        properties=properties,
-    )
-
-
 @app.errorhandler(Exception)
 def handle_exception(e):
     if isinstance(e, UnsupportedVectorstoreError):
@@ -95,9 +87,10 @@ def predict(question, rag_structure):
     result = process_question(question, rag_structure, logger, get_config())
 
     user_token = request.headers.get("x-user-id")
-    capture_posthog_event(
+    print("user token", user_token)
+    posthog.capture(
         user_token,
-        "MODEL_PREDICTION",
+        "MODEL_PREDICTED_ANSWER",
         {
             "endpoint": "predict",
             "question": question,
@@ -130,9 +123,10 @@ def predict_stream(question, rag_structure):
         yield "[DONE]\n"
 
         user_token = request.headers.get("x-user-id")
-        capture_posthog_event(
+        print("user token", user_token)
+        posthog.capture(
             user_token,
-            "MODEL_PREDICTION",
+            "MODEL_PREDICTED_ANSWER",
             {
                 "endpoint": "predict_stream",
                 "question": question,
