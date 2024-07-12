@@ -1,6 +1,6 @@
 # op_chat_brains
 
-op_chat_brains is an advanced question-answering system that utilizes Retrieval-Augmented Generation (RAG) techniques to provide intelligent responses tailored to specific domains. Designed for flexibility, it can be adapted for various use cases, such as Optimism Collective/Optimism L2 or ClickFiscal.
+op_chat_brains is an advanced question-answering system that utilizes Retrieval-Augmented Generation (RAG) techniques to provide intelligent responses tailored to specific domains. Designed for flexibility, it can be adapted for various use cases, such as Optimism Collective/Optimism L2.
 
 ## Features
 
