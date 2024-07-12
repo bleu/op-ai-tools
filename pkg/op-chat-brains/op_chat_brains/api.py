@@ -73,14 +73,12 @@ def handle_question(func):
     return wrapper
 
 
-def capture_posthog_event(event_name, properties):
-    user_token = request.headers.get("x-user-id")
-    if user_token:
-        posthog.capture(
-            distinct_id=user_token,
-            event=event_name,
-            properties=properties,
-        )
+def capture_posthog_event(user_token, event_name, properties):
+    posthog.capture(
+        distinct_id=user_token,
+        event=event_name,
+        properties=properties,
+    )
 
 
 @app.errorhandler(Exception)
@@ -96,7 +94,9 @@ def handle_exception(e):
 def predict(question, rag_structure):
     result = process_question(question, rag_structure, logger, get_config())
 
+    user_token = request.headers.get("x-user-id")
     capture_posthog_event(
+        user_token,
         "MODEL_PREDICTION",
         {
             "endpoint": "predict",
@@ -129,7 +129,9 @@ def predict_stream(question, rag_structure):
             yield chunk_answer
         yield "[DONE]\n"
 
+        user_token = request.headers.get("x-user-id")
         capture_posthog_event(
+            user_token,
             "MODEL_PREDICTION",
             {
                 "endpoint": "predict_stream",
