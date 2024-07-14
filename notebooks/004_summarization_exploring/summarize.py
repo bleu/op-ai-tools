@@ -1,124 +1,148 @@
 import streamlit as st
 import pandas as pd
 import random, time
+import matplotlib.pyplot as plt
 random.seed(42)
 
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 
-import load_optimism
+import load_optimism, util
 
-def llm_builder(model_name):
-    if model_name in chat_models_openai:
-        llm = ChatOpenAI(temperature=0, model_name=model_name)
-    elif model_name in chat_models_anthropic:
-        llm = ChatAnthropic(temperature=0, model_name=model_name)
-    return llm
+"""
+# Summarization Script
+This script allows you to summarize the threads from the Optimism Governance Forum testing different LLM models.
 
-class Prompt:
-    @staticmethod
-    def tldr(thread_content, orginal_chain=[]):
-        return orginal_chain+[
-            (
-                "system",
-                "Return a TLDR about the content of this forum thread. This is going to be exhibited right before the actual thread, so just summarize the content in AT MOST 3 sentences. Return in the format '**TLDR:** Text'"
-            ),
-            (
-                "user",
-                thread_content
-            )
-        ]
-    
-    @staticmethod
-    def opinions(thread_content, orginal_chain=[]):
-        return orginal_chain+[
-            (
-                "system",
-                "List UP TO 5 sentences that encapsulate the main opinions expressed in this thread. Try to follow a chronological order, listing first the opinions that appeared first. Return each sentence in the format '- Some users think...'. Do not include the user's name. Return in the format '**Users' Considerations:** Text"
-            ),
-            (
-                "user",
-                thread_content
-            )
-        ]
-    
-    @staticmethod
-    def first_post(thread_content, orginal_chain=[]):
-        return orginal_chain+[
-            (
-                "system",
-                "Return ONE short paragraph encapsulating the main ideas of the first post of this forum thread. This is going to be exhibited right before the thread to give some general context. Return in the format '**Main Post:** Text'"
-            ),
-            (
-                "user",
-                thread_content
-            )
-        ]
-    
-    @staticmethod
-    def general_reaction(thread_content, orginal_chain=[]):
-        return orginal_chain+[
-            (
-                "system",
-                "Return ONE short paragraph encapsulating the general reaction of the users to the first post of this forum thread. This is going to be exhibited right before the thread to give some general context. Return in the format '**General Reaction:** Text'"
-            ),
-            (
-                "user",
-                thread_content
-            )
-        ]
+## Main Steps:
+"""
 
-st.title("Summarize")
-
-forum_path = "../../data/002-governance-forum-202406014/dataset/_out.jsonl"
+"""
+- Load the forum posts from the loaded dataset
+"""
+forum_path = util.forum_path
 posts = load_optimism.ForumPostsProcessingStrategy.process_document(forum_path)
 df_posts = pd.DataFrame(posts).T
+with st.expander("Posts Info"):
+    st.write(f"Number of Loaded Posts: {len(df_posts)}")
+    st.write(df_posts)
 
-st.write("Collected Posts")
-st.write(df_posts)
+    df_posts["content_length"] = df_posts["content"].apply(lambda x: len(x))
+    st.write("Number of Characters per Post:")
+    st.write(df_posts["content_length"].describe())
 
+    largest_post = df_posts.loc[df_posts["content_length"].idxmax()]
+    st.write(f"Largest Post (len {largest_post['content_length']}):")
+    st.write(largest_post)    
+
+"""
+- Get the threads from the forum posts.
+"""
 threads = load_optimism.ForumPostsProcessingStrategy.return_threads(df_posts)
+with st.expander("Threads Info"):
+    st.write(f"Threads Metadata:")
+    st.write(threads[0].metadata.keys())
+    
+    st.write(f"Template that will be used for inserting threads into the LLMs:")
+    st.text(load_optimism.ForumPostsProcessingStrategy.template_thread)
 
+    df_threads = pd.DataFrame([t.metadata for t in threads])
+    st.write(f"Number of Loaded Threads: {len(threads)}")
+
+    st.write("Number of Threads per Board:")
+    st.write(df_threads["board_name"].value_counts())
+    
+    st.write("Number of Posts per Thread:")
+    st.write(df_threads["num_posts"].describe())
+    
+    st.write("Number of Characters per Thread:")
+    st.write(df_threads["length_str_thread"].describe())
+
+
+
+"""
+- Select the threads to explore
+    - If chosen the random selection, selects a random number of threads with a minimum number of posts instead of selecting the threads manually from their URLs
+"""
 if st.checkbox("Random Selection"):
     minimum_posts = st.number_input("Minimum number of posts in a thread", 1, 20, 10)
     threads = [t for t in threads if t.metadata["num_posts"] >= minimum_posts]
     num_threads = st.number_input("Number of Threads to explore", 1, 20, 3)
     threads = random.sample(threads, num_threads)
 else:
-    thread_urls = st.multiselect("Thread URLs", [t.metadata["url"] for t in threads], ["https://gov.optimism.io/t/airdrop-1-feedback-thread/80/1", "https://gov.optimism.io/t/upgrade-proposal-6-multi-chain-prep-mcp-l1/7677/1"])
+    #defalut_threads = ["https://gov.optimism.io/t/airdrop-1-feedback-thread/80", "https://gov.optimism.io/t/upgrade-proposal-6-multi-chain-prep-mcp-l1/7677"]
+    defalut_threads = ["https://gov.optimism.io/t/special-voting-cycle-9a-grants-council/4198"]
+    thread_urls = st.multiselect("Thread URLs", [t.metadata["url"] for t in threads], default=defalut_threads)
     threads = [t for t in threads if t.metadata["url"] in thread_urls]
 
-chat_models_openai = ["gpt-3.5-turbo-0125", "gpt-4o"]
-chat_models_anthropic = ["claude-3-sonnet-20240229", "claude-3-haiku-20240307", "claude-3-opus-20240229", "claude-3-5-sonnet-20240620"]
+"""
+- Select the models to try for summarization
+"""
+chat_models_openai = util.chat_models_openai
+chat_models_anthropic = util.chat_models_anthropic
 chat_models = chat_models_openai + chat_models_anthropic
-model_name = st.multiselect("Model Name", chat_models, default=["gpt-4o", "claude-3-haiku-20240307", "claude-3-opus-20240229", "claude-3-5-sonnet-20240620"])
+defalut_models = ["gpt-4o"]#, "claude-3-haiku-20240307", "claude-3-opus-20240229", "claude-3-5-sonnet-20240620"]
+model_name = st.multiselect("Model Name", chat_models, default=defalut_models)
 
+
+"""
+## Special Threads
+
+- Snapshot Proposals: Threads that are discussing Snapshot Proposals
+    - We rely on the Snapshot dataset to get the proposals
+    - We will load the snapshot data and check if the marked discussion page is the same as the thread URL
+"""
+snapshot_path = util.snapshot_path
+snapshot_proposals = load_optimism.ForumPostsProcessingStrategy.return_snapshot_proposals(snapshot_path)
+
+
+"""
+## Run
+"""
 if st.button("Summarize Threads"):   
-    str_out = "## Summarized Threads\n"
-    st.write("## Summarized Threads")
+    str_out = ""
+    def append_text(*text):
+        global str_out
+        for t in text:
+            str_out += str(t) + "\n"
+            st.write(t)
+
+    append_text("## Summarized Threads")
+
     for thread in threads:
-        st.write("----")
-        st.write(thread.metadata)
-        st.write(thread.metadata["url"])
-        str_out += f"----\n### Thread: {thread.metadata['url']}\n {thread.metadata}\n"
+        append_text(f"----\n### Thread: {thread.metadata['url']}", thread.metadata)
         for m in model_name:
-            llm = llm_builder(m)
-            st.write(f"### Model: {m}")
+            append_text(f"### Model: {m}")
+
+            llm = util.llm_builder(m)
             start = time.time()
-            
-            tldr = llm.invoke(Prompt.tldr(thread.page_content)).content
-            #opinions = llm.invoke(Prompt.opinions(thread.page_content)).content
-            first_post = llm.invoke(Prompt.first_post(thread.page_content)).content
-            general_reaction = llm.invoke(Prompt.general_reaction(thread.page_content)).content
+
+            if thread.metadata["url"] in '\t'.join(snapshot_proposals.keys()):
+                url = thread.metadata["url"]
+                for k in snapshot_proposals.keys():
+                    if url in k:
+                        url = k
+
+                prompt = util.Prompt.snapshot_summarize(
+                    snapshot_content = snapshot_proposals[url]['str'], 
+                    thread_content = thread.page_content
+                )
+                snapshot_tldr = llm.invoke(prompt).content
+                prompt = util.Prompt.opinions(
+                    orginal_chain = prompt + [('assistant', snapshot_tldr)]
+                )
+                opinions = llm.invoke(prompt).content
+                
+                summary = f"{snapshot_tldr}\n\n**Some user opinions:**\n{opinions}\n"
+                tldr = llm.invoke(util.Prompt.tldr_response(summary)).content
+                summary = f"{tldr}\n\n{summary}"
+            else:
+                tldr = llm.invoke(util.Prompt.tldr(thread.page_content)).content
+                first_post = llm.invoke(util.Prompt.first_post(thread.page_content)).content
+                general_reaction = llm.invoke(util.Prompt.general_reaction(thread.page_content)).content
+                summary = f"{tldr}\n\n{first_post}\n\n{general_reaction}\n"
 
             end = time.time()
-            st.write(tldr)
-            st.write(first_post)
-            st.write(general_reaction)
-
-            #st.write(opinions)
-            st.write(f"(Time taken: {end-start}s)")
-            #str_out += f"#### Model: {m}, Chain: {c}\n{result['output_text']}\n(Time taken: {end-start}s)\n"
+            append_text(summary, f"(Time taken: {end-start}s)")
 
     st.download_button(
         label="Download Summarized Threads",
