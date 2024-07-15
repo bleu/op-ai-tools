@@ -17,6 +17,7 @@ This script allows you to summarize the threads from the Optimism Governance For
 """
 
 """
+----
 - Load the forum posts from the loaded dataset
 """
 forum_path = util.forum_path
@@ -35,6 +36,7 @@ with st.expander("Posts Info"):
     st.write(largest_post)    
 
 """
+----
 - Get the threads from the forum posts.
 """
 threads = load_optimism.ForumPostsProcessingStrategy.return_threads(df_posts)
@@ -60,31 +62,49 @@ with st.expander("Threads Info"):
 
 
 """
+----
 - Select the threads to explore
     - If chosen the random selection, selects a random number of threads with a minimum number of posts instead of selecting the threads manually from their URLs
 """
-if st.checkbox("Random Selection"):
+selection_type = st.selectbox("Select Threads", ["Manual Selection", "Random Selection"], index=0)
+if selection_type == "Random Selection":
     minimum_posts = st.number_input("Minimum number of posts in a thread", 1, 20, 10)
     threads = [t for t in threads if t.metadata["num_posts"] >= minimum_posts]
     num_threads = st.number_input("Number of Threads to explore", 1, 20, 3)
     threads = random.sample(threads, num_threads)
 else:
-    #defalut_threads = ["https://gov.optimism.io/t/airdrop-1-feedback-thread/80", "https://gov.optimism.io/t/upgrade-proposal-6-multi-chain-prep-mcp-l1/7677"]
-    defalut_threads = ["https://gov.optimism.io/t/special-voting-cycle-9a-grants-council/4198"]
+    defalut_threads = []
+    if st.checkbox("Add Snapshot Example"):
+        snapshot_example = "https://gov.optimism.io/t/special-voting-cycle-9a-grants-council/4198"
+        defalut_threads.append(snapshot_example)
+    if st.checkbox("Add Feedback Example"):
+        feedback_example = "https://gov.optimism.io/t/airdrop-1-feedback-thread/80"
+        defalut_threads.append(feedback_example)
+    if st.checkbox("Add Announcement Example"):
+        announcement_example = "https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
+        defalut_threads.append(announcement_example)
+    if st.checkbox("Add Discussion Example"):
+        discussion_example = "https://gov.optimism.io/t/the-future-of-optimism-governance/6471"
+        defalut_threads.append(discussion_example)
+
     thread_urls = st.multiselect("Thread URLs", [t.metadata["url"] for t in threads], default=defalut_threads)
     threads = [t for t in threads if t.metadata["url"] in thread_urls]
 
 """
+----
 - Select the models to try for summarization
 """
 chat_models_openai = util.chat_models_openai
 chat_models_anthropic = util.chat_models_anthropic
 chat_models = chat_models_openai + chat_models_anthropic
-defalut_models = ["gpt-4o"]#, "claude-3-haiku-20240307", "claude-3-opus-20240229", "claude-3-5-sonnet-20240620"]
+#defalut_models = ["gpt-4o", "claude-3-haiku-20240307", "claude-3-opus-20240229", "claude-3-5-sonnet-20240620"]
+defalut_models = ["claude-3-opus-20240229"]
+defalut_models = ["gpt-4o"]
 model_name = st.multiselect("Model Name", chat_models, default=defalut_models)
 
 
 """
+----
 ## Special Threads
 
 - Snapshot Proposals: Threads that are discussing Snapshot Proposals
@@ -96,6 +116,7 @@ snapshot_proposals = load_optimism.ForumPostsProcessingStrategy.return_snapshot_
 
 
 """
+----
 ## Run
 """
 if st.button("Summarize Threads"):   
@@ -136,10 +157,54 @@ if st.button("Summarize Threads"):
                 tldr = llm.invoke(util.Prompt.tldr_response(summary)).content
                 summary = f"{tldr}\n\n{summary}"
             else:
-                tldr = llm.invoke(util.Prompt.tldr(thread.page_content)).content
-                first_post = llm.invoke(util.Prompt.first_post(thread.page_content)).content
-                general_reaction = llm.invoke(util.Prompt.general_reaction(thread.page_content)).content
-                summary = f"{tldr}\n\n{first_post}\n\n{general_reaction}\n"
+                type_thread = llm.invoke(util.Prompt.classify_thread(thread.page_content)).content
+                st.write(type_thread.upper().strip())
+                match type_thread.upper():
+                    case "FEEDBACK":
+                        prompt = util.Prompt.feedbacking_what(thread.page_content)
+                        topic = llm.invoke(prompt).content
+                        prompt = util.Prompt.opinions(
+                            orginal_chain = prompt + [('assistant', topic)]
+                        )
+                        opinions = llm.invoke(prompt).content
+
+                        summary = f"{topic}\n\n**Some user opinions:**\n{opinions}\n"
+
+                        tldr = llm.invoke(util.Prompt.tldr_response(summary)).content
+                        summary = f"{tldr}\n\n{summary}"
+                    case "ANNOUNCEMENT":
+                        prompt = util.Prompt.announcing_what(thread.page_content)
+                        topic = llm.invoke(prompt).content
+                        prompt = util.Prompt.opinions(
+                            orginal_chain = prompt + [('assistant', topic)]
+                        )
+                        opinions = llm.invoke(prompt).content
+
+                        summary = f"{topic}\n\n**Some user opinions:**\n{opinions}\n"
+
+                        tldr = llm.invoke(util.Prompt.tldr_response(summary)).content
+                        summary = f"{tldr}\n\n{summary}"
+                    case "DISCUSSION":
+                        prompt = util.Prompt.discussing_what(thread.page_content)
+                        topic = llm.invoke(prompt).content
+
+                        prompt = util.Prompt.first_opinion(
+                            orginal_chain = prompt + [('assistant', topic)]
+                        )
+                        first_opinion = llm.invoke(prompt).content
+
+                        prompt = util.Prompt.reactions(
+                            orginal_chain = prompt + [('assistant', first_opinion)]
+                        )
+                        reactions = llm.invoke(prompt).content
+
+                        summary = f"{topic}\n\n{first_opinion}\n\n**Reactions:**\n{reactions}\n"
+
+                        tldr = llm.invoke(util.Prompt.tldr_response(summary)).content
+                        summary = f"{tldr}\n\n{summary}"
+                    case _:
+                        summary = llm.invoke(util.Prompt.tldr(thread.page_content)).content
+
 
             end = time.time()
             append_text(summary, f"(Time taken: {end-start}s)")

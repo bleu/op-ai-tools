@@ -25,8 +25,8 @@ def llm_builder(model_name):
 
 class Prompt:
     @staticmethod
-    def tldr(thread_content, orginal_chain=[]):
-        return orginal_chain+[
+    def tldr(thread_content):
+        return [
             (
                 "system",
                 "Return a TLDR about the content of this forum thread. This is going to be exhibited right before the actual thread, so just summarize the content in AT MOST 3 sentences. Return in the format '**TLDR:** Text'"
@@ -38,34 +38,8 @@ class Prompt:
         ]
     
     @staticmethod
-    def first_post(thread_content, orginal_chain=[]):
-        return orginal_chain+[
-            (
-                "system",
-                "Return ONE short paragraph encapsulating the main ideas of the first post of this forum thread. This is going to be exhibited right before the thread to give some general context. Return in the format '**Main Post:** Text'"
-            ),
-            (
-                "user",
-                thread_content
-            )
-        ]
-    
-    @staticmethod
-    def general_reaction(thread_content, orginal_chain=[]):
-        return orginal_chain+[
-            (
-                "system",
-                "Return ONE short paragraph encapsulating the general reaction of the users to the first post of this forum thread. This is going to be exhibited right before the thread to give some general context. Return in the format '**General Reaction:** Text'"
-            ),
-            (
-                "user",
-                thread_content
-            )
-        ]
-    
-    @staticmethod
-    def snapshot_summarize(snapshot_content, thread_content, orginal_chain=[]):
-        return orginal_chain+[
+    def snapshot_summarize(snapshot_content, thread_content):
+        return [
             (
                 "system",
                 f"You are going to have access to a proposal related to the Optimism Collective and the forum thread that discuss it. Return a text explaining the proposal discussed. This is going to be exhibited right before the actual thread, so just summarize the content in AT MOST 3 short paragraphs. Do not include users opinions. If the decision was already made, start by mentioning it. Return in the format '**Proposal:** Text'"
@@ -77,7 +51,7 @@ class Prompt:
         ]
     
     @staticmethod
-    def opinions(orginal_chain=[]):
+    def opinions(orginal_chain):
         return orginal_chain+[
             (
                 "user",
@@ -95,5 +69,72 @@ class Prompt:
             (
                 "user",
                 content
+            )
+        ]
+    
+    @staticmethod
+    def classify_thread(thread_content):
+        return [
+            (
+                "system",
+                "Classify the forum thread in one of the following categories: **Announcment**, **Discussion**, **Feedback**, **Other**. Return only one word, the category."
+            ),
+            (
+                "user",
+                thread_content
+            )
+        ]
+    
+
+    @staticmethod
+    def feedbacking_what(thread_content):
+        return [
+            (
+                "system",
+                f"You are going to have access to a forum thread that is classified as **Feedback**. Return a text explaining what the users are giving feedback about. This is going to be exhibited right before the actual thread, so just summarize the content in AT MOST 3 short paragraphs. Do not include users opinions. Return in the format '**Feedback Session:** Text'"
+            ),
+            (
+                "user",
+                thread_content
+            )
+        ]
+    
+    def announcing_what(thread_content):
+        return [
+            (
+                "system",
+                f"You are going to have access to a forum thread that is classified as **Announcement**. Return a text explaining what is being announced. This is going to be exhibited right before the actual thread, so just summarize the content in AT MOST 3 short paragraphs. Do not include users opinions. Return in the format '**Announcement:** Text'"
+            ),
+            (
+                "user",
+                thread_content
+            )
+        ]
+    
+    def discussing_what(thread_content):
+        return [
+            (
+                "system",
+                f"You are going to have access to a forum thread that is classified as **Discussion**. Return a text explaining what is being discussed. This is going to be exhibited right before the actual thread, so just summarize the content in AT MOST 3 short paragraphs. Do not include users opinions. Return in the format '**Discussion:** Text'"
+            ),
+            (
+                "user",
+                thread_content
+            )
+        ]
+    
+    def first_opinion(orginal_chain):
+        return orginal_chain+[
+            (
+                "user",
+                "Now return the opinion of the first user that started the discussion by making the first post. Return in the format '**First Opinion:** Text'"
+            )
+        ]
+    
+    def reactions(orginal_chain):
+        return orginal_chain+[
+            (
+                "user",
+                "Now list UP TO 5 short paragraphs that summarize the most interessant reactions to the first opinion. Do not include the users' name. Return only as a markdown list"
             )
         ]
