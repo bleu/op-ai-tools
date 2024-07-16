@@ -4,9 +4,6 @@ import random, time
 import matplotlib.pyplot as plt
 random.seed(42)
 
-from langchain_openai import ChatOpenAI
-from langchain_anthropic import ChatAnthropic
-
 import load_optimism, util
 
 """
