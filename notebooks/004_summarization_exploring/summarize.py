@@ -81,8 +81,14 @@ else:
         announcement_example = "https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
         defalut_threads.append(announcement_example)
     if st.checkbox("Add Discussion Example"):
-        discussion_example = "https://gov.optimism.io/t/the-future-of-optimism-governance/6471"
+        discussion_example = "https://gov.optimism.io/t/how-to-start-a-project-at-optimism/7220"
         defalut_threads.append(discussion_example)
+    if st.checkbox("Add Guide Example"):
+        guide_example = "https://gov.optimism.io/t/grant-misuse-reporting-process/7346"
+        defalut_threads.append(guide_example)
+    if st.checkbox("Add Unimportant Example"):
+        unimportant_example = "https://gov.optimism.io/t/how-to-stay-up-to-date/6124"
+        defalut_threads.append(unimportant_example)
 
     thread_urls = st.multiselect("Thread URLs", [t.metadata["url"] for t in threads], default=defalut_threads)
     threads = [t for t in threads if t.metadata["url"] in thread_urls]
@@ -135,73 +141,9 @@ if st.button("Summarize Threads"):
             start = time.time()
 
             if thread.metadata["url"] in '\t'.join(snapshot_proposals.keys()):
-                url = thread.metadata["url"]
-                for k in snapshot_proposals.keys():
-                    if url in k:
-                        url = k
-
-                prompt = util.Prompt.snapshot_summarize(
-                    snapshot_content = snapshot_proposals[url]['str'], 
-                    thread_content = thread.page_content
-                )
-                snapshot_tldr = llm.invoke(prompt).content
-                prompt = util.Prompt.opinions(
-                    orginal_chain = prompt + [('assistant', snapshot_tldr)]
-                )
-                opinions = llm.invoke(prompt).content
-                
-                summary = f"{snapshot_tldr}\n\n**Some user opinions:**\n{opinions}\n"
-                tldr = llm.invoke(util.Prompt.tldr_response(summary)).content
-                summary = f"{tldr}\n\n{summary}"
+                summary = util.InternalDialogue.proposal(llm, thread, snapshot_proposals)
             else:
-                type_thread = llm.invoke(util.Prompt.classify_thread(thread.page_content)).content
-                st.write(type_thread.upper().strip())
-                match type_thread.upper():
-                    case "FEEDBACK":
-                        prompt = util.Prompt.feedbacking_what(thread.page_content)
-                        topic = llm.invoke(prompt).content
-                        prompt = util.Prompt.opinions(
-                            orginal_chain = prompt + [('assistant', topic)]
-                        )
-                        opinions = llm.invoke(prompt).content
-
-                        summary = f"{topic}\n\n**Some user opinions:**\n{opinions}\n"
-
-                        tldr = llm.invoke(util.Prompt.tldr_response(summary)).content
-                        summary = f"{tldr}\n\n{summary}"
-                    case "ANNOUNCEMENT":
-                        prompt = util.Prompt.announcing_what(thread.page_content)
-                        topic = llm.invoke(prompt).content
-                        prompt = util.Prompt.opinions(
-                            orginal_chain = prompt + [('assistant', topic)]
-                        )
-                        opinions = llm.invoke(prompt).content
-
-                        summary = f"{topic}\n\n**Some user opinions:**\n{opinions}\n"
-
-                        tldr = llm.invoke(util.Prompt.tldr_response(summary)).content
-                        summary = f"{tldr}\n\n{summary}"
-                    case "DISCUSSION":
-                        prompt = util.Prompt.discussing_what(thread.page_content)
-                        topic = llm.invoke(prompt).content
-
-                        prompt = util.Prompt.first_opinion(
-                            orginal_chain = prompt + [('assistant', topic)]
-                        )
-                        first_opinion = llm.invoke(prompt).content
-
-                        prompt = util.Prompt.reactions(
-                            orginal_chain = prompt + [('assistant', first_opinion)]
-                        )
-                        reactions = llm.invoke(prompt).content
-
-                        summary = f"{topic}\n\n{first_opinion}\n\n**Reactions:**\n{reactions}\n"
-
-                        tldr = llm.invoke(util.Prompt.tldr_response(summary)).content
-                        summary = f"{tldr}\n\n{summary}"
-                    case _:
-                        summary = llm.invoke(util.Prompt.tldr(thread.page_content)).content
-
+                summary = llm.invoke(util.Prompt.default_summarizer.format(THREAD_CONTENT=thread.page_content)).content
 
             end = time.time()
             append_text(summary, f"(Time taken: {end-start}s)")

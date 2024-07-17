@@ -22,16 +22,7 @@ def summarize(thread, model_name):
     if thread.metadata["url"] in '\t'.join(snapshot_proposals.keys()):
         summary = util.InternalDialogue.proposal(llm, thread, snapshot_proposals)
     else:
-        type_thread = llm.invoke(util.Prompt.classify_thread(thread.page_content)).content
-        match type_thread.upper():
-            case "FEEDBACK":
-                topic, opinions, summary = util.InternalDialogue.feedback(llm, thread)
-            case "ANNOUNCEMENT":
-                topic, opinions, summary = util.InternalDialogue.announcement(llm, thread)
-            case "DISCUSSION":
-                topic, first_opinion, reactions, summary = util.InternalDialogue.discussion(llm, thread)
-            case _:
-                summary = util.InternalDialogue.other(llm, thread)
+        summary = llm.invoke(util.Prompt.default_summarizer.format(THREAD_CONTENT=thread.page_content)).content
 
     print(summary)
     return summary

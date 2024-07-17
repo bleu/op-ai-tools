@@ -13,14 +13,6 @@ snapshot_path = "../../data/003-snapshot-spaces-proposals-20240711/dataset.jsonl
 chat_models_openai = ["gpt-3.5-turbo-0125", "gpt-4o"]
 chat_models_anthropic = ["claude-3-sonnet-20240229", "claude-3-haiku-20240307", "claude-3-opus-20240229", "claude-3-5-sonnet-20240620"]
 
-def llm_builder(model_name):
-    if model_name in chat_models_openai:
-        llm = ChatOpenAI(temperature=0, model_name=model_name)
-    elif model_name in chat_models_anthropic:
-        llm = ChatAnthropic(temperature=0, model_name=model_name)
-    return llm
-
-
 class Prompt:
     default_summarizer = f"""
     You are tasked with summarizing and classifying a thread from the Optimism documentation forum. The content of the thread is provided below:
@@ -166,7 +158,6 @@ class Prompt:
     Begin your analysis and provide the structured summary now.
     """
     
-class InternalDialogue:
     @staticmethod
     def proposal(llm: Any, thread: Document, snapshot_proposals: Dict[str, Any]):
         url = thread.metadata["url"]

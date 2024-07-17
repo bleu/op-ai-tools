@@ -1,0 +1,1767 @@
+URL: https://gov.optimism.io/t/optimism-fundamentals-by-token-terminal/5866
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+Token Terminal introduces a governance forum for discussing Optimism's data and announces monthly data updates.
+</about>
+
+<overview>
+- Introduction of a governance forum for public discussion on Optimism data
+- Monthly data updates to be shared on Token Terminal and cross-posted on the Optimism forum
+- Links to the Token Terminal dashboard and governance forum provided
+</overview>
+
+<reaction>
+- Positive feedback on tracking activity within the forum
+- Some users find the idea useful but complicated
+- Suggestions to improve the comparison of Optimism with other chains
+- Clarifications provided on how to filter data on the Token Terminal platform
+</reaction>
+
+<tldr>
+Token Terminal announces a new governance forum for discussing Optimism's data and monthly updates. The community responds positively, with some suggestions for improvement and clarifications on data filtering.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/op-community-governance-call-december-6th-at-10am-pt-1pm-et-7pm-cet/4112
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+Announcement of the OP Community Governance Call scheduled for December 6th, 2022, including topics to be discussed and Zoom details.
+</about>
+
+<overview>
+- Call scheduled for December 6th, 2022, at 10am PT / 1pm ET / 7pm CET
+- Topics include forum discussion management, Grants Council updates, public reporting requirements for grantees, delegate code of conduct, and updates from Karma
+- Zoom link and passcode provided for joining the call
+- Recording of the call will be available later
+</overview>
+
+<reaction>
+- Suggestions on managing off-topic forum discussions
+- Questions about incinerating OP with gas, running another community channel, providing multilingual text, and future airdrops
+- Issues with joining the call and subsequent resolution
+- Interest in minting NFTs for charitable endeavors
+</reaction>
+
+<tldr>
+This is an old thread and the information may be outdated. The thread announces the OP Community Governance Call on December 6th, 2022, detailing the topics to be discussed and providing Zoom details. Reactions include suggestions for managing off-topic discussions, questions about community channels and airdrops, and issues with joining the call.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/the-age-of-enlightenment/6868
+
+Summary:
+<classification>unimportant</classification>
+
+<about>
+The thread is a personal anecdote from a user with a low trust level sharing their experience with the Optimism chain. It does not introduce a topic for discussion, provide feedback, make an announcement, or serve as a guide. The content is more of a personal story and does not engage other users in a meaningful way.
+</about>
+
+<tldr>
+A user shares a personal experience about using the Optimism chain to help a friend in Ghana with a crypto transaction. The post highlights the user's newfound appreciation for the Optimism chain but does not engage other users or provide significant information.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/code-of-conduct-council-retrospective-season-5/8062
+
+Summary:
+<classification>unimportant</classification>
+
+<about>
+The thread contains a single post by a user with a low trust level, which has been deleted by the author. There is no substantial content or discussion to analyze.
+</about>
+
+<tldr>
+The thread is unimportant as it contains a single deleted post by a user with a low trust level, offering no relevant information or discussion.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/recording-recap-24th-op-community-call-tuesday-july-18th/6456
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+The thread is an announcement about the 24th OP Community Call scheduled for Tuesday, July 18th, 2023, including updates and topics to be discussed.
+</about>
+
+<overview>
+- Community call scheduled for July 18th, 2023
+- Updates on mission building cycle, Grants Council cycles, and EthCC events
+- Season 4 feedback and issues discussed in Governance Update #7
+- Financial disclosure discussion and its implications
+- Grants Council updates, including cycle comparisons and budget optimization
+- Resources and deadlines for grant submissions
+- Zoom link, recording, and slides provided
+</overview>
+
+<reaction>
+- Appreciation for the announcement and confirmation of attendance
+- Suggestion to discuss undisclosed financial interests and other relevant topics
+</reaction>
+
+<tldr>
+The thread announces the 24th OP Community Call on July 18th, 2023, covering updates on mission cycles, grants, and financial disclosures. It includes resources like Zoom links, recordings, and slides. Some users suggested additional discussion topics.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/transitioning-to-on-chain-voting/4193
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+The thread announces the transition of Optimism governance to an on-chain voting system, replacing the previous Snapshot-based voting.
+</about>
+
+<overview>
+- Announcement of issues with previous voting infrastructure
+- Introduction of Agora as the vendor for on-chain voting MVP for Season 3
+- Interim use of Snapshot with manual vote counting if necessary
+- Recommendations for smoother voting on Snapshot
+</overview>
+
+<reaction>
+- General support for the transition to on-chain voting
+- Concerns about lack of inclusion of Snapshot in the discussion
+- Excitement about Agora's involvement and the new voting system
+- Queries about the new system's implementation and open-source status
+- Positive feedback on the new user interface and governance portal
+</reaction>
+
+<tldr>
+This is an old thread and the information may be outdated. The Optimism forum announced a transition to on-chain voting with Agora as the vendor, addressing issues with the previous Snapshot-based system. The community generally supports the move, with some concerns about the process and excitement about the new governance portal.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/the-10-legitimacy-pillars-of-the-optimism-collective/5947
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+Discussion on the legitimacy pillars of the Optimism Collective, focusing on maintaining and enhancing its legitimacy within the community and broader ecosystem.
+</about>
+
+<first_post>
+- Introduction of 10 legitimacy pillars
+- Emphasis on transparent and fair decision-making
+- Importance of inclusive community participation
+- Need for a robust and accountable delegate system
+- Consistent progress and positive outcomes
+- Preservation of history and traditions
+- Shared responsibility and ownership
+- Accessible governance education
+- Community resilience
+- Transparency and openness
+- External validation and recognition
+</first_post>
+
+<reaction>
+- Agreement on the importance of legitimacy theories
+- Reference to Vitalik Buterin's theories on legitimacy
+- Support for the listed theories: brute force, continuity, fairness, process, performance, participation
+</reaction>
+
+<tldr>
+Discussion on the 10 legitimacy pillars essential for the Optimism Collective's success, emphasizing transparency, inclusivity, accountability, and community resilience. Participants agree on the importance of these pillars and reference Vitalik Buterin's theories on legitimacy.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/gf-phase-0-proposal-layer2dao/1198
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+The thread is about a proposal by Layer2DAO for the distribution of OP tokens to support the Ethereum L2 ecosystem, specifically on Optimism.
+</about>
+
+<overview>
+- Proposal to use 300,000 OP tokens
+- 240,000 OP for OPIncubator to invest in Optimism projects
+- 60,000 OP for L2DAO/OP liquidity pool incentives
+- Dynamic NFT (OPIncubator passport) for voting on projects
+- Matching funds with L2DAO tokens on a 1:1 basis
+</overview>
+
+<reaction>
+- General support and positive feedback
+- Interest in the dynamic NFT concept
+- Some users missed previous airdrops but are optimistic about future opportunities
+- Calls for transparency and adherence to grant policies
+- Concerns about unusual transactions and need for accountability
+</reaction>
+
+<tldr>
+This is an old thread and the information may be outdated. The thread discusses Layer2DAO's proposal to distribute 300,000 OP tokens to support the Ethereum L2 ecosystem on Optimism, including the creation of a dynamic NFT for project voting and liquidity incentives. The community generally supports the proposal, with some concerns about transparency and accountability.
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/we-need-direct-promotion-of-op/4060
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+The thread discusses the need for direct promotion of the OP token, particularly through airdrops, to increase interest and engagement within the Korean community and potentially other markets.
+</about>
+
+<first_post>
+- Korean community's declining interest in DeFi and NFTs
+- High interest in Web3 and airdrops due to APT and HFT
+- Suggests promoting OP through airdrops and rewarding community collaboration and quality promotional articles
+</first_post>
+
+<reaction>
+- Question about the source of promotion, mentioning Elon Musk
+- Agreement on the need for OP to decide its own means of publicity and allocate airdrop quotas for promotion
+</reaction>
+
+<tldr>
+The thread discusses the need for direct promotion of the OP token, especially through airdrops, to boost interest in the Korean community. The initial post suggests rewarding community collaboration and quality promotional articles, while reactions include questions about the source of promotion and agreement on the need for OP to manage its publicity strategies.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/proposal-to-pause-governance-fund-voting-cycles-till-minimum-viable-decentralization-is-achieved/3215
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+The discussion revolves around a proposal to pause Governance Fund voting cycles for the Optimism network until a minimum viable decentralization (MVD) is achieved. The primary concern is the centralization of control within the Optimism Foundation and the associated risks.
+</about>
+
+<first_post>
+- Optimism is growing rapidly but remains highly centralized
+- Centralized control poses significant regulatory and security risks
+- Proposes pausing Governance Fund voting until MVD is achieved
+- Defines MVD as no backdoors, decentralized block production, and semi-permissioned fraud proofs
+- Suggests waiting until Q2 2023 for Bedrock implementation
+- Recommends a committee for exceptional/urgent proposals during the pause
+</first_post>
+
+<reaction>
+- Some agree with the need for decentralization but suggest focusing on long-term sustainable growth
+- Concerns about centralization and lack of fraud proofs are echoed
+- Suggestions to improve governance and security before resuming fund distribution
+- Emphasis on educating users about current risks and the roadmap
+- Mixed opinions on pausing all proposals; some suggest selective approval
+- Calls for more transparency and communication from the Optimism Foundation
+- Acknowledgment of the risks but debate on the best approach to mitigate them
+</reaction>
+
+<tldr>
+The thread discusses a proposal to pause Governance Fund voting cycles for the Optimism network until minimum viable decentralization is achieved, citing centralization risks. Opinions vary, with some supporting the pause and others suggesting alternative approaches to address the risks while continuing selective funding.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/inconsistencies-in-our-retropgf3-evaluation/7076
+
+Summary:
+<classification>feedback</classification>
+
+<about>
+The thread is about feedback on the evaluation process for the RetroPGF3 funding round, specifically addressing the rejection of the Women Biz Core team's application.
+</about>
+
+<overview>
+- Women Biz Core team questions the rejection of their application despite their contributions to the Optimism ecosystem.
+- They provide detailed evidence of their activities and impact, including workshops, events, and educational initiatives.
+- A reviewer explains the reasons for rejection, citing issues like factual mistakes, irrelevant actions, and insufficient documentation of offline events.
+- The Women Biz Core team members respond, clarifying their efforts and seeking better understanding of the evaluation criteria.
+- They express concerns about perceived inconsistencies in the evaluation process and the approval of other applications with fewer metrics.
+</overview>
+
+<reaction>
+- Acknowledgment of the detailed feedback and its value for future applications.
+- Clarification of the team's commitment to the Optimism ecosystem and their extensive efforts in education and onboarding.
+- Concerns about the evaluation criteria and the perceived inconsistency in the approval process.
+- Emphasis on the genuine impact and dedication of the Women Biz Core team.
+</reaction>
+
+<tldr>
+The thread discusses feedback on the rejection of the Women Biz Core team's RetroPGF3 application, highlighting their contributions and seeking clarity on the evaluation criteria. The team provides detailed evidence of their efforts, while a reviewer explains the reasons for rejection, including factual mistakes and insufficient documentation. The team responds with clarifications and concerns about the evaluation process.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/optimism-espanol-general-communication-thread/6383
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+This thread is about the activities, updates, and reports from the Optimism Español community, focusing on their efforts to promote Optimism in the Spanish-speaking world.
+</about>
+
+<overview>
+- Introduction of Optimism Español team and their mission
+- Detailed history and activities since inception
+- Financial transparency and expense reports
+- Workshops and educational initiatives
+- Delegation of OP tokens to LATAM delegates
+- Monthly activity and expense reports
+- Special events and collaborations
+- RetroPGF3 funding and its impact
+</overview>
+
+<reaction>
+- Positive feedback on the contributions and impact of Optimism Español
+- Appreciation for the detailed reports and transparency
+- Encouragement to continue the good work and educational initiatives
+</reaction>
+
+<tldr>
+This thread provides comprehensive updates and reports from the Optimism Español community, detailing their mission, activities, financial transparency, and educational initiatives. The community has received positive feedback and support for their efforts in promoting Optimism in the Spanish-speaking world.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/how-to-navigate-the-forum/6120
+
+Summary:
+<classification>guide</classification>
+
+<about>
+This thread provides a guide on how to navigate the Optimism forum, detailing various categories and their purposes.
+</about>
+
+<overview>
+- Updates and Announcements: Community calls, governance summaries, updates from partners
+- Grants: Information about Mission Grants
+- Technical Proposals: Non-grant proposals, standard templates, submission process
+- Retro Funding: Discussions on Retro Funding allocation, key info about rounds
+- Token House Governance: Governance info for delegates, voting cycles, communication threads
+- Accountability: Transparency and accountability posts, supported by verifiable evidence
+- Elected Representatives: Information on councils and elected representative structures
+- Collective Strategy: Discussions on intents and roadmaps
+- Citizens: All things related to Citizens
+- General Discussions: Public discussions not fitting other categories
+- Feedback: General feedback
+- Governance Design: Metagovernance strategy and design
+</overview>
+
+<reaction>
+- Suggestion to pin the guide prominently for easy access by new users
+</reaction>
+
+<tldr>
+This thread provides a comprehensive guide on navigating the Optimism forum, detailing various categories and their purposes. A suggestion was made to pin this guide for better visibility to new users.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/ready-gf-phase-1-proposal-candide-wallet/2656
+
+Summary:
+<about>
+The discussion revolves around a proposal for the Governance Fund Phase 1 by Candide Wallet, submitted to the Optimism Collective. The proposal seeks funding to develop an open-source, self-custodial wallet that facilitates cross-rollup transactions. The proposal has been approved and the voting has concluded with a majority voting "Yes."
+</about>
+
+<overview>
+- Proposal requests 190k OP tokens (~$89,000) for development
+- Focus on building fundamental wallet components, ecosystem integration, and user-friendly interfaces
+- Allocation includes incentives for fiat-on-ramp fees and educational content
+- Development to be completed over 8 months
+- No co-incentives from Candide due to being a new project
+</overview>
+
+<reaction>
+- General support for the open-source nature and public good aspect
+- Concerns about the crowded wallet market and competition with established players
+- Mixed opinions on the project's potential to drive adoption and liquidity on Optimism
+- Suggestions for better user acquisition strategies and collaboration with existing wallets
+- Positive feedback on the detailed budget and clear funding allocation
+</reaction>
+
+<tldr>
+The proposal for Candide Wallet to receive 190k OP tokens for developing a cross-rollup, self-custodial wallet has been approved. While the community appreciates the open-source initiative, there are concerns about market competition and user adoption. The project aims to enhance the Optimism ecosystem with a focus on user-friendly interfaces and educational content.
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/ready-gf-phase-1-proposal-optimismua/4970
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+The thread is about a proposal for the OptimismUA project, which aims to establish a national hub for Optimism in Ukraine, promoting its vision, values, and technology.
+</about>
+
+<overview>
+- Project name: OptimismUA
+- Author: CJ Hetherington
+- Mission: Spread Optimism’s vision and tech in Ukraine, onboard new users
+- Team: Includes co-founders of Atlantis World, KyivTech, and other notable contributors
+- Funding request: 200,000 $OP tokens
+- Distribution plan: Community events, growth initiatives, incentivized initiatives
+- Milestones: Branding, community meetups, educational content, partnerships, hackathons
+</overview>
+
+<reaction>
+- Announcement of a milestone: Launch of a government-led web3 education course in Ukraine
+- Goal: Make half of the Ukrainian population crypto-literate by 2030
+- Initial success: 20k+ students enrolled since launch
+</reaction>
+
+<tldr>
+This is an old thread and the information may be outdated. The thread announces the OptimismUA project proposal, aiming to establish a national hub for Optimism in Ukraine. The project seeks 200,000 $OP tokens for community events, growth initiatives, and educational programs. A significant milestone mentioned is the launch of a government-led web3 education course in Ukraine, with a goal to make half of the population crypto-literate by 2030.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/cycle-15-final-grants-roundup/6858
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+The thread announces the conclusion of Cycle 15 of the Optimism Grants program, summarizing the achievements and listing the finalists for the Builders and Experiments tracks.
+</about>
+
+<overview>
+- End of Season 4 and Cycle 15 of the Optimism Grants program
+- Growth in proposals: 34% increase from Season 3
+- Finalists for Builders and Experiments tracks listed
+- Rubrics for final review provided
+- Cycle 15 was the most selective cycle of Season 4
+- Total proposed grants for Cycle 15: 1.7M OP
+- Total recommended grants for Season 4: ~4.9M OP
+- Expected return of ~1.41M OP designated for Intent 2
+</overview>
+
+<reaction>
+- Congratulations to the finalists
+- Appreciation for the Grants Council's hard work and process
+- Excitement for the upcoming projects and collaborations
+</reaction>
+
+<tldr>
+The thread announces the end of Cycle 15 of the Optimism Grants program, highlighting the growth and selectivity of the cycle, listing the finalists, and summarizing the total grants proposed and recommended. The community expressed congratulations and appreciation for the Grants Council's efforts.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/media-proposal-gabriel-haines/3247
+
+Summary:
+<classification>unimportant</classification>
+
+<about>
+The thread is a media proposal by a user with a low trust level, seeking a grant for creating Optimism-related content. The responses indicate that the proposal was posted in the wrong forum section and provide guidance on where to post it correctly.
+</about>
+
+<tldr>
+This is an old thread and the information may be outdated. A user proposed a media project for an Optimism grant but was advised to follow the correct procedures and post in the appropriate forum section.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/why-do-you-think-this-is-the-best-l2-solution/4251
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+The thread discusses why Optimism is considered the best Layer 2 (L2) solution compared to its competitors.
+</about>
+
+<first_post>
+- User requests a comparison with competitors
+- Seeks at least three main positions or points of comparison
+</first_post>
+
+<tldr>
+The thread initiates a discussion on why Optimism is viewed as the best L2 solution, asking for comparisons with competitors and highlighting key points.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/draft-gf-phase-1-proposal-giveth-cycle-10-archived-original/3735
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+The discussion is about a proposal by Giveth to integrate their donation platform with Optimism, requesting 220,000 OP tokens to incentivize donations and create a liquidity pool.
+</about>
+
+<first_post>
+- Giveth wants to add Optimism to their DApp
+- Requesting 220,000 OP tokens
+- Plan to incentivize donations with GIV tokens, not OP
+- Will create a 50/50 liquidity pool with OP and GIV
+- Detailed project description and ecosystem value proposition
+</first_post>
+
+<reaction>
+- General support for the proposal
+- Some users suggest it aligns well with Optimism's goals
+- Questions about the implementation on Optimism and choice of SushiSwap for liquidity
+- Clarifications provided by the proposer on functionality and future plans
+- Discussion on the proposal's readiness for voting and feedback from the community
+</reaction>
+
+<tldr>
+Giveth proposes integrating their donation platform with Optimism, requesting 220,000 OP tokens to incentivize donations and create a liquidity pool. The community generally supports the proposal, with discussions on implementation details and readiness for voting.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/final-op-governance-analytics-dashboard/6171
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+The thread is about the announcement and progress updates of the OP Governance Analytics Dashboard, a tool designed to enhance governance accessibility within the Optimism Collective by providing detailed governance metrics.
+</about>
+
+<overview>
+- Mission: Develop a DAO Governance Analytics Dashboard for Optimism Collective
+- Focus: Key governance metrics like participation, voter behavior, and power structures
+- Budget: 24,500 OP tokens
+- Milestones: Initial design mockups, mid-development preview, integration of additional metrics, refinement based on feedback, and public report on user engagement
+- Team: Composed of governance analysts, full-stack developers, blockchain engineers, UX/UI designers, and product analysts
+</overview>
+
+<reaction>
+- Positive feedback on the dashboard's potential to enhance governance transparency and participation
+- Questions about differences from existing tools like Boardroom and Dune Analytics
+- Suggestions for additional features and metrics
+- Updates on milestone completions and community feedback integration
+- Continued support and interest in further development and integration of new metrics
+</reaction>
+
+<tldr>
+The thread announces the development and progress of the OP Governance Analytics Dashboard, aimed at improving governance transparency and participation within the Optimism Collective. The project has received positive feedback, suggestions for additional features, and updates on milestone completions. The community shows continued support and interest in the dashboard's further development.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/we-need-to-create-a-campaign-similar-to-the-odyssey-arbitrum-campaign/2810
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+The thread discusses the idea of creating an incentive campaign for the Optimism ecosystem, similar to the Odyssey Arbitrum campaign, to increase user engagement and utilization.
+</about>
+
+<first_post>
+- Suggests creating an incentive campaign for the second phase of AirDrop
+- Aims to increase the utilization of the Optimism ecosystem
+</first_post>
+
+<reaction>
+- Agreement on the idea of an incentive campaign
+- Suggestion to wait for the Bedrock upgrade
+- Emphasis on gamification to attract users
+- Concern about preventing airdrop hunters and focusing on real users
+</reaction>
+
+<tldr>
+This is an old thread and the information may be outdated. The discussion revolves around creating an incentive campaign for the Optimism ecosystem to boost user engagement, with suggestions to wait for the Bedrock upgrade and focus on real users while preventing airdrop hunters.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/lets-talk-about-identity-in-the-citizens-house/2170
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+Discussion on how to establish and manage identity within the Citizens' House of the Optimism Collective, focusing on citizenship granting, soulbound tokens, and handling bad actors.
+</about>
+
+<first_post>
+- Interest in creating ties between individuals and the governing protocol
+- Questions on how to grant citizenship, nature of "souls," and revoking citizenship
+- Shared resources on Soulbound Tokens
+</first_post>
+
+<reaction>
+- Emphasis on positive reinforcement alongside punishment for bad actors
+- Challenges in creating a Sybil-resistant process for granting citizenship
+- Suggestions for using POAPs, social recovery wallets, and non-transferable tokens
+- Concerns about revoking citizenship and potential for corruption
+- Ideas for combining multiple identity verification methods
+- Discussion on linking citizenship to voting and participation
+- Consideration of manual selection process for initial phases
+</reaction>
+
+<tldr>
+Discussion on establishing identity in the Citizens' House of the Optimism Collective, covering citizenship granting, soulbound tokens, and handling bad actors. Emphasis on positive reinforcement, Sybil resistance, and combining multiple verification methods.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/updates-improving-governance-accessibility-through-praise-and-contribution-based-attestations/6516
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+The thread is about updates and progress reports on the project to improve governance accessibility through Praise and contribution-based attestations within the Optimism community.
+</about>
+
+<overview>
+- Introduction of the project and its goals
+- Regular updates on milestones and progress
+- Integration of Praise bot into the Optimism Discord
+- Development and testing of the attestation feature
+- Community engagement through events and workshops
+</overview>
+
+<reaction>
+- Positive feedback on the progress and features
+- Questions about data transparency and public access to scores
+- Clarifications provided on data analysis and transparency
+</reaction>
+
+<tldr>
+This thread provides updates on the project to enhance governance accessibility in the Optimism community using Praise and contribution-based attestations. It includes progress reports, integration of tools, and community engagement activities. The project has received positive feedback and addressed questions about data transparency.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/draft-proposal-protocol-delegation-program/3946
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+The discussion revolves around a draft proposal for the Protocol Delegation Program in the Optimism ecosystem, which aims to delegate a portion of idle OP tokens to value-aligned protocols to enhance their participation in governance.
+</about>
+
+<first_post>
+- Introduction of the Protocol Delegation Program
+- Explanation of the need for protocol involvement in governance
+- Outline of the program's structure and criteria
+- Details on the delegation cap and renewal conditions
+</first_post>
+
+<reaction>
+- General support for the proposal with suggestions for improvement
+- Concerns about the impact on individual delegates and potential centralization
+- Suggestions to include additional metrics like TVL, volume, and protocol commitment
+- Debate on the fairness of criteria and the inclusion of multipliers for OP native protocols
+- Agreement on the need for a multifactorial approach to determine protocol eligibility
+- Final proposal adjustments based on community feedback, including a flat rate distribution with multipliers
+</reaction>
+
+<tldr>
+The thread discusses a draft proposal for the Protocol Delegation Program, aiming to delegate idle OP tokens to protocols for governance participation. The community generally supports the proposal but suggests improvements, including additional metrics and concerns about centralization. The final proposal includes a flat rate distribution with multipliers for OP native protocols.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/12th-op-community-governance-call-is-january-10th-at-10am-pt-1pm-et-7pm-cet/4428
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+This thread is an announcement about the 12th OP Community Governance Call scheduled for January 10th, 2023.
+</about>
+
+<overview>
+- Initial call scheduled for January 3rd, 2023
+- Postponed to January 10th, 2023 due to holidays
+- Zoom link provided for the call
+- Slides for the call shared
+</overview>
+
+<reaction>
+- Positive anticipation and appreciation for the call
+- Some users expressed eagerness to attend
+- Gratitude for hosting the call
+- Offers to host future calls
+</reaction>
+
+<tldr>
+This is an old thread and the information may be outdated. The 12th OP Community Governance Call was initially scheduled for January 3rd, 2023, but was postponed to January 10th, 2023. The thread includes the Zoom link and slides for the call, with users expressing positive anticipation and gratitude.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/manifesto-how-base-will-participate-in-optimism-governance/7361
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+Base announces its participation in Optimism governance, outlining its plans and contributions to the Superchain.
+</about>
+
+<overview>
+- Base plans to vote on proposals and delegate voting power as a pilot program.
+- Contributions include technical support, revenue sharing, experience, reach, scale, interoperability, and participation in the Law of Chains and Security Council.
+- Governance objectives include a learning attitude, adherence to values, and a commitment to decentralization and neutrality.
+- Voting strategy involves a cap of 9% of the total votable supply, with decisions made by a panel of Base contributors.
+- Delegation pilot involves selecting two delegates and delegating 500K OP tokens to each for six months.
+</overview>
+
+<reaction>
+- Excitement and curiosity about the selection process for delegates.
+- Appreciation for the detailed announcement and effort.
+- Questions about potential challenges and conflicts of interest.
+- Inquiries about the number of OP tokens Base holds and the source of these tokens.
+- Clarifications provided about the token grant and user delegation process.
+</reaction>
+
+<tldr>
+Base announces its participation in Optimism governance, detailing its contributions, governance objectives, voting strategy, and a delegation pilot. The community responds with excitement, questions about the selection process, potential challenges, and clarifications on token holdings and delegation.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/jiffyscan-builder-grant-cycle-11-update/5919
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+The thread provides updates on the progress of JiffyScan's builder grant milestones for Cycle 11.
+</about>
+
+<overview>
+- Initial post introduces the topic and mentions the completion of several milestones.
+- Subsequent posts detail the progress made, including links to Twitter announcements and the new site.
+- Updates on additional milestones completed over the months.
+- Final post confirms the completion of all proposed milestones and provides some usage statistics.
+</overview>
+
+<reaction>
+- Positive feedback from the milestones committee, recommending disbursement of milestone funding.
+- Acknowledgment and appreciation from the original poster.
+</reaction>
+
+<tldr>
+The thread announces the completion of JiffyScan's builder grant milestones for Cycle 11, detailing progress and achievements over several months, and concludes with positive feedback from the milestones committee recommending funding disbursement.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/retro-funding-moving-from-broad-to-narrow-scoped-rounds/7759
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+The thread announces changes to the Retroactive Public Goods Funding (Retro Funding) program, transitioning from broad to narrow scoped funding rounds.
+</about>
+
+<overview>
+- Announcement of the transition to narrow scoped rounds based on feedback from previous rounds.
+- Explanation of the concept of "scope" and its impact on funding rounds.
+- Identification of issues with broad scoped rounds, such as overwhelming citizens and builders.
+- Introduction of benefits expected from narrow scoped rounds, including better measurement of impact and prioritization.
+- Plan to experiment with narrow scoped rounds for the remainder of 2024 and open source the design process.
+</overview>
+
+<reaction>
+- General support for the transition to narrow scoped rounds.
+- Suggestions for prioritizing specific areas like revenue, developer tools, and user acquisition.
+- Concerns about the potential exclusion of some projects due to the narrow focus.
+- Questions about the implementation details and the decision-making process for the new scopes.
+- Emphasis on the need for clear communication and guidance for builders.
+</reaction>
+
+<tldr>
+The thread announces a shift in the Retro Funding program from broad to narrow scoped rounds to address feedback and improve the funding process. The community generally supports the change but raises concerns about potential exclusions and the need for clear guidance and communication.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/special-voting-cycle-12b-roundup/5984
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+The thread is an announcement about Special Voting Cycle #12b for the Optimism governance community, detailing the voting process, eligible proposals, and key dates.
+</about>
+
+<overview>
+- Special Voting Cycle #12b runs from May 18th to May 31st, 2023.
+- Non-grant proposals need approval from four delegates with >0.25% votable token supply.
+- Voting occurs via the Optimism Governance Portal.
+- Eligible proposals include Council Reviewer Elections, Treasury Appropriations, and Inflation Adjustment.
+</overview>
+
+<reaction>
+- Inflation Adjustment Proposal has received sufficient delegate approval to proceed to a vote.
+</reaction>
+
+<tldr>
+Special Voting Cycle #12b for the Optimism governance community runs from May 18th to May 31st, 2023, with key proposals including Council Reviewer Elections, Treasury Appropriations, and Inflation Adjustment. The Inflation Adjustment Proposal has received enough delegate approval to move forward.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/retropgf-3-badgeholder-manual/7035
+
+Summary:
+<classification>feedback</classification>
+
+<about>
+The thread is about gathering feedback on the RetroPGF 3 Badgeholder Manual, which guides badgeholders through their voting experience for the RetroPGF Round 3.
+</about>
+
+<overview>
+- Badgeholder Manual provides content for voting experience
+- Includes sections on RetroPGF 3 overview, Impact = Profit Framework, voting mechanics, and administration
+- Requests specific feedback on the main page, voting mechanics, Lists functionality, and navigation
+- Feedback needed by Nov 3rd for incorporation before voting starts on Nov 6th
+</overview>
+
+<reaction>
+- Suggestion to reschedule the Round 3 Retrospective call to after results are announced
+- Clarification needed on voting mechanics, specifically on the use of voting power and the impact of votes below 1500 OP
+- Moderator confirms changes to the retrospective schedule and clarifies voting mechanics
+</reaction>
+
+<tldr>
+The thread seeks feedback on the RetroPGF 3 Badgeholder Manual, covering its content and usability. Key points include rescheduling the retrospective call and clarifying voting mechanics. Feedback is requested by Nov 3rd to be incorporated before voting starts on Nov 6th.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/fake-op-twitter-profiles-creating-chaos/5765
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+The discussion is about the issue of fake Twitter profiles causing chaos and confusion within the community. Participants suggest ways to identify and mitigate these fake accounts.
+</about>
+
+<first_post>
+- Many fake Twitter profiles causing chaos
+- Suggests a unique disclaimer to identify real accounts
+</first_post>
+
+<reaction>
+- Agreement on the need for a unique identifier, like a gold tick
+- Emphasis on the importance of creating identifiable identities to prevent scams
+- Suggestions to use browser extensions and wallets to avoid phishing and scams
+- Mention of Twitter Blue subscription as a potential indicator of real accounts
+- Frustration with the prevalence of fake accounts and the need for better solutions
+</reaction>
+
+<tldr>
+The thread discusses the problem of fake Twitter profiles causing confusion and suggests implementing unique identifiers to distinguish real accounts. Participants agree on the need for better identification methods and share tips to avoid scams.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/draft-gf-phase-1-proposal-hats-finance-archived-original/3815
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+The thread is about a proposal for Hats Finance to receive a grant from the Optimism Governance Fund Phase 1 to deploy their on-chain bug bounty protocol on the Optimism network.
+</about>
+
+<overview>
+- Hats Finance is an on-chain bug bounty protocol incentivizing stakeholders to contribute to Web3 security.
+- Proposal requests 200k $OP tokens to incentivize OP ecosystem projects to create bug bounty vaults.
+- The protocol aims to increase security and trust in the Optimism ecosystem.
+- The proposal includes details on team members, project metrics, and the advantages of Hats over traditional bug bounty services.
+- The proposal was edited to focus on incentivizing OP ecosystem projects rather than funding the Optimism tech stack directly.
+</overview>
+
+<reaction>
+- Positive feedback on the proposal's alignment with Optimism's values and its potential to enhance security.
+- Questions about the specifics of the proposal, including how white hat hackers are assured payment and the distribution of $OP tokens.
+- Suggestions to refine the proposal to better fit the grant program's objectives.
+- Acknowledgment of the proposal's potential to address real security issues in the ecosystem.
+</reaction>
+
+<tldr>
+This is an old thread and the information may be outdated. The thread discusses a proposal by Hats Finance to receive a grant from the Optimism Governance Fund to deploy their bug bounty protocol on Optimism. The proposal aims to enhance security in the Optimism ecosystem by incentivizing projects to create bug bounty vaults. The community provided positive feedback and suggestions for refining the proposal.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/final-velodrome-fostering-inclusive-governance-through-leading-optimism-builders-and-long-term-users/6186
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+The discussion is about a proposal by Velodrome to foster inclusive governance in the Optimism ecosystem by engaging leading protocols and long-term users through a program that distributes vested OP tokens.
+</about>
+
+<first_post>
+- Proposal to engage leading protocols and veVELO community in Optimism Governance
+- Request for 1M OP grant to be distributed to participants
+- Detailed plan for developing govNFTs to manage vested OP tokens
+- Emphasis on increasing governance accessibility and reducing voting power concentration
+</first_post>
+
+<reaction>
+- Requests for more detailed budget breakdown and clarification on fund allocation
+- Concerns about the large grant amount and its justification
+- Clarifications on grant policies and self-delegation restrictions
+- Mixed opinions on the effectiveness and necessity of the proposal
+- Some support for the proposal moving to a vote, while others express skepticism
+</reaction>
+
+<tldr>
+The thread discusses Velodrome's proposal to enhance Optimism Governance by distributing vested OP tokens to leading protocols and long-term users. The proposal includes developing govNFTs to manage these tokens. While some users support the initiative, others raise concerns about the large grant amount and seek more detailed budget breakdowns. The proposal eventually moves to a vote with mixed opinions.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/about-the-citizens-category/7579
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+This announcement provides information about the Citizens category in the Optimism forum, detailing the role and responsibilities of Citizens within the governance system.
+</about>
+
+<overview>
+- Citizens are members of the Citizens’ House, part of the Collective’s governance system.
+- Operate a reputation-based governance system (one member = one vote).
+- Responsible for allocating retroactive public goods funding and vetoing protocol upgrades.
+- Citizenship distributed via a web-of-trust mechanism; future criteria to be defined by Citizens.
+</overview>
+
+<tldr>
+This announcement explains the role of Citizens in the Optimism governance system, their responsibilities, and how Citizenship is currently distributed and will be defined in the future.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/incentives-for-non-token-holders-in-governance-of-optimism-ecosystem/7352
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+The discussion revolves around how the Optimism Collective incentivizes non-token holders or those with minimal tokens to participate in governance.
+</about>
+
+<first_post>
+- Inquiry about incentives for non-token holders
+- Frequent user of Optimism chain
+- Concern about governance system's awareness of regular users
+</first_post>
+
+<reaction>
+- Agreement with the concern
+- Mention of lack of incentives for new users
+- Reference to past airdrop favoring current token holders
+</reaction>
+
+<tldr>
+The thread discusses the lack of incentives for non-token holders in the Optimism governance system, with users expressing concerns about the current focus on existing token holders and the need for more inclusive engagement strategies.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/change-sorting-from-alphabetical-to-shuffle/7025
+
+Summary:
+<classification>feedback</classification>
+
+<about>
+The thread discusses feedback on changing the default sorting method for RetroPGF projects on the Agora platform from alphabetical to shuffle to ensure fair exposure for all projects.
+</about>
+
+<overview>
+- Initial concern about alphabetical sorting giving an advantage to projects starting with earlier letters.
+- Suggestion to make shuffle the default sorting option for fair exposure.
+- Immediate agreement on the need for implementation.
+- Moderator confirms action has been taken and shuffle is now the default on Supermodular.
+- Additional suggestion to apply the shuffle sorting to West’s Retro PGF as well.
+</overview>
+
+<reaction>
+- Agreement on the fairness of shuffle sorting.
+- Confirmation that feedback has been forwarded and action taken.
+- Suggestion to extend the shuffle sorting to other related platforms.
+</reaction>
+
+<tldr>
+Feedback on changing the default sorting method for RetroPGF projects from alphabetical to shuffle to ensure fair exposure has been positively received and acted upon, with suggestions to extend this change to other related platforms.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/setup-myself-as-a-delegator-deligate-and-vote-on-proposal/6538
+
+Summary:
+<classification>unimportant</classification>
+
+<about>
+This thread falls into the "unimportant" category because it primarily consists of a new user asking for help, a welcome message, and a brief greeting. There is no substantial discussion or detailed information provided.
+</about>
+
+<tldr>
+A new user asked for help on setting up as a delegator and voting on proposals. They were welcomed to the community and directed to the relevant documentation.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/pooltogether-grant-2-update-moving-forward/5724
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+The thread provides an update on PoolTogether's second grant from Optimism and outlines future plans, including a potential third grant application.
+</about>
+
+<overview>
+- PoolTogether received two grants from Optimism: 450,000 $OP (Grant 1) and 550,000 $OP (Grant 2).
+- Grant 2 aimed to grow deposits and depositors while reducing $OP distribution.
+- Achievements: Reduced $OP distribution by 30%, increased deposits to $40 million, and grew unique depositors to over 35,000.
+- Developed two alternative interfaces: PoolyGotchi and RetroPooling.
+- Future plans include a "hyperstructure" upgrade to make yield sources and token types permissionless, expected by July 15th.
+- PoolTogether Inc plans to apply for a third grant to continue current operations and support the hyperstructure upgrade.
+</overview>
+
+<reaction>
+- Positive feedback on the presentation and perspective.
+</reaction>
+
+<tldr>
+The thread announces the successful outcomes of PoolTogether's second grant from Optimism, including increased deposits and unique depositors, and outlines plans for a third grant to support a major protocol upgrade. Positive feedback was received from the community.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/do-you-think-it-is-necessary-for-op-project-parties-to-take-action-to-attract-market-attention-again/7271
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+The discussion revolves around whether the Optimism (OP) project should conduct another large-scale airdrop to attract market attention and address user frustrations with previous airdrops.
+</about>
+
+<first_post>
+- Suggests a large-scale airdrop to revive interest in Optimism L2
+- Notes that only a small portion of the originally planned airdrop tokens have been distributed
+- Mentions user frustration over unfulfilled rewards from past Optimism Quests
+</first_post>
+
+<reaction>
+- General frustration with how past airdrops were handled, favoring governance participants over regular users
+- Criticism of the Optimism Foundation for not rewarding regular users who contributed time and effort
+- Concerns that the project team may regret the initial airdrop design
+- Acknowledgment of the OP project team's marketing and relationship-building skills, with a possibility of future airdrops to attract attention
+</reaction>
+
+<tldr>
+The thread discusses the need for another large-scale airdrop by the Optimism project to regain market attention and address user frustrations over previous airdrops, which were perceived as favoring governance participants over regular users.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/how-is-blockchain-being-appllied-in-supply-chain-management-and-logistics/8232
+
+Summary:
+<classification>unimportant</classification>
+
+<about>
+The thread consists of a single post by a user with a low trust level (0) discussing the application of blockchain in supply chain management and logistics. There are no follow-up posts or discussions, making it unimportant.
+</about>
+
+<tldr>
+A single post by a low-trust user discusses blockchain's role in supply chain management and logistics, highlighting benefits like real-time tracking, traceability, and efficiency improvements. No further discussion or reactions.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/who-should-i-delegate-to/2546
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+The discussion revolves around the topic of delegating voting power within the Optimism governance system. Users share their thoughts on whether to self-delegate or delegate to others, and the implications of these choices on decentralization and effective governance.
+</about>
+
+<first_post>
+- User nominated themselves for delegation
+- Acknowledges lack of full understanding but sees it as a learning opportunity
+- Seeks opinions on self-nomination vs. delegating to others
+</first_post>
+
+<reaction>
+- Positive reinforcement for self-nomination and participation
+- Concerns about centralized voting power if many delegate to a few
+- Support for more decentralized governance with increased number of delegates
+- Some users prefer self-delegation despite time constraints
+- Emphasis on ethical and transparent governance
+- References to resources for finding delegate information
+</reaction>
+
+<tldr>
+The thread discusses the pros and cons of self-delegating versus delegating voting power within the Optimism governance system. Users express support for decentralized governance and share resources for finding delegate information. Ethical and transparent governance is emphasized.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/layer2dao-response-to-allegations-from-velodrome-november-2022/5705
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+The thread discusses the response of Layer2DAO to allegations made by Velodrome regarding the handling of OP tokens and the subsequent actions taken by Layer2DAO.
+</about>
+
+<first_post>
+- Layer2DAO worked with the OP Foundation, provided requested information
+- All assets returned to Optimism, OP tokens repurchased
+- No no-sale policy at grant receipt; moved assets due to false hack rumors
+- Continued to build projects and repurchase OP tokens
+- Denies making a $200k profit; claims narrative is false and harmful
+- Provided transaction details and transparency
+</first_post>
+
+<reaction>
+- Questions raised about Layer2DAO's motivations and actions
+- Concerns about bridging funds and lack of immediate disclosure
+- Highlighted inconsistencies with grant spirit and lack of communication
+- Additional details on transactions and movements of funds
+- Some users express support, others highlight potential benefits from Arbitrum airdrop
+</reaction>
+
+<tldr>
+The thread discusses Layer2DAO's response to Velodrome's allegations about mishandling OP tokens. Layer2DAO claims transparency and denies profit motives, while others question their actions and motivations. Some users express support, while others highlight potential benefits from Arbitrum airdrop.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/review-gf-phase-1-nex/3439
+
+Summary:
+<classification>feedback</classification>
+
+<about>
+The thread is about feedback on a grant proposal submitted by NEX for the Governance Fund (Phase 1) on the Optimism forum.
+</about>
+
+<overview>
+- NEX is a decentralized perpetual and spot exchange.
+- Proposal requests 900,000 OP tokens for liquidity, referral rebates, and liquidity incentives.
+- NEX aims to provide a seamless trading experience with zero slippage and price impact.
+- The project launched on Optimism on August 31, 2022.
+- NEX plans to use the grant to boost liquidity and attract traders.
+</overview>
+
+<reaction>
+- Concerns about the large amount requested for an early-stage project.
+- Questions about the need for immediate funding when some incentives are planned for early 2023.
+- Suggestions to lower the requested amount and remove the allocation for the project's own liquidity.
+</reaction>
+
+<tldr>
+This is an old thread and the information may be outdated. The thread discusses feedback on NEX's grant proposal for 900,000 OP tokens to enhance liquidity and attract traders. Concerns were raised about the large amount requested and the timing of fund usage, with suggestions to reduce the request and remove self-liquidity allocation.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/draft-gf-phase-1-proposal-curve/3089
+
+Summary:
+<about>
+The discussion revolves around a proposal for Curve to receive a grant of 504,828 OP tokens from the Optimism Collective to incentivize liquidity on the Optimism network. The proposal has been reviewed and closed, with the voting results favoring approval. The forum thread includes detailed discussions on the proposal, feedback, and subsequent revisions.
+</about>
+
+<overview>
+- Initial proposal: 1,000,000 OP for liquidity incentives
+- Revised to 504,828 OP for vote incentives
+- Distribution: 42,069 OP/week for 12 weeks
+- Recipient address updated to a trustless L2 vault contract
+- Votium deployment on Optimism for vote incentivization
+</overview>
+
+<reaction>
+- General support for Curve's integration and potential benefits to Optimism
+- Concerns about the initial high ask and lack of clear co-incentives
+- Suggestions to align OP distribution with CRV emissions
+- Discussions on the recipient address and KYC requirements
+- Positive feedback on the revised proposal and trustless contract solution
+</reaction>
+
+<tldr>
+The proposal for Curve to receive 504,828 OP tokens for liquidity incentives on Optimism has been approved after revisions and community feedback. The distribution will be managed through a trustless L2 vault contract, with Votium facilitating vote incentivization on Optimism.
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/footprint-analytics-builders-grant-cycle-11-milestone-update/6982
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+The thread is about Footprint Analytics providing updates on their milestones for the Optimism Builders Grant Cycle 11, including the completion of various development milestones and the organization of a hackathon.
+</about>
+
+<overview>
+- Announcement of completed development milestones
+- Details of milestones provided in a Google Sheet
+- Updates on pending milestones: maintenance and hackathon
+- Launch and results of the Optimism Hackathon
+- Confirmation of milestone completion and recommendation for fund disbursement
+</overview>
+
+<reaction>
+- Acknowledgment of pending milestones and reminders about deadlines
+- Confirmation of hackathon preparation and request for feedback
+- Announcement of hackathon launch and its success
+- Confirmation of fund disbursement process after milestone completion
+- Inquiry about the status of funding post lock-up period
+</reaction>
+
+<tldr>
+Footprint Analytics announced the completion of their development milestones for the Optimism Builders Grant Cycle 11, with the final milestone being the successful organization of a hackathon. The community acknowledged the updates, and the grant council recommended fund disbursement after the one-year lockup period.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/let-s-create-a-new-way-to-learn-english-and-get-immersive-in-crypto-world/7634
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+The discussion is about creating a new method to learn English while getting immersed in the crypto world, specifically targeting the Latin community. The idea involves using Duolingo for English learning and rewarding efforts with cryptocurrency.
+</about>
+
+<first_post>
+- Introduction of a new way to learn English using Duolingo
+- Focus on the Latin community facing language barriers
+- Combining learning with cryptocurrency rewards
+- Seeking feedback and suggestions from the community
+</first_post>
+
+<reaction>
+- Discussion about a conversational group approach for learning English
+- Emphasis on Web3 topics and technical discussions
+- Suggestion to use Spanish as a fallback for better understanding
+- Interest in web3 gaming apps to aid in learning
+</reaction>
+
+<tldr>
+The thread discusses a new method to learn English using Duolingo and cryptocurrency rewards, targeting the Latin community. The community suggests a conversational approach focusing on Web3 topics and using Spanish as a fallback. There is also interest in web3 gaming apps to support learning.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/incentive-impact-analysis-polynomial/6796
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+The discussion revolves around the impact and effectiveness of incentive programs, specifically focusing on Polynomial's trading incentives and their outcomes.
+</about>
+
+<first_post>
+- Incentives drive short-term usage spikes; tapering and vesting recommended for sustainability
+- Retroactive airdrop for Polynomial Vault V1 depositors lacked longevity; liquidity mining incentives unused
+- Incentives led to a 23x surge in trading volume but slower user growth
+- Polynomial’s XP system innovatively structured incentives but wash trading remains an issue
+</first_post>
+
+<reaction>
+- Reward > fees leads to wash trading; reward < fees is less exciting but more resistant to sybil/wash trading
+- Polynomial Trading Season aimed to build a trader community; collaborated with various protocols and exchanges
+- Vesting periods suggested to delay incentives and show long-term commitment
+- Importance of tracking long-term customer value to assess incentive effectiveness
+- General agreement on the analysis and recommendations provided
+</reaction>
+
+<tldr>
+The thread discusses the impact of Polynomial's trading incentives, highlighting short-term usage spikes, issues with wash trading, and the need for sustainable incentive structures. Participants suggest tapering rewards, implementing vesting periods, and tracking long-term customer value to improve future programs.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/topic/5528
+
+Summary:
+<classification>unimportant</classification>
+
+<about>
+The thread is a request for financial assistance from a user with a low trust level. The user is asking for a small amount of cryptocurrency to cover transaction fees and offers an NFT as a reward.
+</about>
+
+<tldr>
+A user with a low trust level is requesting a small amount of cryptocurrency to cover transaction fees and offers an NFT as a reward. This thread is classified as unimportant.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/proposal-for-a-governance-structure/2977
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+The discussion is about proposing a new governance structure for the Optimism forum, focusing on roles such as voters, proposal promoters, and the automation of tasks to enhance efficiency and growth.
+</about>
+
+<first_post>
+- Forum as the backbone of governance
+- Roles needed: treasury, voters, proposal promoters
+- Automation to make pay for work efficient
+- Incentivizing builders and voters
+- Monthly issuance of tokens based on user growth
+- Voters rewarded based on voting efficiency and network growth
+- Proposal promoters to filter and fine-tune proposals
+</first_post>
+
+<reaction>
+- Agreement on the need for a governance dashboard
+- Ambivalence about the proposal; concerns about paying for participation
+- Preference for involvement without direct financial benefit
+- Concerns about centralization and the role of committees
+- Debate on the necessity and impact of proposal promoters
+- Discussion on the balance between delegates and promoters
+- Skepticism about the proposed financial rewards and their impact
+</reaction>
+
+<tldr>
+The thread discusses a proposal for a new governance structure in the Optimism forum, focusing on roles like voters and proposal promoters, and the automation of tasks. While some agree on the need for a governance dashboard, others express concerns about paying for participation and the potential centralization of decision-making. The debate also covers the balance between delegates and promoters and the impact of proposed financial rewards.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/what-is-the-exact-amount-of-badgeholders-in-the-citizen-house/8085
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+The thread discusses the number of badgeholders in the Citizen House of the Optimism community.
+</about>
+
+<first_post>
+- User seeks information on the number of Citizens in the Citizen House
+- Explored various platforms (Agora, Dune, Curia) without success
+</first_post>
+
+<reaction>
+- Provided a link to a relevant page on vote.optimism.io
+- User manually counted the badgeholders and gave feedback to Agora
+- Moderator provided a detailed response with a link to the RetroPGF 3 voting badge distribution results
+</reaction>
+
+<tldr>
+The thread is about finding the number of badgeholders in the Citizen House. Initial attempts to find this information were unsuccessful, but users provided helpful links and a moderator shared detailed results from the RetroPGF 3 voting badge distribution.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/where-are-the-artists-creators-optimism-rewarded/7693
+
+Summary:
+<classification>feedback</classification>
+
+<about>
+User is providing feedback on the perceived lack of impact and value of OP NFT projects, questioning their floor prices and overall influence.
+</about>
+
+<overview>
+- User asks for examples of OP NFT projects with specific floor prices (0.1E and 0.05E).
+- Expresses dissatisfaction with the impact of these projects as a daily OP user.
+</overview>
+
+<tldr>
+User provides feedback questioning the value and impact of OP NFT projects, specifically asking for examples with certain floor prices and expressing dissatisfaction with their influence.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/review-gf-phase-1-proposal-domani-protocol/3410
+
+Summary:
+<classification>feedback</classification>
+
+<about>
+The thread is about a proposal for the DOMANI Protocol to receive a grant of 550,000 OP tokens from the Optimism network to support their DeFi project.
+</about>
+
+<overview>
+- Project Name: DOMANI Protocol
+- Author: DOMANIMike
+- Number of OP tokens requested: 550,000 OP
+- Grant category: DeFi
+- Proposal includes seeding DOMANI DAO and developing options and structured tokens
+- Plan to run a 12-month incentives program
+- DOMANI Protocol aims to become a leading cross-chain asset management protocol
+</overview>
+
+<reaction>
+- Moderator requested clarification on the committee for review
+- DOMANI Protocol updated the proposal to specify "DeFi" as the grant category
+- Concerns raised about the high amount requested and the project's past traction
+- Suggestion to deploy on Optimism and gain traction before requesting incentives
+</reaction>
+
+<tldr>
+This is an old thread and the information may be outdated. The DOMANI Protocol proposed a grant request of 550,000 OP tokens to support their DeFi project on Optimism. The proposal included seeding a DAO and developing new tools. Feedback included concerns about the high amount requested and suggestions to first gain traction on Optimism.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+Announcement of Retro Funding 4: Onchain Builders round details, including eligibility criteria, timeline, and voting design.
+</about>
+
+<overview>
+- Retro Funding 4 rewards onchain builders who deployed contracts to the Superchain.
+- Timeline: Sign up (May 23 - June 6), Application Review (June 6 - June 18), Voting (June 23 - July 8), Results & Grant delivery (July 15).
+- Eligibility: Contracts must have interactions from 420 unique addresses, first transaction before April 1, 2024, and more than 10 days of activity.
+- 10 million OP allocated for rewards.
+- Voting design: Metrics-based evaluation, badgeholders vote on metrics rather than individual projects.
+- KYC & Grant delivery: Grants streamed over 100 days via Superfluid.
+</overview>
+
+<reaction>
+- Positive feedback on metrics-based evaluation and efforts to define "impact."
+- Concerns about potential conflicts of interest for badgeholders.
+- Questions about the specifics of impact metrics and trust scores.
+- Suggestions to include off-chain builders and other types of contributions in future rounds.
+- Issues with the application process and eligibility criteria for certain projects like NFTs and EAS-based projects.
+</reaction>
+
+<tldr>
+Announcement of Retro Funding 4 details, focusing on rewarding onchain builders with 10 million OP. The round includes a metrics-based evaluation for voting, with grants streamed over 100 days. Positive feedback on the new approach, but concerns and questions about eligibility and impact metrics.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/did-op-airdrop-2-increase-governance-engagement/7270
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+The thread discusses an academic analysis of whether Optimism's Airdrop 2 increased governance engagement within the community.
+</about>
+
+<overview>
+- Study on the impact of Airdrop 2 on governance participation
+- Findings: Increase in token delegation and voting
+- Questions raised: Cost-effectiveness, future reward activities, decentralization of the process
+- Unique aspects of OP's airdrop: Promise of future rewards, low token value at the time
+</overview>
+
+<reaction>
+- Positive feedback on the research and analysis
+- Suggestions to include criteria for delegating to active voters
+- Concerns about distinguishing genuine participation from positioning for future airdrops
+- Personal experiences of small token holders appreciating the rewards and community engagement
+</reaction>
+
+<tldr>
+The thread announces an academic analysis showing that Optimism's Airdrop 2 increased governance engagement through token delegation and voting. The community provided positive feedback and raised questions about future reward strategies and distinguishing genuine participation.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/introduction-grindery-dao-zapier-for-web3/3605
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+Introduction of Grindery DAO, a middleware for web3, aiming to build native integrations across web2 and web3 tools, and seeking potential collaboration and grants from Optimism.
+</about>
+
+<overview>
+- Grindery DAO: Middleware for web3, enabling seamless on-, off-, and cross-chain integrations.
+- Purpose: Seeking grants and collaboration opportunities, not an official proposal.
+- Team: Experienced professionals in entrepreneurship, development, and business development.
+- Use Cases: Payout systems, notifications for wallet payments, blockchain transaction data integration, automated social media updates, and custom web3-web2 API connections.
+</overview>
+
+<reaction>
+- Suggestion to post in the gov-general channel on Optimism Discord for better visibility.
+- Positive response to the suggestion, with plans to post a smaller introduction on Discord.
+</reaction>
+
+<tldr>
+This is an old thread and the information may be outdated. Grindery DAO introduced itself as a middleware for web3, seeking collaboration and grants from Optimism. They highlighted their team and use cases, and received a suggestion to post in the Optimism Discord for better engagement.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/quantumfair-ops-onchain-raffle-live/8005
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+The thread announces the launch of QuantumFair's OnChain raffle on the Optimism platform, offering a chance to win ~$1,000 of Velodrome veNFT for 1 DAI per ticket.
+</about>
+
+<overview>
+- QuantumFair's OnChain raffle live on Optimism
+- Prize: ~$1,000 of Velodrome veNFT
+- Raffle ticket price: 1 DAI
+- Link to QuantumFair website and Twitter for more information
+</overview>
+
+<reaction>
+- Positive feedback about QuantumFair, mentioning its use for raffling Optimism skateboards
+- Encouragement to help reach 420 unique users for the raffle
+</reaction>
+
+<tldr>
+QuantumFair has launched an OnChain raffle on the Optimism platform, offering ~$1,000 of Velodrome veNFT for 1 DAI per ticket. The announcement received positive feedback and encouragement to reach 420 unique users.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/season-5-grants-council-operating-budget/6941
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+The thread is about the proposed operating budget for the Optimism Grants Council for Season 5.
+</about>
+
+<overview>
+- Proposed Council Lead: Lund Ventures (Dane Lund)
+- Proposed Budget: 440k OP
+- Changes in Scope: Processing all Delegate Mission Applications, no longer operating its own Request For Grant program
+- Breakdown of Budget: 400k OP for 3 Sub-Committees and Ops, 40k OP for Council-related grants, 0 OP for Lead position
+- Benchmarks and KPIs: Review 95% of Mission Requests, maintain finalist rate < 30%, process > 300 proposals, publish rubrics, NPS score from finalists > 7/10, creation of Milestone Hub, office hours and AMA attendance by > 75 unique proposers
+</overview>
+
+<reaction>
+- General support for the proposal and its readiness for a vote
+- Positive feedback on the addition of roles for milestones and metrics
+- Discussion on the use of AI in grant applications and its potential impact
+- Clarification on the role of the Milestone and Metrics Manager
+</reaction>
+
+<tldr>
+The thread discusses the proposed operating budget for the Optimism Grants Council for Season 5, led by Lund Ventures. The budget is set at 440k OP, with significant changes in scope and additional roles for milestones and metrics. The proposal has received broad support and is ready for a vote.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/calling-out-retropgf-lets-discuss/7069
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+The thread discusses the RetroPGF funding process of Optimism Foundation, questioning its alignment with true public good and its potential biases towards blockchain projects.
+</about>
+
+<first_post>
+- Criticizes Optimism Foundation for "public good washing"
+- Claims grants favor projects benefiting their blockchain
+- Argues real-world value projects are overlooked
+- Suggests RetroPGF funding is biased towards web3 and blockchain projects
+- Calls for more inclusive funding for real-world public good projects
+</first_post>
+
+<reaction>
+- Clarifies that funding decisions are made by Token House, Citizen House, and Grants Council, not the foundation itself
+- Emphasizes the need to hold specific decision-making bodies accountable
+- Points out that many funded projects are not exclusively aligned with Optimism
+- Suggests the need for a balanced and less emotionally driven discussion
+- Highlights the influence of popularity and scale in funding decisions
+- Notes a disconnect between the community and governance participants
+</reaction>
+
+<tldr>
+The thread debates the RetroPGF funding process of Optimism Foundation, with criticisms of bias towards blockchain projects and calls for more inclusive real-world public good funding. Reactions clarify decision-making structures and emphasize accountability and balanced discussion.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/oxytocin-delegate-communication-thread/5278
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+The thread is about the delegate communication and voting decisions of the user Oxytocin within the Optimism governance framework. It includes discussions on various governance topics, voting rationales, and suggestions for improving the delegate system.
+</about>
+
+<first_post>
+- Introduction of Oxytocin's delegate communication thread
+- Intention to discuss voting decisions and metagovernance
+- Concerns about sustainability of growth experiments
+- Support for Bedrock update and future protocol upgrades
+- Feedback on onchain voting beta and delegate centralization
+</first_post>
+
+<reaction>
+- Confirmation of voting decisions on Bedrock and delegate suspension
+- Summary of votes on special cycle proposals and rationale
+- Feedback on mission intents and specific proposals
+- Clarification on the importance of the anticapture commission vote
+</reaction>
+
+<tldr>
+The thread discusses Oxytocin's delegate communication, voting decisions, and suggestions for improving the Optimism governance system. Key topics include growth experiments, Bedrock update, onchain voting, and delegate centralization. The thread also includes feedback on various proposals and the importance of the anticapture commission vote.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/final-technerd-program/6087
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+The thread announces the launch and progress of the TechNERD program, a training initiative aimed at creating technical support specialists for the Optimism ecosystem.
+</about>
+
+<overview>
+- Program aims to train 5 techNERDs for technical support
+- Training course runs for 4 weeks, followed by 6 weeks of support on the Optimism Discord server
+- Program participants must complete KYC to receive grant funds
+- Critical milestones include training completion, active support participation, and ticket resolution
+- Budget includes $1k per techNERD for equipment and 4.2k OP for active participation
+</overview>
+
+<reaction>
+- General support and approval from multiple delegates
+- Some concerns about the relevance of deployment metrics for measuring success
+- Positive feedback on the program's potential to enhance technical decentralization
+- Updates on application process and training schedule
+- Final milestone achievements and program impact reported
+</reaction>
+
+<tldr>
+The TechNERD program, aimed at training technical support specialists for the Optimism ecosystem, received broad support and successfully met its critical milestones, including training completion and ticket resolution. The program is seen as a valuable step towards technical decentralization.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/review-gf-phase-1-proposal-givestation/3496
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+The thread discusses a grant proposal for GiveStation, a multi-chain give-to-earn grant protocol, and its application for OP tokens from the Optimism ecosystem.
+</about>
+
+<first_post>
+- Project Name: GiveStation
+- Request: 60k OP tokens
+- Grant category: DeFi
+- Overview: Multi-chain give-to-earn grant protocol rewarding users for funding projects
+- Mechanism: Grants approved by donor consensus; 50% approval needed for fund disbursement
+- Goal: Incentivize the Optimism ecosystem with OP rewards
+- Deployment: Currently on Optimism Goerli testnet; mainnet imminent
+</first_post>
+
+<reaction>
+- Clarification needed on the exact number of OP tokens requested (60k vs. 50k)
+- Inquiry about the specific committee for proposal review
+- Confirmation that rewards will be integrated post-testnet event
+- Questions about the distribution of OP tokens to contributors
+- Response: Equal OP token rewards for all contributors to prevent whales or reward farming
+</reaction>
+
+<tldr>
+The thread discusses a grant proposal for GiveStation, a decentralized give-to-earn protocol, requesting 60k OP tokens to incentivize the Optimism ecosystem. Clarifications were made regarding the exact token request and the distribution mechanism to ensure fairness among contributors.
+</tldr>
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/retropgf-3-conflicts-of-interest-season-5-citizens/7506
+
+Summary:
+<classification>announcement</classification>
+
+<about>
+The thread discusses the examination of potential conflicts of interest in RetroPGF 3 and updates on Season 5 Citizens in the Optimism governance system.
+</about>
+
+<overview>
+- Foundation reviewed 55 badgeholder ballots; no Code of Conduct violations found.
+- One badgeholder, Lightclient, violated the conflict of interest rule and will have their voting badge removed.
+- 133 out of 145 badgeholders voted in RetroPGF 3; non-voters and violators will lose their badges.
+- Foundation is working on citizenship concepts and future distribution.
+</overview>
+
+<reaction>
+- Mixed opinions on the severity of Lightclient's punishment; some suggest a warning or temporary suspension.
+- Concerns about the clarity and enforcement of conflict of interest rules.
+- Suggestions to refine the rules and improve transparency to avoid disincentivizing disclosure of conflicts.
+- Some users emphasize the importance of following existing rules and the need for a decentralized enforcement process.
+</reaction>
+
+<tldr>
+The thread announces the review of conflicts of interest in RetroPGF 3, resulting in the removal of Lightclient's voting badge for a violation. It also updates on Season 5 Citizens, with non-voters and violators losing their badges. Reactions include mixed opinions on the punishment's severity and calls for clearer rules and decentralized enforcement.
+
+--------------------------------------------------------------------------------
+
+URL: https://gov.optimism.io/t/final-spearbit-immunefi-bug-bounty-program-for-large-protocols-building-on-optimism/6187
+
+Summary:
+<classification>discussion</classification>
+
+<about>
+The discussion revolves around a proposed bug bounty program by Spearbit and Immunefi for large protocols building on Optimism, with a focus on Velodrome.
+</about>
+
+<first_post>
+- Proposal for a bug bounty program targeting large protocols on Optimism
+- Request for 100,000 OP tokens for bug bounty rewards
+- Emphasis on security assurance, distributed accountability, and enabling bridge decentralization
+- Initial focus on Velodrome, with plans to expand to other protocols
+</first_post>
+
+<reaction>
+- Questions about the specifics of the program, including duration, fund usage, and operational costs
+- Clarifications provided about the indefinite nature of the program and no operational costs
+- Concerns about funding large, established projects versus smaller, underfunded ones
+- Agreement on the importance of securing critical protocols like Velodrome
+- Suggestions to extend the program to smaller projects in the future
+- Confirmation that Velodrome is matching the funding and operates as a public good
+- Mixed opinions on whether large protocols should fund their own security measures
+- General support for the proposal with some delegates ready to move it to a vote
+</reaction>
+
+<tldr>
+The thread discusses a proposed bug bounty program by Spearbit and Immunefi for large protocols on Optimism, initially focusing on Velodrome. The proposal requests 100,000 OP tokens for bug bounty rewards, emphasizing security and decentralization. While there is general support, some participants suggest extending the program to smaller projects and question the need for funding large, established protocols.
+</tldr>
+
+--------------------------------------------------------------------------------
+

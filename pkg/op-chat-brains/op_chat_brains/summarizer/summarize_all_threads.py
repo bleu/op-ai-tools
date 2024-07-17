@@ -1,5 +1,5 @@
 import pandas as pd
-import os
+import os, random
 from tqdm import tqdm
 from typing import List, Dict
 import concurrent.futures
@@ -13,12 +13,14 @@ from op_chat_brains.structured_logger import StructuredLogger
 
 logger = StructuredLogger()
 
-
-def get_all_thread_urls() -> List[str]:
+def get_some_thread_urls(proportion : float) -> List[str]:
     posts = ForumPostsProcessingStrategy.process_document(FORUM_PATH)
     df_posts = pd.DataFrame(posts).T
     threads = ForumPostsProcessingStrategy.return_threads(df_posts)
-    return [thread.metadata["url"] for thread in threads if thread.metadata["url"]]
+    all_threads = [thread.metadata["url"] for thread in threads if thread.metadata["url"]]
+
+    random.shuffle(all_threads)
+    return all_threads[:int(len(all_threads) * proportion)]
 
 
 def summarize_single_thread(url: str, model_name: str) -> Dict[str, str]:
@@ -31,8 +33,8 @@ def summarize_single_thread(url: str, model_name: str) -> Dict[str, str]:
         return {url: f"Error: {str(e)}"}
 
 
-def summarize_all_threads(model_name: str = SUMMARIZER_MODEL) -> Dict[str, str]:
-    thread_urls = get_all_thread_urls()
+def summarize_some_threads(proportion: float, model_name: str = SUMMARIZER_MODEL) -> Dict[str, str]:
+    thread_urls = get_some_thread_urls(proportion)
     summaries = {}
 
     # Determine the number of workers based on CPU cores
@@ -61,6 +63,7 @@ def summarize_all_threads(model_name: str = SUMMARIZER_MODEL) -> Dict[str, str]:
 
     return summaries
 
+summarize_all_threads = lambda model_name: summarize_some_threads(1.0, model_name)
 
 def save_summaries(summaries: Dict[str, str], output_file: str):
     with open(output_file, "w", encoding="utf-8") as f:
@@ -76,7 +79,7 @@ def main():
     output_file = os.path.join(output_dir, "all_thread_summaries.txt")
 
     print("Starting parallel summarization of all forum threads...")
-    summaries = summarize_all_threads()
+    summaries = summarize_some_threads(0.05)
 
     print(f"Saving summaries to {output_file}")
     save_summaries(summaries, output_file)

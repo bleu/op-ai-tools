@@ -7,8 +7,7 @@ from langchain_core.documents.base import Document
 from op_chat_brains.config import FORUM_PATH, SNAPSHOT_PATH
 from op_chat_brains.documents.optimism import ForumPostsProcessingStrategy
 from op_chat_brains.exceptions import OpChatBrainsException
-from op_chat_brains.summarizer.internal_dialogue import InternalDialogue
-from op_chat_brains.summarizer.prompts import Prompt
+from op_chat_brains.summarizer.utils import Prompt
 
 
 def get_thread_from_url(url: str) -> Document:
@@ -36,17 +35,5 @@ def summarize_thread(url: str, model_name: str) -> str:
     )
 
     if thread.metadata["url"] in "\t".join(snapshot_proposals.keys()):
-        return InternalDialogue.proposal(llm, thread, snapshot_proposals)
-
-    thread_type = llm.invoke(
-        Prompt.classify_thread(thread.page_content)
-    ).content.lower()
-
-    summary_methods = {
-        "feedback": InternalDialogue.feedback,
-        "announcement": InternalDialogue.announcement,
-        "discussion": InternalDialogue.discussion,
-    }
-
-    summary_method = summary_methods.get(thread_type, InternalDialogue.other)
-    return summary_method(llm, thread)
+        return Prompt.proposal(llm, thread, snapshot_proposals)
+    return llm.invoke(Prompt.default_summarizer.format(THREAD_CONTENT=thread.page_content)).content
