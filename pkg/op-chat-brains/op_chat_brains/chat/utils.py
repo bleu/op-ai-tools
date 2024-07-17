@@ -1,5 +1,5 @@
 from typing import Dict, Any, Iterator
-from op_chat_brains.model import RAGModel
+from op_chat_brains.chat.model import RAGModel
 from op_chat_brains.exceptions import UnsupportedVectorstoreError, OpChatBrainsException
 from op_chat_brains.structured_logger import StructuredLogger
 

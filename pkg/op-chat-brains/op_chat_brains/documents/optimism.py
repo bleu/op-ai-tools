@@ -1,6 +1,6 @@
 import re
 import json
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from langchain_core.documents.base import Document
 from langchain_text_splitters import MarkdownHeaderTextSplitter
@@ -59,7 +59,8 @@ class FragmentsProcessingStrategy(DocumentProcessingStrategy):
 
 
 class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
-    def process_document(self, file_path: str) -> List[Document]:
+    @staticmethod
+    def process_document(file_path: str) -> List[Document]:
         with open(file_path, "r") as file:
             boards, threads, posts = {}, {}, {}
             for line in file:
@@ -92,6 +93,10 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
                             "creation_time": data_line["item"]["creation_time"],
                             "path": data_line["item"]["path"],
                             "download_time": data_line["download_time"],
+                            "reply_to_post_number": data_line["item"]["data"][
+                                "reply_to_post_number"
+                            ],
+                            "post_number": data_line["item"]["data"]["post_number"],
                         }
                 except KeyError:
                     pass
@@ -112,6 +117,10 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
             except:
                 post["thread_title"] = None
 
+        return posts
+
+    @staticmethod
+    def return_posts(file_path: str) -> List[Document]:
         posts_forum = [
             Document(
                 page_content=d["content"],
@@ -127,10 +136,128 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
                     "id": ".".join(d["path"]) + "." + str(id),
                 },
             )
-            for id, d in posts.items()
+            for id, d in ForumPostsProcessingStrategy.process_document(
+                file_path
+            ).items()
         ]
 
         return posts_forum
+
+    template_snapshot_proposal = """
+    PROPOSAL
+    {title}
+    space_id: {space_id}
+    space_name: {space_name}
+    snapshot: {snapshot}
+    state: {state}
+    
+    type: {type}
+    body: {body}
+    start: {start}
+    end: {end}
+    votes: {votes}
+    choices: {choices}
+    scores: {scores}
+    winning_option: {winning_option}
+    ----
+    """
+
+    @staticmethod
+    def return_snapshot_proposals(file_path: str) -> Dict[str, Any]:
+        with open(file_path, "r") as file:
+            proposals = {}
+            for line in file:
+                data_line = json.loads(line)
+                discussion = data_line["discussion"]
+                proposals[discussion] = data_line
+                proposals[discussion]["str"] = (
+                    ForumPostsProcessingStrategy.template_snapshot_proposal.format(
+                        title=data_line["title"],
+                        space_id=data_line["space_id"],
+                        space_name=data_line["space_name"],
+                        snapshot=data_line["snapshot"],
+                        state=data_line["state"],
+                        type=data_line["type"],
+                        body=data_line["body"],
+                        start=data_line["start"],
+                        end=data_line["end"],
+                        votes=data_line["votes"],
+                        choices=data_line["choices"],
+                        scores=data_line["scores"],
+                        winning_option=data_line["winning_option"],
+                    )
+                )
+        return proposals
+
+    template_thread = """
+    OPTIMISM FORUM 
+    board: BOARD NAME
+    thread: THREAD TITLE
+    ---
+    POST #1 
+    user: X (moderator) (admin) (staff)
+    created_at: 2023-06-16T11:17:47.837Z 
+    trust_level (0-4): 4
+    <p>SOME TEXT</p>
+    ---
+    POST #2 
+    user: Y
+    created_at: 2023-06-16T11:17:56.495Z 
+    trust_level (0-4): 1
+    <p>SOME TEXT</p>
+    """
+
+    @staticmethod
+    def return_threads(df_posts) -> List[Document]:
+        threads = []
+        for t in df_posts["thread_id"].unique():
+            posts_thread = df_posts[df_posts["thread_id"] == t].sort_values(
+                by="created_at"
+            )
+            try:
+                url = posts_thread["url"].iloc[0]
+                url = url.split("/")[:-1]
+                url = "/".join(url)
+
+                title = posts_thread["thread_title"].iloc[0]
+                board = posts_thread["board_name"].iloc[0]
+            except:
+                url = None
+                title = None
+                board = None
+            try:
+                str_thread = f"OPTIMISM FORUM \n board: {posts_thread['board_name'].iloc[0]}\n thread: {posts_thread['thread_title'].iloc[0]}\n\n"
+                for i, post in posts_thread.iterrows():
+                    str_thread += f"---\n\nPOST #{post['post_number']} \n user: {post['username']}"
+                    if post["moderator"]:
+                        str_thread += " (moderator)"
+                    if post["admin"]:
+                        str_thread += " (admin)"
+                    if post["staff"]:
+                        str_thread += " (staff)"
+                    str_thread += f"\n created_at: {post['created_at']} \n trust_level (0-4): {post['trust_level']}\n\n"
+                    if post["reply_to_post_number"] != None:
+                        str_thread += (
+                            f"(reply to post number {post['reply_to_post_number']})\n"
+                        )
+                    str_thread += f"{post['content']}\n\n"
+            except:
+                None
+
+            metadata = {
+                "thread_id": t,
+                "thread_title": title,
+                "board_name": board,
+                "url": url,
+                "num_posts": len(posts_thread),
+                "users": list(posts_thread["username"].unique()),
+                "length_str_thread": len(str_thread),
+            }
+            threads.append([str_thread, metadata])
+
+        threads_forum = [Document(page_content=t[0], metadata=t[1]) for t in threads]
+
+        return threads_forum
 
     def get_db_name(self) -> str:
         return "posts_forum_db"
