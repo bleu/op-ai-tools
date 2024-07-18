@@ -8,9 +8,7 @@ import load_optimism, util
 DEFAULT_LLM = "gpt-4o"
 
 def get_thread_from_url(url):
-    posts = load_optimism.ForumPostsProcessingStrategy.process_document(util.forum_path)
-    df_posts = pd.DataFrame(posts).T
-    threads = load_optimism.ForumPostsProcessingStrategy.return_threads(df_posts)
+    threads = load_optimism.ForumPostsProcessingStrategy.return_threads(util.forum_path)
     threads_url = [t.metadata['url'] for t in threads]
     thread = threads[threads_url.index(url)]
     return thread

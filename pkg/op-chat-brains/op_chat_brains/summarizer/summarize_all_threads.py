@@ -14,9 +14,7 @@ from op_chat_brains.structured_logger import StructuredLogger
 logger = StructuredLogger()
 
 def get_some_thread_urls(proportion : float) -> List[str]:
-    posts = ForumPostsProcessingStrategy.process_document(FORUM_PATH)
-    df_posts = pd.DataFrame(posts).T
-    threads = ForumPostsProcessingStrategy.return_threads(df_posts)
+    threads = ForumPostsProcessingStrategy.return_threads(FORUM_PATH)
     all_threads = [thread.metadata["url"] for thread in threads if thread.metadata["url"]]
 
     random.shuffle(all_threads)
@@ -79,7 +77,7 @@ def main():
     output_file = os.path.join(output_dir, "all_thread_summaries.txt")
 
     print("Starting parallel summarization of all forum threads...")
-    summaries = summarize_some_threads(0.05)
+    summaries = summarize_some_threads(1)
 
     print(f"Saving summaries to {output_file}")
     save_summaries(summaries, output_file)

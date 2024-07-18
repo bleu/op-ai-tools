@@ -1,5 +1,5 @@
-import re
-import json
+import re, json
+import pandas as pd
 from typing import Dict, List, Any
 
 from langchain_core.documents.base import Document
@@ -69,15 +69,9 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
                 try:
                     id = data_line["item"]["data"]["id"]
                     if type_line == "board":
-                        boards[id] = {"name": data_line["item"]["data"]["name"]}
+                        boards[id] = data_line["item"]["data"]
                     elif type_line == "thread":
-                        threads[id] = {
-                            "title": data_line["item"]["data"]["title"],
-                            "category_id": data_line["item"]["data"]["category_id"],
-                            "created_at": data_line["item"]["data"]["created_at"],
-                            "views": data_line["item"]["data"]["views"],
-                            "like_count": data_line["item"]["data"]["like_count"],
-                        }
+                        threads[id] = data_line["item"]["data"]
                     elif type_line == "post":
                         posts[id] = {
                             "url": data_line["item"]["url"],
@@ -115,8 +109,14 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
             except:
                 post["thread_title"] = None
 
-        return posts
+        return posts, threads, boards
     
+    @staticmethod
+    def get_posts(file_path: str) -> List[Document]:
+        posts, t, b = ForumPostsProcessingStrategy.process_document(file_path)
+
+        return posts
+
     @staticmethod
     def return_posts(file_path: str) -> List[Document]:
         posts_forum = [
@@ -134,33 +134,33 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
                     "id": ".".join(d["path"]) + "." + str(id),
                 },
             )
-            for id, d in ForumPostsProcessingStrategy.process_document(file_path).items()
+            for id, d in ForumPostsProcessingStrategy.get_posts(file_path).items()
         ]
 
         return posts_forum
     
     template_snapshot_proposal = """
-    PROPOSAL
-    {title}
+PROPOSAL
+{title}
 
-    space_id: {space_id}
-    space_name: {space_name}
-    snapshot: {snapshot}
-    state: {state}
-    
-    type: {type}
-    body: {body}
+space_id: {space_id}
+space_name: {space_name}
+snapshot: {snapshot}
+state: {state}
 
-    start: {start}
-    end: {end}
+type: {type}
+body: {body}
 
-    votes: {votes}
-    choices: {choices}
-    scores: {scores}
+start: {start}
+end: {end}
 
-    winning_option: {winning_option}
+votes: {votes}
+choices: {choices}
+scores: {scores}
 
-    ----
+winning_option: {winning_option}
+
+----
     """
 
     @staticmethod
@@ -189,30 +189,38 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
         return proposals
     
     template_thread = """
-    OPTIMISM FORUM 
-    board: BOARD NAME
-    thread: THREAD TITLE
+OPTIMISM GOVERNANCE FORUM 
+board: {BOARD_NAME}
+thread: {THREAD_TITLE}
 
-    ---
+--- THREAD INFO ---
+created_at: {CREATED_AT}
+last_posted_at: {LAST_POSTED_AT}
+tags: {TAGS}
+pinned: {PINNED}
+visible: {VISIBLE}
+closed: {CLOSED}
+archived: {ARCHIVED}
+    """
 
-    POST #1 
-    user: X (moderator) (admin) (staff)
-    created_at: 2023-06-16T11:17:47.837Z 
-    trust_level (0-4): 4
+    template_post = """
+--- NEW POST ---
+POST #{POST_NUMBER}
+user: {USERNAME}
+moderator: {MODERATOR}
+admin: {ADMIN}
+staff: {STAFF}
+created_at: {CREATED_AT}
+trust_level (0-4): {TRUST_LEVEL}
 
-    <p>SOME TEXT</p>
-
-    ---
-
-    POST #2 
-    user: Y
-    created_at: 2023-06-16T11:17:56.495Z 
-    trust_level (0-4): 1
-
-    <p>SOME TEXT</p>
+{IS_REPLY}<content_user_input>
+{CONTENT}
+<\content_user_input>
     """
     @staticmethod
-    def return_threads(df_posts) -> List[Document]:
+    def return_threads(file_path: str) -> List[Document]:
+        posts, threads_info, boards_info = ForumPostsProcessingStrategy.process_document(file_path)
+        df_posts = pd.DataFrame(posts).T
         threads =[]
         for t in df_posts['thread_id'].unique():
             posts_thread = df_posts[df_posts['thread_id'] == t].sort_values(by='created_at')
@@ -220,40 +228,52 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
                 url = posts_thread['url'].iloc[0]
                 url = url.split("/")[:-1]
                 url = "/".join(url)
-
-                title = posts_thread['thread_title'].iloc[0]
                 board = posts_thread['board_name'].iloc[0]
-            except:
-                url = None
-                title = None
-                board = None
-            try:
-                str_thread = f"OPTIMISM FORUM \n board: {posts_thread['board_name'].iloc[0]}\n thread: {posts_thread['thread_title'].iloc[0]}\n\n"
+                t_i = threads_info[int(t)]
+                
+                str_thread = ForumPostsProcessingStrategy.template_thread.format(
+                    BOARD_NAME=board,
+                    THREAD_TITLE=t_i["title"],
+                    TAGS=t_i["tags"],
+                    CREATED_AT=t_i["created_at"],
+                    LAST_POSTED_AT=t_i["last_posted_at"],
+                    PINNED=t_i["pinned"],
+                    VISIBLE=t_i["visible"],
+                    CLOSED=t_i["closed"],
+                    ARCHIVED=t_i["archived"],
+                )
                 for i, post in posts_thread.iterrows():
-                    str_thread += f"---\n\nPOST #{post['post_number']} \n user: {post['username']}" 
-                    if post['moderator']:
-                        str_thread += " (moderator)"
-                    if post['admin']:
-                        str_thread += " (admin)"
-                    if post['staff']:
-                        str_thread += " (staff)"
-                    str_thread += f"\n created_at: {post['created_at']} \n trust_level (0-4): {post['trust_level']}\n\n"
-                    if post['reply_to_post_number'] != None:
-                        str_thread += f"(reply to post number {post['reply_to_post_number']})\n"
-                    str_thread += f"{post['content']}\n\n"
+                    str_thread += ForumPostsProcessingStrategy.template_post.format(
+                        POST_NUMBER=post['post_number'],
+                        USERNAME=post['username'],
+                        CREATED_AT=post['created_at'],
+                        TRUST_LEVEL=post['trust_level'],
+                        IS_REPLY=f"(reply to post #{post['reply_to_post_number']})\n" if post['reply_to_post_number'] != None else "",
+                        CONTENT=post['content'].replace("<\content_user_input>", "").replace("<content_user_input>", ""),
+                        MODERATOR=post['moderator'],
+                        ADMIN=post['admin'],
+                        STAFF=post['staff'],
+                    )
+
+                metadata = {
+                    "thread_id": t,
+                    "thread_title": t_i["title"],
+                    "created_at": t_i["created_at"],
+                    "last_posted_at": t_i["last_posted_at"],
+                    "tags": t_i["tags"],
+                    "pinned": t_i["pinned"],
+                    "visible": t_i["visible"],
+                    "closed": t_i["closed"],
+                    "archived": t_i["archived"],
+                    "board_name": board,
+                    "url": url,
+                    "num_posts": len(posts_thread),
+                    "users": list(posts_thread['username'].unique()),
+                    'length_str_thread': len(str_thread),
+                }
+                threads.append([str_thread, metadata])
             except:
                 None
-
-            metadata = {
-                "thread_id": t,
-                "thread_title": title,
-                "board_name": board,
-                "url": url,
-                "num_posts": len(posts_thread),
-                "users": list(posts_thread['username'].unique()),
-                'length_str_thread': len(str_thread),
-            }
-            threads.append([str_thread, metadata])
 
         threads_forum = [
             Document(

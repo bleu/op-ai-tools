@@ -18,7 +18,7 @@ This script allows you to summarize the threads from the Optimism Governance For
 - Load the forum posts from the loaded dataset
 """
 forum_path = util.forum_path
-posts = load_optimism.ForumPostsProcessingStrategy.process_document(forum_path)
+posts = load_optimism.ForumPostsProcessingStrategy.get_posts(forum_path)
 df_posts = pd.DataFrame(posts).T
 with st.expander("Posts Info"):
     st.write(f"Number of Loaded Posts: {len(df_posts)}")
@@ -36,13 +36,14 @@ with st.expander("Posts Info"):
 ----
 - Get the threads from the forum posts.
 """
-threads = load_optimism.ForumPostsProcessingStrategy.return_threads(df_posts)
+threads = load_optimism.ForumPostsProcessingStrategy.return_threads(forum_path)
 with st.expander("Threads Info"):
     st.write(f"Threads Metadata:")
     st.write(threads[0].metadata.keys())
     
     st.write(f"Template that will be used for inserting threads into the LLMs:")
     st.text(load_optimism.ForumPostsProcessingStrategy.template_thread)
+    st.text(load_optimism.ForumPostsProcessingStrategy.template_post)
 
     df_threads = pd.DataFrame([t.metadata for t in threads])
     st.write(f"Number of Loaded Threads: {len(threads)}")
@@ -133,7 +134,7 @@ if st.button("Summarize Threads"):
     append_text("## Summarized Threads")
 
     for thread in threads:
-        append_text(f"----\n### Thread: {thread.metadata['url']}", thread.metadata)
+        append_text(f"\n----\n### Thread: {thread.metadata['url']}", thread.metadata)
         for m in model_name:
             append_text(f"### Model: {m}")
 
@@ -146,7 +147,9 @@ if st.button("Summarize Threads"):
                 summary = llm.invoke(util.Prompt.default_summarizer.format(THREAD_CONTENT=thread.page_content)).content
 
             end = time.time()
-            append_text(summary, f"(Time taken: {end-start}s)")
+            append_text(summary, 
+                        f"len(summary): {len(summary)}", 
+                        f"(Time taken: {end-start}s)")
 
     st.download_button(
         label="Download Summarized Threads",

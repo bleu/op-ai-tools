@@ -11,9 +11,7 @@ from op_chat_brains.summarizer.utils import Prompt
 
 
 def get_thread_from_url(url: str) -> Document:
-    posts = ForumPostsProcessingStrategy.process_document(FORUM_PATH)
-    df_posts = pd.DataFrame(posts).T
-    threads = ForumPostsProcessingStrategy.return_threads(df_posts)
+    threads = ForumPostsProcessingStrategy.return_threads(FORUM_PATH)
     thread = next((t for t in threads if t.metadata["url"] == url), None)
     if not thread:
         raise OpChatBrainsException(f"Thread not found for URL: {url}")
