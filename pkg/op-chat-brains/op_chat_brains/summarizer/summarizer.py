@@ -9,9 +9,9 @@ from op_chat_brains.documents.optimism import ForumPostsProcessingStrategy
 from op_chat_brains.exceptions import OpChatBrainsException
 from op_chat_brains.summarizer.utils import Prompt
 
+threads = ForumPostsProcessingStrategy.return_threads(FORUM_PATH)
 
 def get_thread_from_url(url: str) -> Document:
-    threads = ForumPostsProcessingStrategy.return_threads(FORUM_PATH)
     thread = next((t for t in threads if t.metadata["url"] == url), None)
     if not thread:
         raise OpChatBrainsException(f"Thread not found for URL: {url}")

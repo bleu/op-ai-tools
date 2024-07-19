@@ -12,9 +12,9 @@ from op_chat_brains.exceptions import OpChatBrainsException
 from op_chat_brains.structured_logger import StructuredLogger
 
 logger = StructuredLogger()
+threads = ForumPostsProcessingStrategy.return_threads(FORUM_PATH)
 
 def get_some_thread_urls(proportion : float) -> List[str]:
-    threads = ForumPostsProcessingStrategy.return_threads(FORUM_PATH)
     all_threads = [thread.metadata["url"] for thread in threads if thread.metadata["url"]]
 
     random.shuffle(all_threads)
