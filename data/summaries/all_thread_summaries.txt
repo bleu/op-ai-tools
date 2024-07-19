@@ -25559,7 +25559,7 @@ The thread provides detailed instructions for the Council Reviewer Elections for
 
 --------------------------------------------------------------------------------
 
-URL: https://gov.optimism.io/t/retro-funding-4-application-process/8013
+URL: https://gov.optimism.io/t/nftearth-rpgf-appeal/7159
 
 Summary:
 <classification>feedback</classification>
@@ -30081,10 +30081,12 @@ The Alchemix proposal for 500,000 OP tokens to incentivize vault depositors and 
 
 --------------------------------------------------------------------------------
 
-URL: https://gov.optimism.io/t/optimism-fractal-weekly-events/7378
+URL: https://gov.optimism.io/t/building-a-private-on-chain-implementation-for-retropgf/7733
 
 Summary:
-<classification>announcement</classification>
+Error: 1 validation error for ChatOpenAI
+__root__
+  Did not find openai_api_key, please add an environment variable `OPENAI_API_KEY` which contains it, or pass `openai_api_key` as a named parameter. (type=value_error)
 
 <about>
 The thread is about the weekly events organized by Optimism Fractal, a community focused on collaboration and awarding public goods creators on Optimism. It includes announcements for event schedules, changes, and updates.
@@ -30098,11 +30100,10 @@ The thread is about the weekly events organized by Optimism Fractal, a community
 - Season breaks and the start of new seasons
 </overview>
 
-<reaction>
-- General excitement and support for the events
-- Positive feedback on the Respect Game and its impact
-- Interest in Retro Funding and how it can benefit the community
-</reaction>
+Summary:
+Error: 1 validation error for ChatOpenAI
+__root__
+  Did not find openai_api_key, please add an environment variable `OPENAI_API_KEY` which contains it, or pass `openai_api_key` as a named parameter. (type=value_error)
 
 <tldr>
 The thread announces and provides updates on Optimism Fractal's weekly events, including schedule changes, event details, and community initiatives like the Respect Game and Retro Funding opportunities. The community shows strong support and engagement with these activities.
