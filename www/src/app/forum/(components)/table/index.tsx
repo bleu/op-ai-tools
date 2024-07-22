@@ -144,7 +144,7 @@ function ForumInfiniteScrollTable({
 
   return (
     <div
-      className="overflow-auto relative h-[650px]"
+      className="overflow-auto relative max-h-screen"
       onScroll={(e) => fetchMoreOnBottomReached(e.target as HTMLDivElement)}
       ref={tableContainerRef}
     >
