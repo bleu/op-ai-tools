@@ -1,37 +1,11 @@
-from typing import Iterator, List, Dict, Any, Callable, Tuple
-import os
+from typing import Iterator, List, Dict, Any, Callable
 
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_community.vectorstores import FAISS
 from langchain_anthropic import ChatAnthropic
 import weave
 
-from op_chat_brains.config import DB_STORAGE_PATH
-
-
-class DatabaseLoader:
-    @staticmethod
-    def load_db(
-        dbs: Tuple[str, ...], model_embeddings: str, vectorstore: str = "faiss"
-    ) -> FAISS:
-        embeddings = OpenAIEmbeddings(model=model_embeddings)
-        if vectorstore == "faiss":
-            db_paths = [
-                os.path.join(DB_STORAGE_PATH, f"{name}_db/faiss/{model_embeddings}")
-                for name in dbs
-            ]
-            loaded_dbs = [
-                FAISS.load_local(
-                    db_path, embeddings, allow_dangerous_deserialization=True
-                )
-                for db_path in db_paths
-            ]
-            merged_db = loaded_dbs[0]
-            for db in loaded_dbs[1:]:
-                merged_db.merge_from(db)
-            return merged_db
-        raise ValueError(f"Unsupported vectorstore: {vectorstore}")
+from op_chat_brains.retriever.faiss import DatabaseLoader
 
 
 class ChatBuilder:
@@ -52,7 +26,7 @@ class RetrieverBuilder:
         vectorstore: str = "faiss",
         retriever_pars: Dict[str, Any] = {},
     ):
-        db = DatabaseLoader.load_db(dbs_name, embeddings_name, vectorstore)
+        db = DatabaseLoader.load_db(tuple(dbs_name), embeddings_name, vectorstore)
         if vectorstore == "faiss":
             return db.as_retriever(**retriever_pars)
         raise ValueError(f"Unsupported vectorstore: {vectorstore}")

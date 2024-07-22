@@ -22,7 +22,6 @@ class StructuredLogger:
         self.logger = logging.getLogger("OpChatBrainsLogger")
         self.logger.setLevel(logging.INFO)
 
-        # File handler for app.log
         file_handler = RotatingFileHandler(
             "app.log", maxBytes=10 * 1024 * 1024, backupCount=5
         )
@@ -30,7 +29,6 @@ class StructuredLogger:
         file_handler.setFormatter(file_formatter)
         self.logger.addHandler(file_handler)
 
-        # CSV handler for logs.csv
         self.csv_handler = CSVHandler("logs.csv")
         self.logger.addHandler(self.csv_handler)
 
@@ -40,9 +38,22 @@ class StructuredLogger:
         self.logger.info(
             "CSV_LOG",
             extra={
+                "type": "query",
                 "question": question,
                 "answer": output["answer"],
                 "context": output["context"],
+            },
+        )
+
+    def log_summary(self, url: str, summary: str):
+        self.logger.info(f"Summarized thread: {url}")
+        self.logger.info(f"Summary: {summary}")
+        self.logger.info(
+            "CSV_LOG",
+            extra={
+                "type": "summary",
+                "url": url,
+                "summary": summary,
             },
         )
 
@@ -54,19 +65,20 @@ class CSVHandler(logging.Handler):
         self.csv_file = open(self.filename, "a", newline="")
         self.csv_writer = csv.writer(self.csv_file)
         if self.csv_file.tell() == 0:
-            self.csv_writer.writerow(["timestamp", "question", "answer", "context"])
+            self.csv_writer.writerow(["timestamp", "type", "content"])
 
     def emit(self, record):
         if record.msg == "CSV_LOG":
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            self.csv_writer.writerow(
-                [
-                    timestamp,
-                    record.__dict__.get("question", ""),
-                    record.__dict__.get("answer", ""),
-                    record.__dict__.get("context", ""),
-                ]
-            )
+            log_type = record.__dict__.get("type", "")
+            if log_type == "query":
+                content = f"Q: {record.__dict__.get('question', '')}\nA: {record.__dict__.get('answer', '')}"
+            elif log_type == "summary":
+                content = f"URL: {record.__dict__.get('url', '')}\nSummary: {record.__dict__.get('summary', '')}"
+            else:
+                content = str(record.__dict__)
+
+            self.csv_writer.writerow([timestamp, log_type, content])
             self.csv_file.flush()
 
     def close(self):

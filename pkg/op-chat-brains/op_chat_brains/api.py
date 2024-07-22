@@ -6,7 +6,6 @@ from op_chat_brains.structured_logger import StructuredLogger
 from op_chat_brains.config import (
     API_RATE_LIMIT,
     API_SECRET_KEY,
-    DEFAULT_DBS,
     DEFAULT_RAG_STRUCTURE,
     POSTHOG_API_KEY,
     VECTORSTORE,
@@ -17,8 +16,7 @@ from op_chat_brains.config import (
     MAX_RETRIES,
     K_RETRIEVER,
 )
-from op_chat_brains.prompts import PROMPT_BUILDER, PROMPT_BUILDER_EXPANDER
-from op_chat_brains.utils import process_question_stream, process_question
+from op_chat_brains.chat.utils import process_question_stream, process_question
 from flask_cors import CORS
 from posthog import Posthog
 from functools import wraps
@@ -40,6 +38,11 @@ logger = StructuredLogger()
 
 
 def get_config():
+    from op_chat_brains.config import (
+        DEFAULT_DBS,
+    )
+    from op_chat_brains.chat.prompts import PROMPT_BUILDER, PROMPT_BUILDER_EXPANDER
+
     return {
         "DEFAULT_DBS": DEFAULT_DBS,
         "EMBEDDING_MODEL": EMBEDDING_MODEL,
