@@ -9,7 +9,8 @@
     "lint:fix": "yarn biome check --write ./src",
     "prisma:seed": "ts-node prisma/seed.ts",
     "prisma:reset": "ts-node prisma/reset.ts",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@faker-js/faker": "^8.4.1",
@@ -73,8 +74,6 @@
   },
   "packageManager": "yarn@4.3.0",
   "msw": {
-    "workerDirectory": [
-      "public"
-    ]
+    "workerDirectory": ["public"]
   }
 }

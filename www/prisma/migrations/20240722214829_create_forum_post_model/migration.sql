@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "ForumPost" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "id" SERIAL NOT NULL,
     "url" TEXT NOT NULL,
     "category" TEXT NOT NULL,
     "about" TEXT NOT NULL,
@@ -8,8 +8,10 @@ CREATE TABLE "ForumPost" (
     "reaction" TEXT NOT NULL,
     "overview" TEXT NOT NULL,
     "tldr" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ForumPost_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
