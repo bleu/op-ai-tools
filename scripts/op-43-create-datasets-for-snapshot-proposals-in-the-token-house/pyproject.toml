@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "op-43-create-datasets-for-snapshot-proposals-in-the-token-house"
+version = "0.1.0"
+description = ""
+authors = ["José Ribeiro <me@joseribeiro.dev>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+requests = "^2.32.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

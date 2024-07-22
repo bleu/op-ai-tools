@@ -1,93 +1,70 @@
-import type { Message, UserData } from "@/app/data";
-import React, { useState, useCallback } from "react";
+import type { Message } from "@/app/data";
+import type { ChatData } from "@/lib/chat-utils";
+import React from "react";
+import ChatBottombar from "./chat-bottombar";
+import { ChatEmptyState } from "./chat-empty-state";
 import { ChatList } from "./chat-list";
 import ChatTopbar from "./chat-topbar";
+import { useChatState } from "./useChatState";
 
 interface ChatProps {
-  messages?: Message[];
-  selectedUser: UserData;
+  selectedChat: ChatData;
   isMobile: boolean;
+  onUpdateMessages: (newMessages: Message[]) => void;
+  onToggleSidebar: () => void;
 }
 
-export function Chat({ messages, selectedUser, isMobile }: ChatProps) {
-  const [messagesState, setMessages] = useState<Message[]>(messages ?? []);
-  const [isStreaming, setIsStreaming] = useState(false);
+export function Chat({
+  selectedChat,
+  isMobile,
+  onUpdateMessages,
+  onToggleSidebar,
+}: ChatProps) {
+  const {
+    isStreaming,
+    inputMessage,
+    setInputMessage,
+    isTyping,
+    currentMessages,
+    sendMessage,
+    handleRegenerateMessage,
+    loadingMessageId,
+  } = useChatState(selectedChat, onUpdateMessages);
 
-  const sendMessage = useCallback(
-    async (newMessage: Message) => {
-      setMessages((prev) => [...prev, newMessage]);
-      setIsStreaming(true);
-
-      try {
-        const response = await fetch(
-          process.env.NEXT_PUBLIC_CHAT_STREAMING_API_URL!,
-          // "http://localhost:9090/predict_stream",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ question: newMessage.message }),
-          }
-        );
-
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder();
-
-        if (reader) {
-          let assistantMessage = "";
-          const assistantMessageId = Date.now() + 1;
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: assistantMessageId,
-              name: selectedUser.name,
-              message: "",
-              avatar: selectedUser.avatar,
-            },
-          ]);
-
-          while (true) {
-            const { value, done } = await reader.read();
-            if (done) break;
-            const chunk = decoder.decode(value);
-            assistantMessage += chunk;
-            if (chunk.trim() === "[DONE]") {
-              setIsStreaming(false);
-              break;
-            }
-            if (chunk.startsWith("error:")) {
-              console.error("Error from server:", chunk.slice(6));
-              setIsStreaming(false);
-              break;
-            }
-
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.id === assistantMessageId
-                  ? { ...msg, message: assistantMessage }
-                  : msg
-              )
-            );
-          }
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        setIsStreaming(false);
-      }
-    },
-    [selectedUser]
-  );
+  const handleSuggestionClick = (suggestion: string) => {
+    setInputMessage(suggestion);
+  };
 
   return (
-    <div className="flex flex-col justify-between w-full h-full">
-      <ChatTopbar selectedUser={selectedUser} />
-      <ChatList
-        messages={messagesState}
-        selectedUser={selectedUser}
+    <div className="flex flex-col w-full h-full">
+      <ChatTopbar
+        isTyping={isTyping}
+        onToggleSidebar={onToggleSidebar}
+        isMobile={isMobile}
+      />
+      <div className="flex-grow overflow-hidden relative">
+        {currentMessages.length === 0 ? (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <ChatEmptyState onSuggestionClick={handleSuggestionClick} />
+          </div>
+        ) : (
+          <ChatList
+            messages={currentMessages}
+            selectedChat={selectedChat}
+            isMobile={isMobile}
+            isStreaming={isStreaming}
+            onRegenerateMessage={handleRegenerateMessage}
+            loadingMessageId={loadingMessageId}
+          />
+        )}
+      </div>
+      <ChatBottombar
+        selectedChat={selectedChat}
         sendMessage={sendMessage}
         isMobile={isMobile}
         isStreaming={isStreaming}
+        inputMessage={inputMessage}
+        setInputMessage={setInputMessage}
       />
     </div>
   );

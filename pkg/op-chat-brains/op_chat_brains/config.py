@@ -24,5 +24,6 @@ API_SECRET_KEY = os.getenv("API_SECRET_KEY", "your-secret-key-here")
 SUMMARIZER_MODEL = os.getenv("SUMMARIZER_MODEL", CHAT_MODEL_OPENAI)
 
 DB_STORAGE_PATH = os.path.join(BASE_PATH, "dbs")
+POSTHOG_API_KEY = os.getenv("POSTHOG_API_KEY", "")
 
 os.makedirs(BASE_PATH, exist_ok=True)

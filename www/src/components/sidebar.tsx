@@ -1,5 +1,3 @@
-"use client";
-
 import type { Message } from "@/app/data";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -8,24 +6,36 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { getChatName } from "@/lib/chat-utils";
+import { formatDate } from "@/lib/chat-utils";
 import { cn } from "@/lib/utils";
 import { MoreHorizontal, SquarePen } from "lucide-react";
 import Link from "next/link";
-import { Avatar, AvatarImage, BoringAvatar } from "./ui/avatar";
+import { Avatar, AvatarImage } from "./ui/avatar";
+import { ScrollArea } from "./ui/scroll-area";
 
 interface SidebarProps {
   isCollapsed: boolean;
   links: {
+    id: string;
     name: string;
     messages: Message[];
-    avatar?: string;
-    variant: "grey" | "ghost";
+    variant: "grey" | "ghost" | "default";
+    timestamp: number;
   }[];
   onClick?: () => void;
   isMobile: boolean;
+  onSelectChat: (id: string) => void;
+  onNewChat: () => void;
 }
 
-export function Sidebar({ links, isCollapsed, isMobile }: SidebarProps) {
+export function Sidebar({
+  links,
+  isCollapsed,
+  isMobile,
+  onSelectChat,
+  onNewChat,
+}: SidebarProps) {
   return (
     <div
       data-collapsed={isCollapsed}
@@ -45,98 +55,64 @@ export function Sidebar({ links, isCollapsed, isMobile }: SidebarProps) {
                 buttonVariants({ variant: "ghost", size: "icon" }),
                 "h-9 w-9",
               )}
-            >
-              <MoreHorizontal size={20} />
-            </Link>
-
-            <Link
-              href="#"
-              className={cn(
-                buttonVariants({ variant: "ghost", size: "icon" }),
-                "h-9 w-9",
-              )}
+              onClick={onNewChat}
             >
               <SquarePen size={20} />
             </Link>
           </div>
         </div>
       )}
-      <nav className="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
-        {links.map((link, index) =>
-          isCollapsed ? (
-            <TooltipProvider key={link.name}>
-              <Tooltip key={link.name} delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <Link
-                    href="#"
-                    className={cn(
-                      buttonVariants({ variant: link.variant, size: "icon" }),
-                      "h-11 w-11 md:h-16 md:w-16",
-                      link.variant === "grey" &&
-                        "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white",
-                    )}
-                  >
-                    <Avatar className="flex justify-center items-center">
-                      {link.avatar ? (
-                        <AvatarImage
-                          src={link.avatar}
-                          alt={link.name}
-                          width={6}
-                          height={6}
-                          className="w-10 h-10 "
-                        />
-                      ) : (
-                        <BoringAvatar name={link.name} />
+      <ScrollArea className="flex-1">
+        <nav className="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
+          {links.map((link, index) =>
+            isCollapsed ? (
+              <TooltipProvider key={link.timestamp}>
+                <Tooltip key={link.timestamp} delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <Link
+                      href="#"
+                      onClick={() => onSelectChat(link.id)}
+                      className={cn(
+                        buttonVariants({ variant: link.variant, size: "icon" }),
+                        "h-11 w-11 md:h-16 md:w-16",
+                        link.variant === "grey" &&
+                          "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white",
                       )}
-                    </Avatar>
-                    <span className="sr-only">{link.name}</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="right"
-                  className="flex items-center gap-4"
-                >
-                  {link.name}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : (
-            <Link
-              key={link.name}
-              href="#"
-              className={cn(
-                buttonVariants({ variant: link.variant, size: "xl" }),
-                link.variant === "grey" &&
-                  "dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white shrink",
-                "justify-start gap-4",
-              )}
-            >
-              <Avatar className="flex justify-center items-center">
-                {link.avatar ? (
-                  <AvatarImage
-                    src={link.avatar}
-                    alt={link.name}
-                    width={6}
-                    height={6}
-                    className="w-10 h-10 "
-                  />
-                ) : (
-                  <BoringAvatar name={link.name} />
+                    >
+                      <span className="sr-only">{link.name}</span>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="right"
+                    className="flex items-center gap-4"
+                  >
+                    {link.name}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              <Link
+                key={link.timestamp}
+                href="#"
+                onClick={() => onSelectChat(link.id)}
+                className={cn(
+                  buttonVariants({ variant: link.variant, size: "xl" }),
+                  link.variant === "grey" &&
+                    "dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white shrink",
+                  "justify-start gap-4",
                 )}
-              </Avatar>
-              <div className="flex flex-col max-w-28">
-                <span>{link.name}</span>
-                {link.messages.length > 0 && (
-                  <span className="text-zinc-300 text-xs truncate ">
-                    {link.messages[link.messages.length - 1].name.split(" ")[0]}
-                    : {link.messages[link.messages.length - 1].message}
+              >
+                <div className="flex flex-col max-w-28">
+                  <span>{getChatName(link.messages)}</span>
+                  <span className="text-zinc-300 text-xs">
+                    {formatDate(link.timestamp)}
                   </span>
-                )}
-              </div>
-            </Link>
-          ),
-        )}
-      </nav>
+                </div>
+              </Link>
+            ),
+          )}
+        </nav>
+      </ScrollArea>
     </div>
   );
 }
