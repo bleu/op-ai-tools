@@ -1,6 +1,7 @@
 import re, json
 import pandas as pd
 from typing import Any, Dict, List
+from collections import defaultdict
 
 from langchain_core.documents.base import Document
 from langchain_text_splitters import MarkdownHeaderTextSplitter
@@ -218,7 +219,7 @@ trust_level (0-4): {TRUST_LEVEL}
 
 {IS_REPLY}<content_user_input>
 {CONTENT}
-<\content_user_input>
+<\\content_user_input>
     """
 
     @staticmethod
@@ -252,19 +253,15 @@ trust_level (0-4): {TRUST_LEVEL}
                 )
                 for i, post in posts_thread.iterrows():
                     str_thread += ForumPostsProcessingStrategy.template_post.format(
-                        POST_NUMBER=post["post_number"],
-                        USERNAME=post["username"],
-                        CREATED_AT=post["created_at"],
-                        TRUST_LEVEL=post["trust_level"],
-                        IS_REPLY=f"(reply to post #{post['reply_to_post_number']})\n"
-                        if post["reply_to_post_number"] != None
-                        else "",
-                        CONTENT=post["content"]
-                        .replace("<\content_user_input>", "")
-                        .replace("<content_user_input>", ""),
-                        MODERATOR=post["moderator"],
-                        ADMIN=post["admin"],
-                        STAFF=post["staff"],
+                        POST_NUMBER=post['post_number'],
+                        USERNAME=post['username'],
+                        CREATED_AT=post['created_at'],
+                        TRUST_LEVEL=post['trust_level'],
+                        IS_REPLY=f"(reply to post #{post['reply_to_post_number']})\n" if post['reply_to_post_number'] != None else "",
+                        CONTENT=post['content'].replace("<\\content_user_input>", "").replace("<content_user_input>", ""),
+                        MODERATOR=post['moderator'],
+                        ADMIN=post['admin'],
+                        STAFF=post['staff'],
                     )
 
                 metadata = {
@@ -294,6 +291,67 @@ trust_level (0-4): {TRUST_LEVEL}
     def get_db_name(self) -> str:
         return "posts_forum_db"
 
+template_summary = """
+<tldr>{TLDR}</tldr>
+<about>{ABOUT}</about>
+<overview>{OVERVIEW}</overview>
+<reaction>{REACTION}</reaction>
+"""
+class SummaryProcessingStrategy(DocumentProcessingStrategy):
+    @staticmethod
+    def process_document(summary_path: str, forum_path: str) -> List[Dict]:
+        with open(summary_path, 'r') as file:
+            content = file.read()
+            
+        sections = content.split("\n\n--------------------------------------------------------------------------------\n\n")
+        data = []
+
+        url_pattern = re.compile(r"URL: (https?://[^\s]+)")
+        xml_tag_pattern = re.compile(r"<(\w+)>(.+?)</\1>", re.DOTALL)
+
+        for section in sections:
+            entry = defaultdict(lambda: None)  # Use defaultdict to handle missing keys gracefully
+
+            # Extract the URL
+            url_match = url_pattern.search(section)
+            if url_match:
+                entry["URL"] = url_match.group(1)
+            
+            # Extract all XML tags and their content
+            for match in xml_tag_pattern.findall(section):
+                tag, content = match
+                entry[tag.lower()] = content.strip()  # Capitalize tag names for uniform keys
+
+            data.append(dict(entry))  # Convert defaultdict back to regular dict before appending
+
+        threads = ForumPostsProcessingStrategy.return_threads(forum_path)
+
+        for entry in data:
+            try:
+                url = entry["URL"]
+                thread = next((t for t in threads if t.metadata["url"] == url), None)
+                entry['metadata'] = thread.metadata
+                entry['metadata']['whole_thread'] = thread.page_content
+                entry['metadata']['classification'] = entry['classification']
+            except:
+                None
+
+        docs = [
+            Document(
+                page_content=template_summary.format(
+                    TLDR=entry["tldr"] if "tldr" in entry else "",
+                    ABOUT=entry["about"] if "about" in entry else "",
+                    OVERVIEW=entry["overview"] if "overview" in entry else "",
+                    REACTION=entry["reaction"] if "reaction" in entry else "",
+                ),
+                metadata=entry["metadata"] if "metadata" in entry else {},
+            )
+            for entry in data
+        ]
+        
+        return docs
+
+
 
 class OptimismDocumentProcessorFactory(DocumentProcessorFactory):
     def create_processor(self, doc_type: str) -> DocumentProcessingStrategy:
@@ -301,6 +359,8 @@ class OptimismDocumentProcessorFactory(DocumentProcessorFactory):
             return FragmentsProcessingStrategy()
         elif doc_type == "forum_posts":
             return ForumPostsProcessingStrategy()
+        elif doc_type == "summaries":
+            return SummaryProcessingStrategy()
         else:
             raise ValueError(f"Unsupported document type: {doc_type}")
 
