@@ -147,7 +147,7 @@ function ForumInfiniteScrollTable({ title }: { title: string }) {
         <h1 className="text-2xl font-bold mb-6">{title}</h1>
         <div className="w-full flex gap-2 items-center flex-col md:flex-row">
           <FilterSelect data={FILTER_OPTIONS} />
-          <FilterDates />
+          {/* <FilterDates /> */}
         </div>
       </div>
       {/* Even though we're still using sematic table tags, we must use CSS grid and flexbox for dynamic row heights */}
@@ -183,7 +183,10 @@ function ForumInfiniteScrollTable({ title }: { title: string }) {
                       created_at={row.original.created_at}
                       lastActivity={row.original.lastActivity}
                     />
-                    <Separator orientation="horizontal" className="max-w-7xl mt-1" />
+                    <Separator
+                      orientation="horizontal"
+                      className="max-w-7xl mt-1"
+                    />
                   </div>
                 </td>
               </tr>

@@ -21,7 +21,7 @@ export function Header() {
           />
           <span className="text-xs md:text-sm font-light">GovSummarizer</span>
         </div>
-        <form className="w-1/2 hidden md:block">
+        {/* <form className="w-1/2 hidden md:block">
           <div className="relative">
             <Search className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -29,7 +29,7 @@ export function Header() {
               className="w-full appearance-none bg-background pr-8 shadow-none rounded-2xl focus-visible:ring-"
             />
           </div>
-        </form>
+        </form> */}
       </div>
     </header>
   );
