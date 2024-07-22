@@ -4,15 +4,8 @@ import Link from "next/link";
 import React from "react";
 import { ForumPost } from "./post-options";
 
-const CATEGORY_COLORS = {
-  all: "text-[#505050]",
-  discussion: "text-[#B0B0B0]",
-  informative: "text-[#C0392B]",
-  feedback: "text-[#E74C3C]",
-  announcement: "text-[#E67E22]",
-  unimportant: "text-[#F39C12]",
-  guide: "text-[#F1C40F]",
-};
+import { CATEGORY_COLORS } from "../categoryColors";
+import { Badge } from "@/components/ui/badge";
 
 export const SnapshotProposal = ({
   about,
@@ -46,10 +39,6 @@ export const SnapshotProposal = ({
           />
           <span className="text-muted-foreground">{category}</span>
         </div>
-        <span className="mx-2">|</span>
-        <a href="#" className="text-blue-600">
-          {author}
-        </a>
       </div>
       <p className="text-gray-700 mb-4">{tldr}</p>
       <div className="flex items-center text-xs text-gray-500">
@@ -61,6 +50,5 @@ export const SnapshotProposal = ({
       </div>
     </div>
     </Link>
-    
   );
 };

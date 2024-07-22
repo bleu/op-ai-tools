@@ -1,7 +1,7 @@
 interface OctagramProps {
   className?: string;
   isMobile?: boolean;
-  label: string;
+  label?: string;
 }
 
 export function Octagram({ className, isMobile, label }: OctagramProps) {

@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Octagram } from "./Octagram";
+import { CATEGORY_COLORS } from "./categoryColors";
 
 interface NavSection {
   title: string;
@@ -52,42 +53,47 @@ const navSections: NavSection[] = [
   {
     title: "Categories",
     items: [
-      { href: "#", icon: Octagram, label: "All" },
+      {
+        href: "#",
+        icon: Octagram,
+        label: "All",
+        className: CATEGORY_COLORS["All"],
+      },
       {
         href: "#",
         icon: Octagram,
         label: "Delegates",
-        className: "text-gray-400",
+        className: CATEGORY_COLORS["Delegates"],
       },
       {
         href: "#",
         icon: Octagram,
         label: "General Discussions",
-        className: "text-red-500",
+        className: CATEGORY_COLORS["General Discussions"],
       },
       {
         href: "#",
         icon: Octagram,
         label: "Mission Grants",
-        className: "text-red-500",
+        className: CATEGORY_COLORS["Mission Grants"],
       },
       {
         href: "#",
         icon: Octagram,
         label: "Updates and Announcements",
-        className: "text-orange-400",
+        className: CATEGORY_COLORS["Updates and Announcements"],
       },
       {
         href: "#",
         icon: Octagram,
         label: "Retro Funding",
-        className: "text-orange-400",
+        className: CATEGORY_COLORS["Retro Funding"],
       },
       {
         href: "#",
         icon: Octagram,
         label: "Others",
-        className: "text-yellow-400",
+        className: CATEGORY_COLORS["Others"],
       },
     ],
   },
