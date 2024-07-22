@@ -1,4 +1,5 @@
 "use client";
+
 import React from "react";
 import Link from "next/link";
 import { BarChart2, Clock, Menu, ExternalLink, LucideIcon } from "lucide-react";
