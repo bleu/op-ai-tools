@@ -8,7 +8,6 @@ const categories = [
   "Retro Funding",
   "Others",
 ];
-
 export type ForumPost = {
   id: number;
   title: string;
@@ -19,6 +18,12 @@ export type ForumPost = {
   readTime: string;
   date: Date;
   lastActivity: string;
+  proposal: string;  
+  userOpinions: string[]; 
+  originalContent: {
+    url: string;
+    text: string;
+  }[]; 
 };
 
 export type ForumPostApiResponse = {
@@ -51,6 +56,18 @@ const newForumPost = (index: number): ForumPost => {
     readTime: `${faker.number.int({ min: 1, max: 15 })} min read`,
     date: faker.date.anytime(),
     lastActivity: `${faker.number.int({ min: 1, max: 24 })} hours ago`,
+    proposal: faker.lorem.paragraphs(2),
+    userOpinions: Array.from({ length: faker.number.int({ min: 1, max: 5 }) }, () => faker.lorem.sentence()), 
+    originalContent: Array.from(
+      { length: faker.number.int({ min: 1, max: 3 }) },
+      (): {
+        url: string;
+        text: string;
+      } => ({
+        url: faker.internet.url(),
+        text: faker.lorem.words(3),
+      })
+    ),
   };
 };
 
