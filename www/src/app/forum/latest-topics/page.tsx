@@ -1,7 +1,13 @@
 import { InfiniteTable } from "../(components)/table";
 
-export default function LatestPage() {
-  return (
-    <InfiniteTable title="Latest Topics" fetchPath="TODO" key="trending" />
-  );
+export interface SearchParams {
+  [key: string]: string | string[] | undefined;
+}
+export interface IndexPageProps {
+  searchParams: SearchParams;
+}
+
+export default async function LatestPage({ searchParams }: IndexPageProps) {
+  console.log({ searchParams });
+  return <InfiniteTable title="Latest Topics" key="trending" />;
 }

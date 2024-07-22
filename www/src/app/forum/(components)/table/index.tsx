@@ -16,35 +16,29 @@ import {
   useInfiniteQuery,
 } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
-
-import { fetchData, ForumPost, ForumPostApiResponse } from "./makeForumData";
 import { SnapshotProposal } from "./table-row";
 import { Separator } from "@/components/ui/separator";
 import { FilterSelect } from "./filter-select";
 import { FilterDates } from "./filter-dates";
-
-const FILTER_OPTIONS = {
-  label: "Filter by category",
-  options: [
-    { label: "All", value: "All" },
-    { label: "Delegates", value: "Delegates" },
-    { label: "General Discussions", value: "General Discussions" },
-    { label: "Mission Grants", value: "Mission Grants" },
-    { label: "Updates and Announcements", value: "Updates and Announcements" },
-    { label: "Retro Funding", value: "Retro Funding" },
-    { label: "Others", value: "Others" },
-  ],
-};
+import {
+  FILTER_OPTIONS,
+  ForumPost,
+  ForumPostApiResponse,
+} from "./post-options";
 
 const FETCH_SIZE = 10;
 
-function ForumInfiniteScrollTable({
-  title,
-  fetchPath,
-}: {
-  title: string;
-  fetchPath?: string;
-}) {
+async function getPosts({ pageParam }: { pageParam: number }) {
+  const start = (pageParam as number) * FETCH_SIZE;
+
+  const response = await fetch(
+    "/api/forum-posts?start=" + start + "&size=" + FETCH_SIZE
+  );
+  const data = await response.json();
+  return data;
+}
+
+function ForumInfiniteScrollTable({ title }: { title: string }) {
   const tableContainerRef = React.useRef<HTMLDivElement>(null);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -53,11 +47,7 @@ function ForumInfiniteScrollTable({
   const { data, fetchNextPage, isFetching, isLoading } =
     useInfiniteQuery<ForumPostApiResponse>({
       queryKey: ["forumPosts"],
-      queryFn: async ({ pageParam = 0 }) => {
-        const start = (pageParam as number) * FETCH_SIZE;
-        const fetchedData = await fetchData(start, FETCH_SIZE);
-        return fetchedData;
-      },
+      queryFn: getPosts as any,
       initialPageParam: 0,
       getNextPageParam: (_lastGroup, groups) => groups.length,
       refetchOnWindowFocus: false,
@@ -69,6 +59,7 @@ function ForumInfiniteScrollTable({
     () => data?.pages?.flatMap((page) => page.data) ?? [],
     [data]
   );
+
   const totalDBRowCount = data?.pages?.[0]?.meta?.totalRowCount ?? 0;
   const totalFetched = flatData.length;
 
@@ -97,7 +88,11 @@ function ForumInfiniteScrollTable({
 
   const table = useReactTable({
     data: flatData,
-    columns: [],
+    columns: [
+      {
+        accessorKey: "category",
+      },
+    ],
     state: {
       columnFilters,
     },
@@ -156,7 +151,7 @@ function ForumInfiniteScrollTable({
         </div>
       </div>
       {/* Even though we're still using sematic table tags, we must use CSS grid and flexbox for dynamic row heights */}
-      <table className="grid pt-2 scrollbar">
+      <table className="grid pt-2">
         <tbody
           className="grid relative"
           style={{
@@ -178,13 +173,14 @@ function ForumInfiniteScrollTable({
                 <td className="flex w-full justify-center">
                   <div className="w-full">
                     <SnapshotProposal
-                      title={row.original.title}
+                      id={row.original.id}
+                      about={row.original.about}
                       status={row.original.status}
                       category={row.original.category}
                       author={row.original.author}
-                      summary={row.original.summary}
+                      tldr={row.original.tldr}
                       readTime={row.original.readTime}
-                      date={row.original.date.toDateString()}
+                      created_at={row.original.created_at}
                       lastActivity={row.original.lastActivity}
                     />
                     <Separator orientation="horizontal" className="max-w-6xl" />
@@ -206,16 +202,10 @@ function ForumInfiniteScrollTable({
 
 const queryClient = new QueryClient();
 
-export function InfiniteTable({
-  title,
-  fetchPath,
-}: {
-  title: string;
-  fetchPath?: string;
-}) {
+export function InfiniteTable({ title }: { title: string }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <ForumInfiniteScrollTable title={title} fetchPath={fetchPath} />
+      <ForumInfiniteScrollTable title={title} />
     </QueryClientProvider>
   );
 }
