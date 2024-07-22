@@ -145,7 +145,7 @@ function ForumInfiniteScrollTable({ title }: { title: string }) {
     >
       <div className="mx-4">
         <h1 className="text-2xl font-bold mb-6">{title}</h1>
-        <div className="w-full flex gap-2 items-center pr-4 flex-col md:flex-row">
+        <div className="w-full flex gap-2 items-center flex-col md:flex-row">
           <FilterSelect data={FILTER_OPTIONS} />
           <FilterDates />
         </div>
@@ -153,7 +153,7 @@ function ForumInfiniteScrollTable({ title }: { title: string }) {
       {/* Even though we're still using sematic table tags, we must use CSS grid and flexbox for dynamic row heights */}
       <table className="grid pt-2">
         <tbody
-          className="grid relative"
+          className="grid relative mx-4"
           style={{
             height: `${rowVirtualizer.getTotalSize()}px`,
           }}
@@ -183,7 +183,7 @@ function ForumInfiniteScrollTable({ title }: { title: string }) {
                       created_at={row.original.created_at}
                       lastActivity={row.original.lastActivity}
                     />
-                    <Separator orientation="horizontal" className="max-w-6xl" />
+                    <Separator orientation="horizontal" className="max-w-7xl mt-1" />
                   </div>
                 </td>
               </tr>

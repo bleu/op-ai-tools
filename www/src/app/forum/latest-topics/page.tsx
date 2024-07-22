@@ -1,4 +1,4 @@
-import { InfiniteTable } from "../(components)/table";
+import { InfiniteTable } from "@/components/forum/table";
 
 export interface SearchParams {
   [key: string]: string | string[] | undefined;
@@ -8,6 +8,5 @@ export interface IndexPageProps {
 }
 
 export default async function LatestPage({ searchParams }: IndexPageProps) {
-  console.log({ searchParams });
   return <InfiniteTable title="Latest Topics" key="trending" />;
 }

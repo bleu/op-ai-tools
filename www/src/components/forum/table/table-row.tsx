@@ -1,5 +1,6 @@
 import { Octagram } from "@/components/forum/Octagram";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 import React from "react";
 import { ForumPost } from "./post-options";
 
@@ -15,6 +16,7 @@ const CATEGORY_COLORS = {
 
 export const SnapshotProposal = ({
   about,
+  id,
   status,
   category,
   author,
@@ -24,7 +26,8 @@ export const SnapshotProposal = ({
   lastActivity,
 }: ForumPost) => {
   return (
-    <div className="p-4 max-w-7xl mx-auto">
+    <Link href={`/forum/topic/${id}`}>
+    <div className="p-4 max-w-7xl mx-auto rounded-md hover:bg-gray-100">
       <div className="flex items-center justify-left mb-2 gap-2">
         <h1 className="text-2xl font-semibold">{about}</h1>
         <span className="bg-yellow-200 text-yellow-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-md">
@@ -57,5 +60,7 @@ export const SnapshotProposal = ({
         <span>{lastActivity}</span>
       </div>
     </div>
+    </Link>
+    
   );
 };
