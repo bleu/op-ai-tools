@@ -144,15 +144,15 @@ function ForumInfiniteScrollTable({
 
   return (
     <div
-      className="container overflow-auto relative h-[650px]"
+      className="overflow-auto relative h-[650px]"
       onScroll={(e) => fetchMoreOnBottomReached(e.target as HTMLDivElement)}
       ref={tableContainerRef}
     >
       <div className="mx-4">
         <h1 className="text-2xl font-bold mb-6">{title}</h1>
-        <div className="w-full flex gap-2 items-center pr-4">
+        <div className="w-full flex gap-2 items-center pr-4 flex-col md:flex-row">
           <FilterSelect data={FILTER_OPTIONS} />
-          <FilterDates className="w-1/5" />
+          <FilterDates />
         </div>
       </div>
       {/* Even though we're still using sematic table tags, we must use CSS grid and flexbox for dynamic row heights */}

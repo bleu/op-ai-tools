@@ -20,7 +20,7 @@ interface FilterSelectProps {
 export function FilterSelect({ data }: FilterSelectProps) {
   return (
     <Select>
-      <SelectTrigger className="w-4/5 bg-muted focus:ring-0 focus:ring-offset-0">
+      <SelectTrigger className="w-full bg-muted focus:ring-0 focus:ring-offset-0">
         <SelectValue placeholder="All" />
       </SelectTrigger>
       <SelectContent>

@@ -127,7 +127,7 @@ function NavLink({
 function NavContent({ isMobile }: NavContentProps) {
   const pathname = usePathname();
   return (
-    <div className={cn("flex flex-col gap-6", isMobile && "py-2")}>
+    <div className={cn("flex flex-col gap-y-2", isMobile && "py-2")}>
       {navSections.map((section, index) => (
         <React.Fragment key={index}>
           {index > 0 && <hr className="border-t border-gray-200 my-4" />}
@@ -180,7 +180,7 @@ function NavContent({ isMobile }: NavContentProps) {
 
 export function DesktopSidebar() {
   return (
-    <div className="hidden border-r bg-white md:block h-full w-64">
+    <div className="hidden border-r bg-white md:block h-full w-full">
       <div className="flex h-full max-h-screen flex-col gap-2 p-4">
         <NavContent isMobile={false} />
       </div>
