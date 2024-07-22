@@ -27,8 +27,13 @@ export default function TopicPage() {
       setTopicData(result.data[0]);
     }
     loadData();
-    setIsLoading(false);
   }, []);
+
+  useEffect(() => {
+    if (topicData) {
+      setIsLoading(false);
+    }
+  }, [topicData]);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -98,7 +103,7 @@ export default function TopicPage() {
 
       <div>
         <div className="flex items-center justify-end gap-x-4 text-optimism">
-         <Feedback />
+          <Feedback />
         </div>
         <Separator orientation="horizontal" />
       </div>
@@ -112,7 +117,6 @@ export default function TopicPage() {
               href={link.url}
               className="text-blue-500 underline underline-offset-2"
               prefetch={false}
-              
             >
               {link.text}
             </Link>
