@@ -41,11 +41,15 @@ export default function TopicPage() {
 
   return (
     <div className="p-6 space-y-8">
-      <div className="space-y-2 flex justify-between items-start">
-        <div>
-          <div className="flex items-center gap-x-2">
-            <h1 className="text-3xl font-bold">{topicData?.title}</h1>
-            <Badge variant="secondary">{topicData?.status}</Badge>
+      <div className="space-y-2 flex flex-col md:flex-row justify-between items-start">
+        <div className="flex flex-col gap-y-2">
+          <div className="flex flex-col md:flex-row md:items-center gap-2">
+            <h1 className="text-2xl md:text-3xl font-bold">
+              {topicData?.title}
+            </h1>
+            <Badge variant="secondary" className="w-fit">
+              {topicData?.status}
+            </Badge>
           </div>
           <div className="flex items-center space-x-2 text-sm">
             <Octagram
@@ -57,7 +61,6 @@ export default function TopicPage() {
               )}
             />
             <span>{topicData?.category}</span>
-            <span>|</span>
             <Link
               target="_blank"
               href="#"

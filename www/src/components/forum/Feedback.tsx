@@ -78,7 +78,7 @@ export function Feedback() {
             <DialogTitle>What's wrong?</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="grid grid-cols-2 gap-4 py-4">
+            <div className="grid md:grid-cols-2 gap-4 py-4">
               {[
                 { value: "incomplete", label: "Incomplete" },
                 { value: "unrelated", label: "Not related to category/topic" },
