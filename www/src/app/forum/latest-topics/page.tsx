@@ -1,5 +1,7 @@
-export default function LatestPage(){
+import { InfiniteTable } from "../(components)/table";
+
+export default function LatestPage() {
   return (
-    <div>latest</div>
-  )
+    <InfiniteTable title="Latest Topics" fetchPath="TODO" key="trending" />
+  );
 }
