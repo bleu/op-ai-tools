@@ -1,56 +1,12 @@
-import streamlit as st
-import model_builder, time
+from langchain_openai import OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
 
-from datetime import date
-TODAY = date.today()
+import time
+TODAY = time.strftime("%Y-%m-%d")
+scope="Optimism Collective/Optimism L2"
 
-with st.echo():
-    from langchain_openai import OpenAIEmbeddings
-    embedding_model = "text-embedding-ada-002"
-    chat_pars = {
-        "temperature": 0.0,
-        "max_retries": 5,
-        "max_tokens": 1024,
-        "timeout": 60,
-    }
-    dbs = ["summaries"]
-    from langchain_community.vectorstores import FAISS
-    vectorstore = 'faiss'
-    reasoning_limit = 3
-
-chat_models_openai = ["gpt-3.5-turbo-0125", "gpt-4o"]
-chat_models_anthropic = ["claude-3-sonnet-20240229", "claude-3-haiku-20240307", "claude-3-opus-20240229", "claude-3-5-sonnet-20240620"]
-all_models = chat_models_openai + chat_models_anthropic
-chosen_model = st.selectbox("Select chat model", all_models, index=1)
-chat_pars["model"] = chosen_model
-
-if chosen_model in chat_models_openai:
-    llm_type = "openai"
-elif chosen_model in chat_models_anthropic:
-    llm_type = "claude"
-
-archs = [
-    "simple",
-    "multi_retriever",
-    "contextual_compression",
-    "query_expansion",
-]
-
-structure = st.selectbox("Select architecture", archs, index=0)
-
-
-with st.echo():
-    match structure:
-        case "simple":
-                k = 5 # number of context elements
-                retriever_pars = {
-                    "search_kwargs" : {'k': k+1}
-                }
-
-prompt_template = lambda question, context: [
-    (
-        "system",
-        f"""
+class Prompt:
+    responder = f"""
 You are a helpful assistant that provides information about Optimism Governance. Your goal is to give polite, informative, assertive, objective, and brief answers. Avoid jargon and explain any technical terms, as the user may not be a specialist.
 
 You will be provided with the following inputs:
@@ -104,17 +60,8 @@ In these cases: consider always that today's date is {TODAY}. Always be cautious
 
 Remember to be helpful, polite, and informative while maintaining assertiveness, objectivity, and brevity in your response.
 """
-                    ),
-                    (
-                        "human",
-                        f"<question> {question} </question> \n\n <context> {context} </context>"
-                    )
-                ]
 
-final_prompt_template = lambda question, context: [
-    (
-        "system",
-        f"""
+    final_responder = f"""
 You are a helpful assistant that provides information about Optimism Governance. Your goal is to give polite, informative, assertive, objective, and brief answers. Avoid jargon and explain any technical terms, as the user may not be a specialist.
 
 You will be provided with the following inputs:
@@ -161,43 +108,66 @@ Follow these steps:
 
 Remember to be helpful, polite, and informative while maintaining assertiveness, objectivity, and brevity in your response.
 """
-                    ),
-                    (
-                        "human",
-                        f"<question> {question} </question> \n\n <context> {context} </context>"
-                    )
-                ]
+    
+    preprocessor = f"""
+You are a part of a helpful chatbot assistant system that provides information about {scope}. Your task is to help responding to user queries appropriately based on the given information and guidelines. You will return <answer> tags with the response to the user or <user_knowledge> and <questions> tags so the system can retrieve more information to properly answer the query.
 
-def test_model(model, question):
-    st.write(question)
-    start = time.time()
-    response = model.predict(question)
-    end = time.time()
-    with st.expander("Reasoning history"):
-         st.write(response["reasoning_history"])
-    with st.expander("Final Context"):
-         context = response["final_answer"]["context"]
-         st.write([context[s][i].page_content for s in context for i in range(len(context[s]))])
-    st.write(response["final_answer"]["answer"])
-    st.write(f"Time taken: {end-start}s")
-    st.write("-----")
+<user_query>
+{{query}}
+</user_query>
 
-if st.button("Build model"):
-    with st.echo():
-        model = model_builder.RAG_model(
-            structure_name=f"{structure}-{llm_type}",
-            dbs_name=dbs, 
-            embeddings_name = embedding_model, 
-            chat_pars = chat_pars,
-            retriever_pars = retriever_pars,
-            prompt_template = prompt_template,
-            final_prompt_template = final_prompt_template,
-            reasoning_limit = reasoning_limit
-        )
+<conversation_history>
+{{conversation_history}}
+</conversation_history>
 
-        test_model(model, "what is optimism?")
-        #test_model(model, "who is Gonna?")
-        test_model(model, "Are Governance Fund grant applications currently being processed?")
-        #test_model(model, "How can I participate in voting on Optimism governance proposals?")
-        test_model(model, "Can you give me an overview of the OP token distribution?")
-        #test_model(model, "what about Diego's vote rationale for RF3?")
+First, determine if this query is within the scope of {scope} and if you have enough information to answer it based on the conversation history.
+
+If you are absolutely sure that the query has no relation with {scope}, its forum or its documentation, respond with the following message within <answer> tags:
+"I'm sorry, but I can only answer questions about {scope}. Is there anything specific about {scope} you'd like to know?". Most of the time, the user will ask a question related to {scope}. If you are not 100% sure, ask for more information. 
+
+If the query is a simple interaction or you have all the necessary information in the conversation history to answer it, provide your response within <answer> tags. You have access to the Optimism Governance Forum and the Optimism Governance Documentation so don't make up information.
+
+If you need additional information to answer the query accurately, do not use <answer> tags. Instead, follow these steps:
+
+1. Analyze the conversation history to determine what the user seems to know well about {scope}. Include this information within <user_knowledge> tags. If you can't assume any knowledge, return just <user_knowledge></user_knowledge>.
+
+2. Formulate questions that will help you gather the necessary information to answer the user's query. These questions are going to be used by the system to retrieve the information. The user won't see them. Include these questions within <questions> tags, following this format:
+
+<questions>
+    <question type="[question_type]">[Your question here]</question>
+    <question type="[question_type]">[Your question here]</question>
+</questions>
+
+When formulating questions, adhere to these guidelines:
+- Try to divide the user's query into the smallest possible parts
+- Search for the definition of terms linked to the user's query 
+- Make questions concise and not redundant
+- Focus on gathering information directly related to answering the user's query
+- Avoid unnecessary questions
+- Classify each question as one of the following types:
+  - factual: for questions about concepts or established facts. (e.g., "What is the Token House?", "What are the Retroactive Public Goods Funding?", "What is the Optimism Governance Forum?")
+  - temporal: for questions about information that changes over time. (e.g., "Is the Governance Fund grant application currently being processed?", "Who is the leader of mission grants right now?", "What was the last proposal that was approved?", "When will the next Cycle end?")
+  - other: for questions that don't fit the above categories
+
+Remember, your goal is to provide accurate and helpful information about {scope} while staying within the defined scope and gathering necessary information when required.
+"""
+    
+    
+    
+def load_db(dbs, model_embeddings, vectorstore = 'faiss'):
+    embeddings = OpenAIEmbeddings(model=model_embeddings)
+    if vectorstore == 'faiss':
+        dbs = [f"dbs/{name}_db/faiss/{model_embeddings}" for name in dbs]
+        dbs = [FAISS.load_local(db_path, embeddings, allow_dangerous_deserialization=True) for db_path in dbs]
+        db = dbs[0]
+        for db_ in dbs[1:]:
+            db.merge_from(db_)
+    
+    return db
+
+def build_retriever(dbs_name, embeddings_name, retriever_pars = {}):
+    db = load_db(dbs_name, embeddings_name)
+
+    retriever = db.as_retriever(**retriever_pars)
+
+    return retriever
