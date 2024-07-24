@@ -1,6 +1,6 @@
 import re, json
 import pandas as pd
-from typing import Any, Dict, List
+from typing import Dict, List, Any
 
 from langchain_core.documents.base import Document
 from langchain_text_splitters import MarkdownHeaderTextSplitter
@@ -60,7 +60,7 @@ class FragmentsProcessingStrategy(DocumentProcessingStrategy):
 
 class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
     @staticmethod
-    def process_document(file_path: str, return_types:str = "posts") -> Any:
+    def process_document(file_path: str) -> List[Document]:
         with open(file_path, "r") as file:
             boards, threads, posts = {}, {}, {}
             for line in file:
@@ -87,9 +87,7 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
                             "creation_time": data_line["item"]["creation_time"],
                             "path": data_line["item"]["path"],
                             "download_time": data_line["download_time"],
-                            "reply_to_post_number": data_line["item"]["data"][
-                                "reply_to_post_number"
-                            ],
+                            "reply_to_post_number": data_line["item"]["data"]["reply_to_post_number"],
                             "post_number": data_line["item"]["data"]["post_number"],
                         }
                 except KeyError:
@@ -110,11 +108,14 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
                 post["thread_id"] = id_thread
             except:
                 post["thread_title"] = None
-        
-        if return_types == "posts":
-            return posts
-        elif return_types == "posts_threads":
-            return posts, threads
+
+        return posts, threads, boards
+    
+    @staticmethod
+    def get_posts(file_path: str) -> List[Document]:
+        posts, t, b = ForumPostsProcessingStrategy.process_document(file_path)
+
+        return posts
 
     @staticmethod
     def return_posts(file_path: str) -> List[Document]:
@@ -133,13 +134,11 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
                     "id": ".".join(d["path"]) + "." + str(id),
                 },
             )
-            for id, d in ForumPostsProcessingStrategy.process_document(
-                file_path
-            ).items()
+            for id, d in ForumPostsProcessingStrategy.get_posts(file_path).items()
         ]
 
         return posts_forum
-
+    
     template_snapshot_proposal = """
 PROPOSAL
 {title}
@@ -172,25 +171,23 @@ winning_option: {winning_option}
                 data_line = json.loads(line)
                 discussion = data_line["discussion"]
                 proposals[discussion] = data_line
-                proposals[discussion]["str"] = (
-                    ForumPostsProcessingStrategy.template_snapshot_proposal.format(
-                        title=data_line["title"],
-                        space_id=data_line["space_id"],
-                        space_name=data_line["space_name"],
-                        snapshot=data_line["snapshot"],
-                        state=data_line["state"],
-                        type=data_line["type"],
-                        body=data_line["body"],
-                        start=data_line["start"],
-                        end=data_line["end"],
-                        votes=data_line["votes"],
-                        choices=data_line["choices"],
-                        scores=data_line["scores"],
-                        winning_option=data_line["winning_option"],
-                    )
+                proposals[discussion]["str"] = ForumPostsProcessingStrategy.template_snapshot_proposal.format(
+                    title=data_line["title"],
+                    space_id=data_line["space_id"],
+                    space_name=data_line["space_name"],
+                    snapshot=data_line["snapshot"],
+                    state=data_line["state"],
+                    type=data_line["type"],
+                    body=data_line["body"],
+                    start=data_line["start"],
+                    end=data_line["end"],
+                    votes=data_line["votes"],
+                    choices=data_line["choices"],
+                    scores=data_line["scores"],
+                    winning_option=data_line["winning_option"],
                 )
         return proposals
-
+    
     template_thread = """
 OPTIMISM GOVERNANCE FORUM 
 board: {BOARD_NAME}
@@ -222,7 +219,7 @@ trust_level (0-4): {TRUST_LEVEL}
     """
     @staticmethod
     def return_threads(file_path: str) -> List[Document]:
-        posts, threads_info = ForumPostsProcessingStrategy.process_document(file_path, return_types="posts_threads")
+        posts, threads_info, boards_info = ForumPostsProcessingStrategy.process_document(file_path)
         df_posts = pd.DataFrame(posts).T
         threads =[]
         for t in df_posts['thread_id'].unique():
