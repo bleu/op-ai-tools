@@ -48,7 +48,6 @@ class RAG_system:
             query = query,
             conversation_history = self.memory
         )).content
-        print(output_LLM)
 
         xml_tag_pattern = re.compile(r"<(\w+)(\s[^>]*)?>(.*?)</\1>", re.DOTALL)
         xml_tags = xml_tag_pattern.findall(output_LLM)
@@ -57,7 +56,10 @@ class RAG_system:
         if "answer" in tags.keys():
             return False, tags["answer"]
         else:
-            user_knowledge = tags["user_knowledge"][1]
+            try:
+                user_knowledge = tags["user_knowledge"][1]
+            except KeyError:
+                user_knowledge = ""
             questions = [{"text": q[2], "type": q[1]} for q in xml_tag_pattern.findall(tags["questions"][1])]
             return True, (user_knowledge, questions)
 
@@ -71,11 +73,57 @@ class RAG_system:
             case _:
                 raise ValueError(f"info_type {info_type} not recognized")
 
-    def responder_LLM(self, query : str, context : list, user_knowledge : str, summary_of_explored_contexts : str, LLM : Any, final : bool = False) -> Tuple[str|list, bool]:
-        pass
+    def responder_LLM(self, query : str, context : str, user_knowledge : str, summary_of_explored_contexts : str, final : bool = False, LLM : Any = None):# -> Tuple[str|list, bool]:
+        if LLM is None:
+            LLM = self.llm[1]
 
-    def predict(self, query : str) -> str:
+        if not final:
+            output_LLM = LLM.invoke(self.system_prompt_responder.format(
+                QUERY = query,
+                CONTEXT = context,
+                USER_KNOWLEDGE = user_knowledge,
+                SUMMARY_OF_EXPLORED_CONTEXTS = summary_of_explored_contexts
+            )).content
+
+            print(output_LLM)
+
+            xml_tag_pattern = re.compile(r"<(\w+)(\s[^>]*)?>(.*?)</\1>", re.DOTALL)
+            xml_tags = xml_tag_pattern.findall(output_LLM)
+            tags = {tag[0]: tag[2] for tag in xml_tags}
+
+            if "answer" in tags.keys():
+                return tags["answer"], True
+            else:
+                knowledge_summary = ""
+                new_questions = ""
+                if "knowledge_summary" in tags.keys():
+                    knowledge_summary = tags["knowledge_summary"]
+                if "new_questions" in tags.keys():
+                    new_questions = tags["new_questions"]
+                    new_questions = [{"text": q[2], "type": q[1]} for q in xml_tag_pattern.findall(new_questions)]
+
+                return [knowledge_summary, new_questions], False
+        else:
+            output_LLM = LLM.invoke(self.system_prompt_final_responder.format(
+                QUERY = query,
+                CONTEXT = context,
+                USER_KNOWLEDGE = user_knowledge,
+                SUMMARY_OF_EXPLORED_CONTEXTS = summary_of_explored_contexts
+            )).content
+
+            xml_tag_pattern = re.compile(r"<(\w+)(\s[^>]*)?>(.*?)</\1>", re.DOTALL)
+            xml_tags = xml_tag_pattern.findall(output_LLM)
+            tags = {tag[0]: tag[2] for tag in xml_tags}
+
+            return tags["answer"], True
+                
+
+
+    def predict(self, query : str, verbose : bool = False) -> str:
         needs_info, preprocess_reasoning = self.query_preprocessing_LLM(query)
+        history_reasoning = {"query": query, "needs_info": needs_info, "preprocess_reasoning": preprocess_reasoning, "reasoning" : {}}
+        if verbose:
+            print(f"-------------------\nQuery: {query}\nNeeds info: {needs_info}\nPreprocess reasoning: {preprocess_reasoning}\n")
         if needs_info:
             is_enough = False
             explored_contexts = []
@@ -85,14 +133,26 @@ class RAG_system:
             while not is_enough:
                 summary_of_explored_contexts, questions = result
 
-                contexts = {q["text"]: self.Retriever(q["text"], info_type=q["type"], reasoning_level=reasoning_level) for q in questions}
-                context = self.context_filter(contexts, explored_contexts)
-                explored_contexts.extend(context)
+                context_list = [self.Retriever(q["text"], info_type=q["type"], reasoning_level=reasoning_level) for q in questions]
+                context_dict = {c.metadata['url']:c for cc in context_list for c in cc}
+
+                context, context_urls = self.context_filter(context_dict, explored_contexts, query)
+                explored_contexts.extend(context_urls)
+
+                if verbose:
+                    print(f"-------Reasoning level {reasoning_level}\nExplored Context URLS: {context_urls}")
 
                 result, is_enough = self.responder_LLM(query, context, user_knowledge, summary_of_explored_contexts, final = reasoning_level > self.REASONING_LIMIT)
                 
+                if verbose:
+                    print(f"-------Result: {result}\n")
+                    if is_enough:
+                        print(f"END!!!\n")
+
                 reasoning_level += 1
+                history_reasoning["reasoning"][reasoning_level] = {"context": context, "result": result}
             answer = result
         else:
             answer = preprocess_reasoning
-        return answer
+        history_reasoning["answer"] = answer
+        return history_reasoning

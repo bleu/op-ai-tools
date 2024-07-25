@@ -51,6 +51,7 @@ class FragmentsProcessingStrategy(DocumentProcessingStrategy):
             for fragment in f:
                 fragment.metadata["path"] = d["path"]
                 fragment.metadata["document_name"] = d["document_name"]
+                fragment.metadata["type_db_info"] = "docs_fragment"
                 fragments_docs.append(fragment)
 
         return fragments_docs
@@ -132,6 +133,7 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
                     "staff": d["staff"],
                     "trust_level": d["trust_level"],
                     "id": ".".join(d["path"]) + "." + str(id),
+                    "type_db_info": "forum_post",
                 },
             )
             for id, d in ForumPostsProcessingStrategy.process_document(
@@ -277,8 +279,9 @@ trust_level (0-4): {TRUST_LEVEL}
                     "board_name": board,
                     "url": url,
                     "num_posts": len(posts_thread),
-                    "users": list(posts_thread["username"].unique()),
-                    "length_str_thread": len(str_thread),
+                    "users": list(posts_thread['username'].unique()),
+                    'length_str_thread': len(str_thread),
+                    "type_db_info": "forum_thread",
                 }
                 threads.append([str_thread, metadata])
             except:
@@ -299,7 +302,7 @@ template_summary = """
 """
 class SummaryProcessingStrategy(DocumentProcessingStrategy):
     @staticmethod
-    def process_document(summary_path: str, forum_path: str) -> List[Dict]:
+    def process_document(summary_path: str, forum_path: str, divide:str|None=None) -> List[Dict]|Dict:
         with open(summary_path, 'r') as file:
             content = file.read()
             
@@ -333,23 +336,45 @@ class SummaryProcessingStrategy(DocumentProcessingStrategy):
                 entry['metadata'] = thread.metadata
                 entry['metadata']['whole_thread'] = thread.page_content
                 entry['metadata']['classification'] = entry['classification']
+                entry['metadata']['type_db_info'] = 'forum_thread_summary'
             except:
-                None
+                entry = None
 
-        docs = [
-            Document(
-                page_content=template_summary.format(
-                    TLDR=entry["tldr"] if "tldr" in entry else "",
-                    ABOUT=entry["about"] if "about" in entry else "",
-                    OVERVIEW=entry["overview"] if "overview" in entry else "",
-                    REACTION=entry["reaction"] if "reaction" in entry else "",
-                ),
-                metadata=entry["metadata"] if "metadata" in entry else {},
-            )
-            for entry in data
-        ]
-        
-        return docs
+        data = [x for x in data if x is not None]
+        data = [x for x in data if 'metadata' in x.keys()]
+
+        if isinstance(divide, str):
+            classes = set([entry['metadata'][divide] for entry in data])
+            docs = {c : [] for c in classes}
+            for entry in data:
+                c = entry['metadata'][divide]
+                docs[c].append(
+                    Document(
+                        page_content=template_summary.format(
+                            TLDR=entry["tldr"] if "tldr" in entry else "",
+                            ABOUT=entry["about"] if "about" in entry else "",
+                            OVERVIEW=entry["overview"] if "overview" in entry else "",
+                            REACTION=entry["reaction"] if "reaction" in entry else "",
+                        ),
+                        metadata=entry["metadata"] if "metadata" in entry else {},
+                    )
+                )
+            return docs
+        else:
+            docs = [
+                Document(
+                    page_content=template_summary.format(
+                        TLDR=entry["tldr"] if "tldr" in entry else "",
+                        ABOUT=entry["about"] if "about" in entry else "",
+                        OVERVIEW=entry["overview"] if "overview" in entry else "",
+                        REACTION=entry["reaction"] if "reaction" in entry else "",
+                    ),
+                    metadata=entry["metadata"] if "metadata" in entry else {},
+                )
+                for entry in data
+            ]
+            
+            return docs
 
 
 
