@@ -15,10 +15,14 @@ with st.echo():
     forum_path = "../../data/002-governance-forum-202406014/dataset/_out.jsonl"
 
 
-summaries = SummaryProcessingStrategy.process_document(summary_path, forum_path)
-data_sources = {
-    "summaries": summaries
-}
+divide = st.checkbox("Divide by board name", value=True)
+if divide:
+    data_sources = SummaryProcessingStrategy.process_document(summary_path, forum_path, divide="board_name")
+else:
+    summaries = SummaryProcessingStrategy.process_document(summary_path, forum_path)
+    data_sources = {
+        "summaries": summaries
+    }
 
 st.write(data_sources)
 

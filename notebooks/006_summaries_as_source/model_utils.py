@@ -1,53 +1,83 @@
+from typing import Tuple
+
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
+from ragatouille import RAGPretrainedModel
+RAG = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
+RAG = RAG.as_langchain_document_compressor()
+
 import time
 TODAY = time.strftime("%Y-%m-%d")
-scope="Optimism Collective/Optimism L2"
+scope="Optimism Governance/Optimism Collective/Optimism L2"
+source="Optimism Governance Forum"
 
 class Prompt:
     responder = f"""
-You are a helpful assistant that provides information about Optimism Governance. Your goal is to give polite, informative, assertive, objective, and brief answers. Avoid jargon and explain any technical terms, as the user may not be a specialist.
+You are a helpful assistant that provides information about {scope}. Your goal is to give polite, informative, assertive, objective, and brief answers. Avoid jargon and explain any technical terms, as the user may not be a specialist.
 
-You will be provided with the following inputs:
+An user inserted the following query:
+<query>
+{{QUERY}}
+<query>
+
+You have the following context information, retrieved from the {source}:
 <context>
 {{CONTEXT}}
 </context>
 
-<question>
-{{USER_QUESTION}}
-<question>
+The user seems to know the following:
+<user_knowledge>
+{{USER_KNOWLEDGE}}
+</user_knowledge>
+
+From past interactions, you have the following knowledge:
+<your_previous_knowledge>
+{{SUMMARY_OF_EXPLORED_CONTEXTS}}
+</your_previous_knowledge>
 
 Today's date is {TODAY}. Be aware of information that might be outdated.
 
 Follow these steps:
 
-1. Analyze the user's question and the provided context.
+1. Analyze the user's question, the provided context and your previous knowledge. Keep in mind the user's knowledge.
 
-2. List briefly what the user seems to want to know inside <things_to_answer> tags.
+2. Summarize the information you have, from the context and your previous knowledge, that is relevant to the user's query. Include this summary inside <knowledge_summary></knowledge_summary> tags. Cite the source URL using the format [1] within the text and list the url references at the end.
 
-3. Check if you have enough information in the context to answer those questions.
+3. Check if you have enough information to answer the user's query. 
 
-4. If you think more information is necessary to fully answer the query, provide related questions that should be clarified inside <need_to_know> tags. Try to expand the user's query to allow for a new improved search. In this case, do not provide an answer. Don't comment on the context or the question, just list every piece of information that you think would be necessary to completely answer the user's query.
-
-5. Some questions can have a temporal aspect. For example:
-- If the user wants to know about the current status of something.
-- If the user wants to know the last time something happened).
-In these cases: consider always that today's date is {TODAY}. Always be cautious about afirming stuff. If you think more recent information is necessary, you think more information is necessary. Mention what type of recent information could be useful in the <need_to_know> tags. Do not provide an answer in this case.
-
-6. If you have enough information to respond at least partially the question, provide an answer inside <answer> tags. Your answer should:
+4. If you have enough information to respond at least partially the question, provide an answer inside <answer></answer> tags. Your answer should:
    - Directly address the user's question without saying "according to the context", "based on the provided context" or similar phrases.
    - Cite the source URL using the format [1] within the text.
    - List the url references at the end of the answer.
    - Be polite, informative, assertive, objective, and brief.
    - Avoid jargon and explain any technical terms.
 
-7. Format your entire response as follows:
-   <things_to_answer>
-   [List of things the user wants to know]
-   </things_to_answer>
+5. Some questions can have a temporal aspect. If the user's query is about information that can change over time (e.g. "Is the Governance Fund grant application currently being processed?", "Who is the leader of mission grants right now?", "What was the last proposal that was approved?", "When will the next Cycle end?"), mention the date of the information. If the contexts are contradictory, provide the most recent information.
 
-   [Either the <need_to_know> section if there's insufficient information, or:]
+5. If you think more information is necessary to fully answer the query, formulate questions about that encompasses the information you think is missing. These questions are going to be used by the system to retrieve the information. The user won't see them. Include these questions within <new_questions> tags, following this format:
+    <new_questions>
+        <question type="[question_type]">[Your question here]</question>
+        <question type="[question_type]">[Your question here]</question>
+    </new_questions>
+When formulating questions, adhere to these guidelines:
+    - Try to divide the lack of information into the smallest possible parts
+    - Make questions concise and not redundant
+    - Focus on gathering information directly related to answering the user's query
+    - Avoid unnecessary questions
+    - Do not ask questions that you already know the answer to
+    - Classify each question as one of the following types: factual, temporal or other.
+
+6. Format your entire response as follows:
+   <knowledge_summary>
+   [Your summary here, with in-text citations]
+
+   References:
+   [1] url
+   [2] url
+   ...
+   </knowledge_summary>
+   [Either the <new_questions> section if there's insufficient information, or:]
 
    <answer>
    [Your answer here, with in-text citations]
@@ -62,40 +92,58 @@ Remember to be helpful, polite, and informative while maintaining assertiveness,
 """
 
     final_responder = f"""
-You are a helpful assistant that provides information about Optimism Governance. Your goal is to give polite, informative, assertive, objective, and brief answers. Avoid jargon and explain any technical terms, as the user may not be a specialist.
+You are a helpful assistant that provides information about {scope}. Your goal is to give polite, informative, assertive, objective, and brief answers. Avoid jargon and explain any technical terms, as the user may not be a specialist.
 
-You will be provided with the following inputs:
+An user inserted the following query:
+<query>
+{{QUERY}}
+<query>
+
+You have the following context information, retrieved from the {source}:
 <context>
 {{CONTEXT}}
 </context>
 
-<question>
-{{USER_QUESTION}}
-<question>
+The user seems to know the following:
+<user_knowledge>
+{{USER_KNOWLEDGE}}
+</user_knowledge>
+
+From past interactions, you have the following knowledge:
+<your_previous_knowledge>
+{{SUMMARY_OF_EXPLORED_CONTEXTS}}
+</your_previous_knowledge>
 
 Today's date is {TODAY}. Be aware of information that might be outdated.
 
 Follow these steps:
 
-1. Analyze the user's question and the provided context.
+1. Analyze the user's question, the provided context and your previous knowledge. Keep in mind the user's knowledge.
 
-2. List briefly what the user seems to want to know inside <things_to_answer> tags.
+2. Summarize the information you have, from the context and your previous knowledge, that is relevant to the user's query. Include this summary inside <knowledge_summary></knowledge_summary> tags. Cite the source URL using the format [1] within the text and list the url references at the end.
 
-3. Check if you have enough information in the context to answer those questions.
+3. Check if you have enough information to answer the user's query. 
 
-4. If you have enough information, provide an answer inside <answer> tags. Your answer should:
-   - Directly address the user's question without saying "according to the context" or similar phrases.
+4. If you have enough information to respond at least partially the question, provide an answer inside <answer></answer> tags. Your answer should:
+   - Directly address the user's question without saying "according to the context", "based on the provided context" or similar phrases.
    - Cite the source URL using the format [1] within the text.
    - List the url references at the end of the answer.
    - Be polite, informative, assertive, objective, and brief.
    - Avoid jargon and explain any technical terms.
 
-5. If you don't have enough information, start the <answer> tag with "I couldn't find all the information I wanted to provide a complete answer." And provide some context about the information you found an what you think is missing to properly answer the user's query.
+5. Some questions can have a temporal aspect. If the user's query is about information that can change over time (e.g. "Is the Governance Fund grant application currently being processed?", "Who is the leader of mission grants right now?", "What was the last proposal that was approved?", "When will the next Cycle end?"), mention the date of the information. If the contexts are contradictory, provide the most recent information.
+
+5. If you don't have enough information, start the <answer> tag with "I couldn't find all the information I wanted to provide a complete answer." And provide some context about the information you have, how it relates to the query and what you think is missing to properly answer the user's query.
 
 6. Format your entire response as follows:
-   <things_to_answer>
-   [List of things the user wants to know]
-   </things_to_answer>
+   <knowledge_summary>
+   [Your summary here, with in-text citations]
+
+   References:
+   [1] url
+   [2] url
+   ...
+   </knowledge_summary>
 
    <answer>
    [Your answer here, with in-text citations]
@@ -152,8 +200,56 @@ When formulating questions, adhere to these guidelines:
 Remember, your goal is to provide accurate and helpful information about {scope} while staying within the defined scope and gathering necessary information when required.
 """
     
+class ContextHandling:
+    summary_template = """
+<summary_from_forum_thread>
+<title>{TITLE}</title>
+<created_at>{CREATED_AT}</created_at>
+<last_posted_at>{LAST_POST_AT}</last_posted_at>
+<context_url>{URL}</context_url>
+
+<content>{CONTENT}</content>
+</summary_from_forum_thread>
+
+"""
+    @staticmethod
+    def filter(context_dict:dict, explored_contexts:list, query:str|None = None, k:int = 5) -> Tuple[str, list]:
+        urls = context_dict.keys()
+        context = [c for c in context_dict.values() if c not in explored_contexts]
+
+        if query is not None:
+            k = min(k, len(context))
+            if k > 0:
+                context = ContextHandling.reordering(context, query, k=k)
+
+        return ContextHandling.format(context, context_dict, urls)
+
+    @staticmethod
+    def format(context: list, context_dict: dict, urls: list) -> Tuple[str, list]:
+        out = []
+        for c in context:
+            type_db = c.metadata["type_db_info"]
+            match type_db:
+                case "forum_thread_summary":
+                    out.append(ContextHandling.summary_template.format(
+                        TITLE = c.metadata["thread_title"],
+                        CREATED_AT = c.metadata["created_at"],
+                        LAST_POST_AT = c.metadata["last_posted_at"],
+                        URL = c.metadata["url"],
+                        CONTENT = c.page_content
+                    ))
+                case _:
+                    pass
+
+        urls = [url for url in urls if context_dict[url] in context]
+        return "".join(out), urls
     
-    
+    @staticmethod
+    def reordering(context:list, query:str, k:int = 5) -> list:
+        return RAG.compress_documents(query=query, documents=context, k=k)
+
+
+
 def load_db(dbs, model_embeddings, vectorstore = 'faiss'):
     embeddings = OpenAIEmbeddings(model=model_embeddings)
     if vectorstore == 'faiss':
@@ -165,9 +261,6 @@ def load_db(dbs, model_embeddings, vectorstore = 'faiss'):
     
     return db
 
-def build_retriever(dbs_name, embeddings_name, retriever_pars = {}):
+def build_retriever(dbs_name, embeddings_name, **retriever_pars):
     db = load_db(dbs_name, embeddings_name)
-
-    retriever = db.as_retriever(**retriever_pars)
-
-    return retriever
+    return lambda query : db.similarity_search(query, **retriever_pars)
