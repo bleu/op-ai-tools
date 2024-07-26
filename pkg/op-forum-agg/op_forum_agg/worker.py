@@ -3,7 +3,7 @@ from celery.schedules import crontab
 
 from op_forum_agg.app import create_worker_app
 from op_forum_agg.config import config
-from op_forum_agg.src.sync.categories import execute_categories_sync
+from op_forum_agg.src.sync.categories import execute_categories_import
 
 
 def create_celery(app):
@@ -46,5 +46,5 @@ def setup_periodic_tasks(sender, **kwargs):
 
 @celery.task
 def long_task():
-    #   execute_categories_sync()
+    #   execute_categories_import()
     pass

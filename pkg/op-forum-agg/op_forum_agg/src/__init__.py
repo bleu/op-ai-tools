@@ -1,3 +1,1 @@
-from . import sync
-from . import queries
-from . import utils
+from . import queries, sync, utils

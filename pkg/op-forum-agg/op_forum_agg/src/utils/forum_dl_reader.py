@@ -1,39 +1,13 @@
-from forum_dl import (
-    ExtractorOptions,
-    ForumDl,
-    SessionOptions,
-    WriterOptions,
-    logging,
-    extractors,
-)
-from forum_dl.writers.common import Entry, Item, Board, Thread, Post, File, Writer
+from datetime import datetime, timezone
+
+from forum_dl import (ExtractorOptions, ForumDl, SessionOptions, WriterOptions,
+                      extractors, logging)
 from forum_dl.extractors.common import Extractor
 from forum_dl.version import __version__
+from forum_dl.writers.common import (Board, Entry, File, Item, Post, Thread,
+                                     Writer)
 
-from datetime import datetime, timezone
-import sys
-
-import httpx
-import psycopg2
-from psycopg2.extras import execute_values
 from op_forum_agg.config import config
-
-
-def fetch_info(url: str):
-    with httpx.Client() as client:
-        response = client.get(url)
-        response.raise_for_status()
-        return response.json()
-
-
-def store_data_in_db(data, query):
-    conn = psycopg2.connect(config["DATABASE_URL"])
-    cur = conn.cursor()
-    execute_values(cur, query, data)
-    conn.commit()
-
-    cur.close()
-    conn.close()
 
 
 class ReadWriter(Writer):

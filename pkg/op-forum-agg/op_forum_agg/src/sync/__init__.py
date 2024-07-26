@@ -1,2 +1,1 @@
-from . import categories
-from . import threads
+from . import base, categories, threads

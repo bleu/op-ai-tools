@@ -1,104 +1,105 @@
-from forum_dl import ExtractorOptions, SessionOptions, WriterOptions, extractors
-from forum_dl.extractors.discourse import DiscourseExtractor
+import re
+from dataclasses import dataclass, field
+
 from psycopg2.extras import execute_values
-from op_forum_agg.src.queries import UPSERT_THREADS
-from op_forum_agg.src.utils import fetch_info, store_data_in_db, ReadWriter
-import json
-from psycopg2.extras import Json
-from datetime import datetime, timezone
 
-FORUM_URL = "https://gov.optimism.io"
-SITE_INFO_URL = f"{FORUM_URL}/site.json"
-CATEGORY_URL = f"{FORUM_URL}/c/{{category_slug}}.json"
-
-
-def fetch_threads(category_slug: str):
-    url = CATEGORY_URL.format(category_slug=category_slug)
-    session_options = SessionOptions(
-        get_urls=False,
-        timeout=5,
-        retries=4,
-        retry_sleep=1,
-        retry_sleep_multiplier=2,
-        warc_output="",
-        user_agent="Forum-DL",
-    )
-    extractor_options = ExtractorOptions(
-        path=False,
-    )
-    writer_options = WriterOptions(
-        output_path=f"out.json",  # unused
-        files_output_path="teste",  # unused
-        write_board_objects=False,
-        write_thread_objects=True,
-        write_post_objects=True,
-        write_file_objects=False,
-        textify=False,
-        content_as_title=False,
-        author_as_addr_spec=False,
-        write_outside_file_objects=True,
-    )
-
-    extractor = extractors.find(url, session_options, extractor_options)
-    if extractor:
-        extractor.fetch()
-        writer = ReadWriter(extractor, writer_options)
-        data = writer.write(url)
-        return data
-
-    return []
-
-    # with open('data.json', 'r') as json_file:
-    #     data = json.load(json_file)
-
-    # return data
+from op_forum_agg.src.queries import (CREATE_FORUM_POSTS, LIST_CATEGORIES,
+                                      RETRIEVE_RAW_THREAD_BY_URL,
+                                      RETRIEVE_RAW_THREADS)
+from op_forum_agg.src.sync.base import Category, DataIngestInterface, Thread
+from op_forum_agg.src.utils.db import (filter_data_from_db,
+                                       retrieve_data_from_db, store_data_in_db)
+from op_forum_agg.src.utils.helpers import fetch_info
 
 
-def parse_data(threads_data):
-    loaded_data = [json.loads(load_data) for load_data in threads_data]
-
-    parsed_data = []
-    for data in loaded_data:
-        post_data = data["item"]["data"]
-        parsed_data.append(
-            (
-                str(post_data["id"]),
-                data["item"]["url"],
-                data["type"],
-                json.dumps(post_data),
-            ),
-        )
-
-    return parsed_data
+def get_thread(thread_url: str):
+    return filter_data_from_db(RETRIEVE_RAW_THREAD_BY_URL, (thread_url,), Thread)
 
 
-def fetch_and_store_thread_data(category_slug: str):
-    threads_data = fetch_threads(category_slug)
-    parsed_data = parse_data(threads_data)
-    store_data_in_db(parsed_data, UPSERT_THREADS)
+def get_first_thread_post(thread_url: str):
+    return filter_data_from_db(RETRIEVE_RAW_THREAD_BY_URL, (f"{thread_url}/1",), Thread)
 
 
-def execute_threads_sync():
-    site_info_raw_json = fetch_info(SITE_INFO_URL)
-    forum_categories = site_info_raw_json["categories"]
+def get_categories():
+    return retrieve_data_from_db(LIST_CATEGORIES, Category)
 
-    for category in forum_categories[1:]:
-        try:
-            print(
-                "Starting to fetch threads for",
-                category["slug"],
-                datetime.now(timezone.utc),
+
+def get_category_by_external_id(categories, category_id):
+    for category in categories:
+        if str(category.external_id) == str(category_id):
+            return category.id
+    return None
+
+
+class ThreadsImport(DataIngestInterface):
+    def fetch(self):
+        file_path = "/Users/joaovictorassisdasilveira/Desktop/work/bleu/repositories/op-ai-tools/data/summaries/all_thread_summaries.txt"
+        with open(file_path, "r", encoding="utf-8") as file:
+            data = file.read()
+
+        posts = [
+            post.strip()
+            for post in data.split(
+                "--------------------------------------------------------------------------------"
             )
-            # this should be an async task
-            fetch_and_store_thread_data(category["slug"])
-            print(
-                "Finished fetching threads for",
-                category["slug"],
-                datetime.now(timezone.utc),
+            if post.strip()
+        ]
+
+        return posts
+
+    def transform(self, data):
+        categories = get_categories()
+
+        parsed_data = []
+        for post in data:
+            url_match = re.search(r"URL:\s*(.*)", post)
+            about_match = re.search(r"<about>\s*([\s\S]*?)<\/about>", post)
+            first_post_match = re.search(
+                r"<first_post>\s*([\s\S]*?)<\/first_post>", post
             )
-        except Exception as e:
-            print(f"Failed to download {category['slug']}: {e}")
+            reaction_match = re.search(r"<reaction>\s*([\s\S]*?)<\/reaction>", post)
+            overview_match = re.search(r"<overview>\s*([\s\S]*?)<\/overview>", post)
+            tldr_match = re.search(r"<tldr>\s*([\s\S]*?)<\/tldr>", post)
+
+            url = url_match.group(1).strip() if url_match else ""
+
+            threads = get_thread(url)
+
+            if len(threads) == 0:
+                continue
+
+            thread = threads[0]
+            fisrt_thread_posts = get_first_thread_post(url)
+            if len(fisrt_thread_posts) == 0:
+                continue
+
+            fisrt_thread_post = fisrt_thread_posts[0]
+            internal_category_id = get_category_by_external_id(
+                categories, thread.rawData["category_id"]
+            )
+            forum_post_data = {
+                "external_id": thread.external_id,
+                "title": thread.rawData["title"],
+                "url": thread.url,
+                "lastPostedAt": thread.rawData["last_posted_at"],
+                "externalId": thread.external_id,
+                "category": internal_category_id,
+                "about": about_match.group(1).strip() if about_match else "",
+                "firstPost": (
+                    first_post_match.group(1).strip() if first_post_match else ""
+                ),
+                "reaction": reaction_match.group(1).strip() if reaction_match else "",
+                "overview": overview_match.group(1).strip() if overview_match else "",
+                "tldr": tldr_match.group(1).strip() if tldr_match else "",
+                "username": fisrt_thread_post.rawData["username"] or "",
+                "displayUsername": fisrt_thread_post.rawData["display_username"] or "",
+            }
+
+            parsed_data.append(forum_post_data)
+
+        return parsed_data
 
 
 if __name__ == "__main__":
-    execute_threads_sync()
+    raw_threads = ThreadsImport(CREATE_FORUM_POSTS, "")
+    raw_threads.execute()

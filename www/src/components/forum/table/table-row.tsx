@@ -1,5 +1,5 @@
 import { Octagram } from "@/components/forum/Octagram";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import React from "react";
 import { ForumPost } from "./post-options";
@@ -17,22 +17,23 @@ const CATEGORY_COLORS = {
 import { Badge } from "@/components/ui/badge";
 
 export const SnapshotProposal = ({
-  about,
   id,
-  status,
+  url,
+  title,
+  username,
+  displayUsername,
   category,
-  author,
-  tldr,
-  readTime,
-  created_at,
-  lastActivity,
+  about,
+  createdAt,
+  updatedAt,
+  status,
 }: ForumPost) => {
   return (
     <Link href={`/forum/topic/${id}`}>
       <div className="p-4 max-w-7xl mx-auto rounded-md hover:bg-gray-100">
         <div className="flex items-center justify-left mb-2 gap-2">
-          <h1 className="text-2xl font-semibold">{about}</h1>
-          {status && <Badge>{status}</Badge>}
+          <h1 className="text-2xl font-semibold">{title}</h1>
+          {username && <Badge>{username}</Badge>}
         </div>
         <div className="flex items-center text-sm mb-4">
           <div className="font-semibold flex gap-1 items-center">
@@ -47,21 +48,21 @@ export const SnapshotProposal = ({
             <span className="text-muted-foreground">{category}</span>
           </div>
         </div>
-        <p className="text-gray-700 mb-4">{tldr}</p>
+        <p className="text-gray-700 mb-4">{about}</p>
         <div className="flex items-center text-xs text-gray-500">
-          {readTime && (
+          {1 && (
             <>
-              <span>{readTime}</span>
+              <span>{"1 minute"}</span>
               <span className="mx-2">•</span>
             </>
           )}
-          {created_at && (
+          {createdAt && (
             <>
-              <span>{created_at}</span>
+              <span>{formatDate(createdAt)}</span>
               <span className="mx-2">•</span>
             </>
           )}
-          {lastActivity && <span>{lastActivity}</span>}
+          {updatedAt && <span>{formatDate(updatedAt)}</span>}
         </div>
       </div>
     </Link>

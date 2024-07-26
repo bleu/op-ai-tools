@@ -8,16 +8,20 @@ datasource db {
 }
 
 model ForumPost {
-  id        Int      @id @default(autoincrement())
-  url       String   @unique
-  category  String
-  about     String
-  firstPost String
-  reaction  String
-  overview  String
-  tldr      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              Int      @id @default(autoincrement())
+  external_id     String   @unique
+  url             String   @unique
+  title           String
+  username        String
+  displayUsername String
+  category        String
+  about           String
+  firstPost       String
+  reaction        String
+  overview        String
+  tldr            String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model ForumPostCategory {

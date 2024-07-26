@@ -19,12 +19,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { SnapshotProposal } from "./table-row";
 import { Separator } from "@/components/ui/separator";
 import { FilterSelect } from "./filter-select";
-import { FilterDates } from "./filter-dates";
-import {
-  FILTER_OPTIONS,
-  ForumPost,
-  ForumPostApiResponse,
-} from "./post-options";
+import { ForumPost, ForumPostApiResponse } from "./post-options";
 
 const FETCH_SIZE = 10;
 
@@ -38,11 +33,22 @@ async function getPosts({ pageParam }: { pageParam: number }) {
   return data;
 }
 
-function ForumInfiniteScrollTable({ title }: { title: string }) {
+function ForumInfiniteScrollTable({
+  title,
+  categories,
+}: {
+  title: string;
+  categories: Array<{ value: string; label: string }>;
+}) {
   const tableContainerRef = React.useRef<HTMLDivElement>(null);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+
+  const filterOptions = {
+    label: "Filter by category",
+    options: categories,
+  };
 
   const { data, fetchNextPage, isFetching, isLoading } =
     useInfiniteQuery<ForumPostApiResponse>({
@@ -146,7 +152,7 @@ function ForumInfiniteScrollTable({ title }: { title: string }) {
       <div className="mx-4">
         <h1 className="text-2xl font-bold mb-6">{title}</h1>
         <div className="w-full flex gap-2 items-center flex-col md:flex-row">
-          <FilterSelect data={FILTER_OPTIONS} />
+          <FilterSelect data={filterOptions} />
           {/* <FilterDates /> */}
         </div>
       </div>
@@ -174,14 +180,15 @@ function ForumInfiniteScrollTable({ title }: { title: string }) {
                   <div className="w-full">
                     <SnapshotProposal
                       id={row.original.id}
-                      about={row.original.about}
-                      status={row.original.status}
+                      url={row.original.url}
+                      title={row.original.title}
+                      username={row.original.username}
+                      displayUsername={row.original.displayUsername}
                       category={row.original.category}
-                      author={row.original.author}
-                      tldr={row.original.tldr}
-                      readTime={row.original.readTime}
-                      created_at={row.original.created_at}
-                      lastActivity={row.original.lastActivity}
+                      about={row.original.about}
+                      createdAt={row.original.createdAt}
+                      updatedAt={row.original.updatedAt}
+                      status={row.original.status}
                     />
                     <Separator
                       orientation="horizontal"
@@ -205,10 +212,17 @@ function ForumInfiniteScrollTable({ title }: { title: string }) {
 
 const queryClient = new QueryClient();
 
-export function InfiniteTable({ title }: { title: string }) {
+export function InfiniteTable({
+  title,
+  categories,
+}: {
+  title: string;
+  categories: Array<{ value: string; label: string }>;
+  color: string;
+}) {
   return (
     <QueryClientProvider client={queryClient}>
-      <ForumInfiniteScrollTable title={title} />
+      <ForumInfiniteScrollTable title={title} categories={categories} />
     </QueryClientProvider>
   );
 }

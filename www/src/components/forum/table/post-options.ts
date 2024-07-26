@@ -13,14 +13,20 @@ export const FILTER_OPTIONS = {
 
 export type ForumPost = {
   id?: number;
-  about: string;
-  status?: "Ongoing" | "Completed" | "Pending";
-  category: string;
-  author?: string;
-  tldr: string;
-  readTime?: string;
-  created_at: string;
-  lastActivity?: string;
+  external_id?: string;
+  url?: string;
+  title?: string;
+  username?: string;
+  displayUsername?: string;
+  category?: string;
+  about?: string;
+  firstPost?: string;
+  reaction?: string;
+  overview?: string;
+  tldr?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  status?: string;
 };
 
 export type ForumPostApiResponse = {

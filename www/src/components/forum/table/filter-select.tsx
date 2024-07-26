@@ -40,6 +40,8 @@ export function FilterSelect({ data, categoryColor }: FilterSelectProps) {
                     //@ts-ignore
                     CATEGORY_COLORS[item.label]
                   )}
+                  // @ts-ignore
+                  style={{ color: `#${item.color}` }} // Pass the color to the style
                 />
                 {item.label}
               </div>
