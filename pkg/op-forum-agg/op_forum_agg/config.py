@@ -12,5 +12,5 @@ config = {
         "BROKER_URL": os.getenv("CELERY_BROKER_URL"),
         "RESULT_BACKEND": os.getenv("CELERY_RESULT_BACKEND"),
         "task_ignore_result": True,
-    }
+    },
 }

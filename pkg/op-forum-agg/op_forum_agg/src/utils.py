@@ -1,4 +1,11 @@
-from forum_dl import ExtractorOptions, ForumDl, SessionOptions, WriterOptions, logging, extractors
+from forum_dl import (
+    ExtractorOptions,
+    ForumDl,
+    SessionOptions,
+    WriterOptions,
+    logging,
+    extractors,
+)
 from forum_dl.writers.common import Entry, Item, Board, Thread, Post, File, Writer
 from forum_dl.extractors.common import Extractor
 from forum_dl.version import __version__
@@ -11,11 +18,13 @@ import psycopg2
 from psycopg2.extras import execute_values
 from op_forum_agg.config import config
 
+
 def fetch_info(url: str):
     with httpx.Client() as client:
         response = client.get(url)
         response.raise_for_status()
         return response.json()
+
 
 def store_data_in_db(data, query):
     conn = psycopg2.connect(config["DATABASE_URL"])
@@ -25,6 +34,7 @@ def store_data_in_db(data, query):
 
     cur.close()
     conn.close()
+
 
 class ReadWriter(Writer):
     def __init__(self, extractor: Extractor, options: WriterOptions):
@@ -83,7 +93,7 @@ class ReadWriter(Writer):
             type=typ,
             item=item,
         )
-    
+
     def _serialize_entry(self, entry: Entry) -> str:
         return entry.json()
 

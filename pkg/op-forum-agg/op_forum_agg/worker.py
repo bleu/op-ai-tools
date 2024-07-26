@@ -5,6 +5,7 @@ from op_forum_agg.app import create_worker_app
 from op_forum_agg.config import config
 from op_forum_agg.src.sync.categories import execute_categories_sync
 
+
 def create_celery(app):
     celery = Celery(
         app.import_name,
@@ -12,7 +13,7 @@ def create_celery(app):
         broker=config["CELERY"]["BROKER_URL"],
     )
     celery.conf.update(app.config)
-    celery.conf.timezone = 'UTC'
+    celery.conf.timezone = "UTC"
     TaskBase = celery.Task
 
     class ContextTask(TaskBase):
@@ -39,11 +40,11 @@ def setup_periodic_tasks(sender, **kwargs):
     #     long_task,
     # )
 
-    # each 10 seconds 
-    sender.add_periodic_task(10, long_task.s(), name='sync categories')
+    # each 10 seconds
+    sender.add_periodic_task(10, long_task.s(), name="sync categories")
+
 
 @celery.task
 def long_task():
-#   execute_categories_sync()
+    #   execute_categories_sync()
     pass
-  

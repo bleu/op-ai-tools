@@ -5,6 +5,7 @@ from op_forum_agg.src.utils import fetch_info, store_data_in_db
 FORUM_URL = "https://gov.optimism.io"
 SITE_INFO_URL = f"{FORUM_URL}/site.json"
 
+
 def parse_categories(site_info_raw_json):
     categories = site_info_raw_json["categories"]
 
@@ -17,11 +18,12 @@ def parse_categories(site_info_raw_json):
                 category.get("color", ""),
                 category.get("slug", ""),
                 category.get("description", ""),
-                category.get("topic_url", "")
+                category.get("topic_url", ""),
             )
         )
 
     return parsed_categories
+
 
 def execute_categories_sync():
     site_info_raw_json = fetch_info(SITE_INFO_URL)
@@ -30,4 +32,4 @@ def execute_categories_sync():
 
 
 if __name__ == "__main__":
-  execute_categories_sync()
+    execute_categories_sync()

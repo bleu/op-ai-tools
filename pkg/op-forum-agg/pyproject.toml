@@ -19,7 +19,10 @@ flower = "^2.0.1"
 forum-dl = "^0.3.0"
 python-dotenv = "^1.0.1"
 
+[tool.poetry.group.dev.dependencies]
+black = "^24.4.2"
+flake8 = "^7.1.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
