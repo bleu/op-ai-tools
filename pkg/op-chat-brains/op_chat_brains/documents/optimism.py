@@ -13,7 +13,7 @@ from op_chat_brains.documents import (
 
 
 class FragmentsProcessingStrategy(DocumentProcessingStrategy):
-    def process_document(self, file_path: str) -> List[Document]:
+    def process_document(self, file_path: str, headers_to_split_on: List|None = None) -> List[Document]:
         with open(file_path, "r") as f:
             docs_read = f.read()
 
@@ -34,13 +34,15 @@ class FragmentsProcessingStrategy(DocumentProcessingStrategy):
 
         docs = [d for d in docs if d["content"].strip() != ""]
 
-        headers_to_split_on = [
-            ("##", "header 2"),
-            ("###", "header 3"),
-            ("####", "header 4"),
-            ("#####", "header 5"),
-            ("######", "header 6"),
-        ]
+        if headers_to_split_on is None:
+            headers_to_split_on = [
+                ("##", "header 2"),
+                ("###", "header 3"),
+                ("####", "header 4"),
+                ("#####", "header 5"),
+                ("######", "header 6"),
+            ]
+            
         markdown_splitter = MarkdownHeaderTextSplitter(
             headers_to_split_on=headers_to_split_on
         )
@@ -49,7 +51,8 @@ class FragmentsProcessingStrategy(DocumentProcessingStrategy):
         for d in docs:
             f = markdown_splitter.split_text(d["content"])
             for fragment in f:
-                fragment.metadata["path"] = d["path"]
+                fragment.metadata["url"] = "https://community.optimism.io/docs/" + d["path"] + "/" + d["document_name"][:-3]
+                fragment.metadata["path"] = d["path"] 
                 fragment.metadata["document_name"] = d["document_name"]
                 fragment.metadata["type_db_info"] = "docs_fragment"
                 fragments_docs.append(fragment)
@@ -58,7 +61,6 @@ class FragmentsProcessingStrategy(DocumentProcessingStrategy):
 
     def get_db_name(self) -> str:
         return "fragments_docs_db"
-
 
 class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
     @staticmethod
@@ -294,13 +296,13 @@ trust_level (0-4): {TRUST_LEVEL}
     def get_db_name(self) -> str:
         return "posts_forum_db"
 
-template_summary = """
-<tldr>{TLDR}</tldr>
-<about>{ABOUT}</about>
-<overview>{OVERVIEW}</overview>
-<reaction>{REACTION}</reaction>
-"""
 class SummaryProcessingStrategy(DocumentProcessingStrategy):
+    template_summary = """
+    <tldr>{TLDR}</tldr>
+    <about>{ABOUT}</about>
+    <overview>{OVERVIEW}</overview>
+    <reaction>{REACTION}</reaction>
+    """
     @staticmethod
     def process_document(summary_path: str, forum_path: str, divide:str|None=None) -> List[Dict]|Dict:
         with open(summary_path, 'r') as file:
@@ -350,7 +352,7 @@ class SummaryProcessingStrategy(DocumentProcessingStrategy):
                 c = entry['metadata'][divide]
                 docs[c].append(
                     Document(
-                        page_content=template_summary.format(
+                        page_content=SummaryProcessingStrategy.template_summary.format(
                             TLDR=entry["tldr"] if "tldr" in entry else "",
                             ABOUT=entry["about"] if "about" in entry else "",
                             OVERVIEW=entry["overview"] if "overview" in entry else "",
@@ -363,7 +365,7 @@ class SummaryProcessingStrategy(DocumentProcessingStrategy):
         else:
             docs = [
                 Document(
-                    page_content=template_summary.format(
+                    page_content=SummaryProcessingStrategy.template_summary.format(
                         TLDR=entry["tldr"] if "tldr" in entry else "",
                         ABOUT=entry["about"] if "about" in entry else "",
                         OVERVIEW=entry["overview"] if "overview" in entry else "",
@@ -375,8 +377,6 @@ class SummaryProcessingStrategy(DocumentProcessingStrategy):
             ]
             
             return docs
-
-
 
 class OptimismDocumentProcessorFactory(DocumentProcessorFactory):
     def create_processor(self, doc_type: str) -> DocumentProcessingStrategy:
