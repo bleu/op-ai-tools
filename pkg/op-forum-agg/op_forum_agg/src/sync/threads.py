@@ -1,8 +1,6 @@
 import re
 from dataclasses import dataclass, field
 
-from psycopg2.extras import execute_values
-
 from op_forum_agg.src.queries import (CREATE_FORUM_POSTS, LIST_CATEGORIES,
                                       RETRIEVE_RAW_THREAD_BY_URL,
                                       RETRIEVE_RAW_THREADS)
@@ -26,9 +24,26 @@ def get_categories():
 
 def get_category_by_external_id(categories, category_id):
     for category in categories:
-        if str(category.external_id) == str(category_id):
+        if str(category.externalId) == str(category_id):
             return category.id
     return None
+
+
+def estimate_reading_time(text: str, WPM: int = 200) -> str:
+    # Inspiration: https://mfouesneau.github.io/posts/python_readtime_estimate.html
+    total_words = len(re.findall(r"\w+", text))
+    time_minutes = total_words // WPM + 1
+
+    if time_minutes < 60:
+        return f"{time_minutes} min"
+    else:
+        hours = time_minutes // 60
+        return f"{hours} hour" if hours == 1 else f"{hours} hours"
+
+
+def concatenate_strings(*args):
+    strings = [arg for arg in args if arg]
+    return " ".join(args)
 
 
 class ThreadsImport(DataIngestInterface):
@@ -60,6 +75,9 @@ class ThreadsImport(DataIngestInterface):
             reaction_match = re.search(r"<reaction>\s*([\s\S]*?)<\/reaction>", post)
             overview_match = re.search(r"<overview>\s*([\s\S]*?)<\/overview>", post)
             tldr_match = re.search(r"<tldr>\s*([\s\S]*?)<\/tldr>", post)
+            classification_match = re.search(
+                r"<classification>\s*([\s\S]*?)<\/classification>", post
+            )
 
             url = url_match.group(1).strip() if url_match else ""
 
@@ -77,22 +95,40 @@ class ThreadsImport(DataIngestInterface):
             internal_category_id = get_category_by_external_id(
                 categories, thread.rawData["category_id"]
             )
+
+            all_text = concatenate_strings(
+                about_match.group(1) if about_match else "",
+                first_post_match.group(1) if first_post_match else "",
+                reaction_match.group(1) if reaction_match else "",
+                overview_match.group(1) if overview_match else "",
+                tldr_match.group(1) if tldr_match else "",
+                classification_match.group(1) if classification_match else "",
+            )
+            read_time = estimate_reading_time(all_text)
+
             forum_post_data = {
-                "external_id": thread.external_id,
+                "external_id": thread.externalId,
                 "title": thread.rawData["title"],
                 "url": thread.url,
-                "lastPostedAt": thread.rawData["last_posted_at"],
-                "externalId": thread.external_id,
-                "category": internal_category_id,
+                "category_id": internal_category_id,
                 "about": about_match.group(1).strip() if about_match else "",
-                "firstPost": (
+                "first_post": (
                     first_post_match.group(1).strip() if first_post_match else ""
                 ),
                 "reaction": reaction_match.group(1).strip() if reaction_match else "",
                 "overview": overview_match.group(1).strip() if overview_match else "",
                 "tldr": tldr_match.group(1).strip() if tldr_match else "",
                 "username": fisrt_thread_post.rawData["username"] or "",
-                "displayUsername": fisrt_thread_post.rawData["display_username"] or "",
+                "display_username": fisrt_thread_post.rawData["display_username"] or "",
+                "raw_forum_post_id": thread.id,
+                "classification": (
+                    classification_match.group(1).strip()
+                    if classification_match
+                    else ""
+                ),
+                "last_activity": thread.rawData["last_posted_at"],
+                "read_time": read_time,
+                "created_at": thread.rawData["created_at"],
             }
 
             parsed_data.append(forum_post_data)

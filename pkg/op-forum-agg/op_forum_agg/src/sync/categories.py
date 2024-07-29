@@ -1,5 +1,3 @@
-from psycopg2.extras import execute_values
-
 from op_forum_agg.src.queries import UPSERT_CATEGORIES
 from op_forum_agg.src.sync.base import DataIngestInterface
 from op_forum_agg.src.utils.db import store_data_in_db
@@ -20,14 +18,14 @@ class CategoriesImport(DataIngestInterface):
         parsed_categories = []
         for category in categories:
             parsed_categories.append(
-                (
-                    category.get("id"),
-                    category.get("name", ""),
-                    category.get("color", ""),
-                    category.get("slug", ""),
-                    category.get("description", ""),
-                    category.get("topic_url", ""),
-                )
+                {
+                    "external_id": category.get("id"),
+                    "name": category.get("name", ""),
+                    "color": category.get("color", ""),
+                    "slug": category.get("slug", ""),
+                    "description": category.get("description", ""),
+                    "topic_url": category.get("topic_url", ""),
+                }
             )
 
         return parsed_categories

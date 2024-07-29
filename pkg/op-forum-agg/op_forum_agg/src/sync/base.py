@@ -134,20 +134,20 @@ class ThreadPost:
 
 @dataclass
 class Thread:
-    # id: str
-    external_id: str
+    externalId: str
     url: str
     type: str
     rawData: Union[ThreadDetails, ThreadPost]
-    # rawData: Any
+    id: Optional[int] = None
 
 
 @dataclass
 class Category:
     id: int
-    external_id: str
+    externalId: str
     name: str
     color: str
     slug: str
     description: str
-    topic_url: str
+    topicUrl: str
+    filterable: Optional[bool] = None

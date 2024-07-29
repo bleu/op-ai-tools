@@ -4,7 +4,6 @@ from datetime import datetime, timezone
 from forum_dl import (ExtractorOptions, SessionOptions, WriterOptions,
                       extractors)
 from forum_dl.extractors.discourse import DiscourseExtractor
-from psycopg2.extras import Json, execute_values
 
 from op_forum_agg.src.queries import UPSERT_THREADS
 from op_forum_agg.src.sync.base import DataIngestInterface
@@ -60,12 +59,12 @@ class RawThreadsImport(DataIngestInterface):
         for threads_data in loaded_data:
             post_data = threads_data["item"]["data"]
             parsed_data.append(
-                (
-                    str(post_data["id"]),
-                    threads_data["item"]["url"],
-                    threads_data["type"],
-                    json.dumps(post_data),
-                ),
+                {
+                    "external_id": str(post_data["id"]),
+                    "url": threads_data["item"]["url"],
+                    "type": threads_data["type"],
+                    "raw_data": json.dumps(post_data),
+                }
             )
 
         return parsed_data

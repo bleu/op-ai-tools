@@ -1,33 +1,34 @@
 UPSERT_CATEGORIES = """
-    INSERT INTO "ForumPostCategory" (external_id, name, color, slug, description, topic_url)
-    VALUES (%s, %s, %s, %s, %s, %s)
-    ON CONFLICT (external_id)
+    INSERT INTO "ForumPostCategory" ("externalId", "name", "color", "slug", "description", "topicUrl")
+    VALUES (%(external_id)s, %(name)s, %(color)s, %(slug)s, %(description)s, %(topic_url)s)
+    ON CONFLICT ("externalId")
     DO UPDATE SET
-      name = EXCLUDED.name,
-      color = EXCLUDED.color,
-      slug = EXCLUDED.slug,
-      description = EXCLUDED.description,
-      topic_url = EXCLUDED.topic_url;
+      "name" = EXCLUDED."name",
+      "color" = EXCLUDED."color",
+      "slug" = EXCLUDED."slug",
+      "description" = EXCLUDED."description",
+      "topicUrl" = EXCLUDED."topicUrl";
     """
 
 UPSERT_THREADS = """
-        INSERT INTO "RawForumPost" ("external_id", "url", "type", "rawData")
-        VALUES (%s, %s, %s, %s)
-        ON CONFLICT ("external_id") DO UPDATE SET
-        "url" = EXCLUDED."url",
-        "type" = EXCLUDED."type",
-        "rawData" = EXCLUDED."rawData"
-    """
+    INSERT INTO "RawForumPost" ("externalId", "url", "type", "rawData")
+    VALUES (%(external_id)s, %(url)s, %(type)s, %(raw_data)s)
+    ON CONFLICT ("externalId") DO UPDATE SET
+    "url" = EXCLUDED."url",
+    "type" = EXCLUDED."type",
+    "rawData" = EXCLUDED."rawData"
+"""
+
 
 RETRIEVE_RAW_THREADS = """
-    SELECT "external_id", "url", "type", "rawData"
+    SELECT "externalId", "url", "type", "rawData"
     FROM "RawForumPost"
     WHERE "type" = 'thread'
 """
 
 
 RETRIEVE_RAW_THREAD_BY_URL = """
-    SELECT "external_id", "url", "type", "rawData"
+    SELECT "externalId", "url", "type", "rawData", "id"
     FROM "RawForumPost"
     WHERE "url" = %s
 """
@@ -41,22 +42,28 @@ LIST_CATEGORIES = """
 
 CREATE_FORUM_POSTS = """
     INSERT INTO "ForumPost" (
-        "external_id", "url", "title", "username", "displayUsername", "category", 
-        "about", "firstPost", "reaction", "overview", "tldr", "createdAt", "updatedAt"
+        "externalId", "url", "title", "username", "displayUsername", "categoryId", 
+        "about", "firstPost", "reaction", "overview", "tldr", "rawForumPostId", 
+        "classification", "lastActivity", "readTime", "createdAt", "updatedAt"
     ) VALUES (
-        %(external_id)s, %(url)s, %(title)s, %(username)s, %(displayUsername)s, %(category)s, 
-        %(about)s, %(firstPost)s, %(reaction)s, %(overview)s, %(tldr)s, NOW(), NOW()
+        %(external_id)s, %(url)s, %(title)s, %(username)s, %(display_username)s, %(category_id)s, 
+        %(about)s, %(first_post)s, %(reaction)s, %(overview)s, %(tldr)s, %(raw_forum_post_id)s,
+        %(classification)s, %(last_activity)s, %(read_time)s, %(created_at)s, NOW()
     )
-    ON CONFLICT ("external_id") DO UPDATE SET
+    ON CONFLICT ("externalId") DO UPDATE SET
     "url" = EXCLUDED."url",
     "title" = EXCLUDED."title",
     "username" = EXCLUDED."username",
     "displayUsername" = EXCLUDED."displayUsername",
-    "category" = EXCLUDED."category",
+    "categoryId" = EXCLUDED."categoryId",
     "about" = EXCLUDED."about",
     "firstPost" = EXCLUDED."firstPost",
     "reaction" = EXCLUDED."reaction",
     "overview" = EXCLUDED."overview",
     "tldr" = EXCLUDED."tldr",
+    "rawForumPostId" = EXCLUDED."rawForumPostId",
+    "classification" = EXCLUDED."classification",
+    "lastActivity" = EXCLUDED."lastActivity",
+    "readTime" = EXCLUDED."readTime",
     "updatedAt" = NOW()
     """
