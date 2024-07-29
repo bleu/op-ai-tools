@@ -1,0 +1,37 @@
+model,query,answer,time_taken,reasoning_level
+gpt-4o-mini,How can I participate in voting on Optimism governance proposals?,"
+To participate in voting on Optimism governance proposals, you need to hold the necessary voting tokens and access the Optimism Governance Portal. Voting typically occurs during specific cycles, where you can review and vote on proposals. Each proposal may require approvals from delegates who hold a certain percentage of the votable token supply before it can proceed to the voting phase. Make sure to check the current voting cycle details and deadlines on the Optimism governance forum for the most accurate information [1][2][3].
+
+References:
+[1] https://gov.optimism.io/t/voting-roundup-cycle-11/5620
+[2] https://gov.optimism.io/t/voting-cycle-roundup-21/7967
+[3] https://gov.optimism.io/t/operating-manual-of-the-optimism-collective-v0-1-1/592
+",6.860743999481201,1
+gpt-4o-mini,How many project grants were approved and how many were rejected in the last three voting cycles?,"
+In the last three voting cycles of the Optimism Collective, 36 project grants were approved and 14 proposals were rejected. This data reflects the outcomes from the initial governance cycles [1]. 
+
+References:
+[1] https://gov.optimism.io/t/governance-update-2/3056
+",8.444920778274536,2
+gpt-4o-mini,Can you explain the most recent Optimism governance proposal?,"
+The most recent governance proposal in the Optimism Governance Forum aims to improve governance accessibility by implementing Praise and contribution-based attestations. This initiative includes the introduction of a Praise bot for Discord and the development of an attestation feature to enhance community engagement. The latest update on this project was shared on September 20, 2023, and it received positive feedback from the community regarding transparency and individual contribution metrics [1].
+
+References:
+[1] https://gov.optimism.io/t/updates-improving-governance-accessibility-through-praise-and-contribution-based-attestations/6516
+[2] https://gov.optimism.io/t/mission-roundup/6206
+",10.177658081054688,2
+gpt-4o-mini,Can you give me an overview of the OP token distribution?,"
+The OP token distribution is designed to support various projects and initiatives within the Optimism ecosystem. For example, the Polynomial Protocol sought 900,000 OP tokens to enhance user growth and visibility, while the Connext project requested 300,000 OP tokens to promote liquidity and cross-chain operations. The distribution plans typically include allocations for liquidity mining, grants, and other incentives to encourage user engagement and network activity. The Perpetual Protocol analysis also noted the importance of transparency in how these tokens are allocated and the impact of reward programs on user participation [1][2][3][4].
+
+References:
+[1] https://gov.optimism.io/t/op-reward-impact-analysis-perpetual-protocol-phase-0/6943  
+[2] https://gov.optimism.io/t/gf-phase-0-proposal-polynomial-protocol/1625  
+[3] https://gov.optimism.io/t/draft-gf-phase-1-rebel-creator-community-platform/2861  
+[4] https://gov.optimism.io/t/gf-phase-0-proposal-connext/851  
+",6.807271957397461,1
+gpt-4o-mini,What cycle is the current voting cycle?,"
+The current voting cycle is Cycle 22, which runs from April 18, 2024, to May 8, 2024. This cycle does not include any protocol upgrade votes or proposals that require delegate votes [1].
+
+References:
+[1] https://gov.optimism.io/t/voting-cycle-roundup-22/8053
+",4.56346583366394,1
