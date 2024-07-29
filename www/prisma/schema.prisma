@@ -8,36 +8,45 @@ datasource db {
 }
 
 model ForumPost {
-  id              Int      @id @default(autoincrement())
-  external_id     String   @unique
-  url             String   @unique
+  id              Int                @id @default(autoincrement())
+  externalId      String             @unique
+  url             String             @unique
   title           String
   username        String
   displayUsername String
-  category        String
-  about           String
-  firstPost       String
-  reaction        String
-  overview        String
-  tldr            String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  categoryId      Int?
+  category        ForumPostCategory? @relation(fields: [categoryId], references: [id])
+  rawForumPostId  Int?
+  rawForumPost    RawForumPost?      @relation(fields: [rawForumPostId], references: [id])
+  about           String?
+  firstPost       String?
+  reaction        String?
+  overview        String?
+  tldr            String?
+  classification  String?
+  lastActivity    DateTime?
+  readTime        String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
 }
 
 model ForumPostCategory {
-  id          Int     @id @default(autoincrement())
-  external_id String  @unique
+  id          Int         @id @default(autoincrement())
+  externalId  String      @unique
   name        String?
   color       String?
   slug        String?
   description String?
-  topic_url   String?
+  topicUrl    String?
+  filterable  Boolean     @default(false)
+  forumPosts  ForumPost[] @relation
 }
 
 model RawForumPost {
-  id          Int    @id @default(autoincrement())
-  external_id String @unique
-  url         String @unique
-  type        String
-  rawData     Json
+  id         Int         @id @default(autoincrement())
+  externalId String      @unique
+  url        String      @unique
+  type       String
+  rawData    Json
+  forumPosts ForumPost[] @relation
 }
