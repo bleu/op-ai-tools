@@ -10,6 +10,12 @@ from op_chat_brains.documents import (
     DocumentProcessingStrategy,
     DocumentProcessorFactory,
 )
+from op_chat_brains.retriever import connect_db
+
+from op_chat_brains.config import (
+    RAW_FORUM_DB,
+    FORUM_SUMMARY_DB
+)
 
 
 class FragmentsProcessingStrategy(DocumentProcessingStrategy):
@@ -64,86 +70,34 @@ class FragmentsProcessingStrategy(DocumentProcessingStrategy):
 
 class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
     @staticmethod
-    def process_document(file_path: str, return_types: str = "posts") -> Any:
-        with open(file_path, "r") as file:
-            boards, threads, posts = {}, {}, {}
-            for line in file:
-                data_line = json.loads(line)
-                type_line = data_line["type"]
-                try:
-                    id = data_line["item"]["data"]["id"]
-                    if type_line == "board":
-                        boards[id] = data_line["item"]["data"]
-                    elif type_line == "thread":
-                        threads[id] = data_line["item"]["data"]
-                    elif type_line == "post":
-                        posts[id] = {
-                            "url": data_line["item"]["url"],
-                            "created_at": data_line["item"]["data"]["created_at"],
-                            "username": data_line["item"]["data"]["username"],
-                            "score": data_line["item"]["data"]["score"],
-                            "readers_count": data_line["item"]["data"]["readers_count"],
-                            "moderator": data_line["item"]["data"]["moderator"],
-                            "admin": data_line["item"]["data"]["admin"],
-                            "staff": data_line["item"]["data"]["staff"],
-                            "trust_level": data_line["item"]["data"]["trust_level"],
-                            "content": data_line["item"]["content"],
-                            "creation_time": data_line["item"]["creation_time"],
-                            "path": data_line["item"]["path"],
-                            "download_time": data_line["download_time"],
-                            "reply_to_post_number": data_line["item"]["data"][
-                                "reply_to_post_number"
-                            ],
-                            "post_number": data_line["item"]["data"]["post_number"],
-                        }
-                except KeyError:
-                    pass
-
-        for id_post, post in posts.items():
-            path = post["path"]
+    def retrieve():
+        out_db = connect_db.retrieve_data(f'select "rawData", url, type, external_id from "{RAW_FORUM_DB}"')
+        posts, threads = {}, {}
+        for line in out_db:
+            id = int(line[3])
+            type_line = line[2]
+            url_line = line[1]
+            data_line = line[0]
+            if type_line == "post":
+                posts[id] = data_line
+                posts[id]['url'] = url_line
+                posts[id]['thread_id'] = int(url_line.split("/")[-2])
+            elif type_line == "thread":
+                threads[id] = data_line
+                threads[id]['url'] = url_line
+        
+        #print(len(posts))
+        to_del =[]
+        for p in posts:
             try:
-                id_board = int(path[0])
-                post["board_name"] = boards[id_board]["name"]
-                post["board_id"] = id_board
-            except:
-                post["board_name"] = None
+                posts[p]['thread_title'] = threads[posts[p]['thread_id']]['title']
+                posts[id]['category_id'] = threads[posts[p]['thread_id']]['category_id']
+            except KeyError:
+                to_del.append(p)
+        posts = {k: v for k, v in posts.items() if k not in to_del}
+        #print(len(posts))
 
-            try:
-                id_thread = int(path[1])
-                post["thread_title"] = threads[id_thread]["title"]
-                post["thread_id"] = id_thread
-            except:
-                post["thread_title"] = None
-
-        if return_types == "posts":
-            return posts
-        elif return_types == "posts_threads":
-            return posts, threads
-
-    @staticmethod
-    def return_posts(file_path: str) -> List[Document]:
-        posts_forum = [
-            Document(
-                page_content=d["content"],
-                metadata={
-                    "board_name": d["board_name"],
-                    "thread_title": d["thread_title"],
-                    "creation_time": d["creation_time"],
-                    "username": d["username"],
-                    "moderator": d["moderator"],
-                    "admin": d["admin"],
-                    "staff": d["staff"],
-                    "trust_level": d["trust_level"],
-                    "id": ".".join(d["path"]) + "." + str(id),
-                    "type_db_info": "forum_post",
-                },
-            )
-            for id, d in ForumPostsProcessingStrategy.process_document(
-                file_path
-            ).items()
-        ]
-
-        return posts_forum
+        return posts, threads
 
     template_snapshot_proposal = """
 PROPOSAL
@@ -168,7 +122,6 @@ winning_option: {winning_option}
 
 ----
     """
-
     @staticmethod
     def return_snapshot_proposals(file_path: str) -> Dict[str, Any]:
         with open(file_path, "r") as file:
@@ -198,7 +151,7 @@ winning_option: {winning_option}
 
     template_thread = """
 OPTIMISM GOVERNANCE FORUM 
-board: {BOARD_NAME}
+category: {CATEGORY_NAME}
 thread: {THREAD_TITLE}
 
 --- THREAD INFO ---
@@ -227,69 +180,74 @@ trust_level (0-4): {TRUST_LEVEL}
     """
 
     @staticmethod
-    def return_threads(file_path: str) -> List[Document]:
-        posts, threads_info = ForumPostsProcessingStrategy.process_document(
-            file_path, return_types="posts_threads"
-        )
+    def return_threads() -> List:
+        posts, threads_info = ForumPostsProcessingStrategy.retrieve()
         df_posts = pd.DataFrame(posts).T
-        threads = []
-        for t in df_posts["thread_id"].unique():
-            posts_thread = df_posts[df_posts["thread_id"] == t].sort_values(
-                by="created_at"
+        threads =[]
+        for t in df_posts['thread_id'].unique():
+            posts_thread = df_posts[df_posts['thread_id'] == t].sort_values(by='created_at')
+            url = posts_thread['url'].iloc[0]
+            url = url.split("/")[:-1]
+            url = "/".join(url)
+            t_i = threads_info[int(t)]
+            category_name = connect_db.retrieve_data(f'select "name" from "ForumPostCategory" where CAST("external_id" AS INT) = {t_i["category_id"]}')[0][0]
+            
+            
+            str_thread = ForumPostsProcessingStrategy.template_thread.format(
+                CATEGORY_NAME=category_name,
+                THREAD_TITLE=t_i["title"],
+                TAGS=t_i["tags"],
+                CREATED_AT=t_i["created_at"],
+                LAST_POSTED_AT=t_i["last_posted_at"],
+                PINNED=t_i["pinned"],
+                VISIBLE=t_i["visible"],
+                CLOSED=t_i["closed"],
+                ARCHIVED=t_i["archived"],
             )
-            try:
-                url = posts_thread["url"].iloc[0]
-                url = url.split("/")[:-1]
-                url = "/".join(url)
-                board = posts_thread["board_name"].iloc[0]
-                t_i = threads_info[int(t)]
 
-                str_thread = ForumPostsProcessingStrategy.template_thread.format(
-                    BOARD_NAME=board,
-                    THREAD_TITLE=t_i["title"],
-                    TAGS=t_i["tags"],
-                    CREATED_AT=t_i["created_at"],
-                    LAST_POSTED_AT=t_i["last_posted_at"],
-                    PINNED=t_i["pinned"],
-                    VISIBLE=t_i["visible"],
-                    CLOSED=t_i["closed"],
-                    ARCHIVED=t_i["archived"],
+            for i, post in posts_thread.iterrows():
+                str_thread += ForumPostsProcessingStrategy.template_post.format(
+                    POST_NUMBER=post['post_number'],
+                    USERNAME=post['username'],
+                    CREATED_AT=post['created_at'],
+                    TRUST_LEVEL=post['trust_level'],
+                    IS_REPLY=f"(reply to post #{post['reply_to_post_number']})\n" if post['reply_to_post_number'] != None else "",
+                    CONTENT=post['cooked'].replace("<\\content_user_input>", "").replace("<content_user_input>", ""),
+                    MODERATOR=post['moderator'],
+                    ADMIN=post['admin'],
+                    STAFF=post['staff'],
                 )
-                for i, post in posts_thread.iterrows():
-                    str_thread += ForumPostsProcessingStrategy.template_post.format(
-                        POST_NUMBER=post['post_number'],
-                        USERNAME=post['username'],
-                        CREATED_AT=post['created_at'],
-                        TRUST_LEVEL=post['trust_level'],
-                        IS_REPLY=f"(reply to post #{post['reply_to_post_number']})\n" if post['reply_to_post_number'] != None else "",
-                        CONTENT=post['content'].replace("<\\content_user_input>", "").replace("<content_user_input>", ""),
-                        MODERATOR=post['moderator'],
-                        ADMIN=post['admin'],
-                        STAFF=post['staff'],
-                    )
 
-                metadata = {
-                    "thread_id": t,
-                    "thread_title": t_i["title"],
-                    "created_at": t_i["created_at"],
-                    "last_posted_at": t_i["last_posted_at"],
-                    "tags": t_i["tags"],
-                    "pinned": t_i["pinned"],
-                    "visible": t_i["visible"],
-                    "closed": t_i["closed"],
-                    "archived": t_i["archived"],
-                    "board_name": board,
-                    "url": url,
-                    "num_posts": len(posts_thread),
-                    "users": list(posts_thread['username'].unique()),
-                    'length_str_thread': len(str_thread),
-                    "type_db_info": "forum_thread",
-                }
-                threads.append([str_thread, metadata])
-            except:
-                None
+            metadata = {
+                "thread_id": t,
+                "thread_title": t_i["title"],
+                "created_at": t_i["created_at"],
+                "last_posted_at": t_i["last_posted_at"],
+                "tags": t_i["tags"],
+                "pinned": t_i["pinned"],
+                "visible": t_i["visible"],
+                "closed": t_i["closed"],
+                "archived": t_i["archived"],
+                "category_name": category_name,
+                "url": url,
+                "num_posts": len(posts_thread),
+                "users": list(posts_thread['username'].unique()),
+                'length_str_thread': len(str_thread),
+                "type_db_info": "forum_thread",
+            }
+            threads.append([str_thread, metadata])
 
-        threads_forum = [Document(page_content=t[0], metadata=t[1]) for t in threads]
+        return threads
+    
+    @staticmethod
+    def get_threads_documents() -> List[Document]:
+        threads = ForumPostsProcessingStrategy.return_threads()
+        threads_forum = [
+            Document(
+                page_content = t[0],
+                metadata = t[1]
+            ) for t in threads
+        ]
 
         return threads_forum
 
@@ -303,44 +261,40 @@ class SummaryProcessingStrategy(DocumentProcessingStrategy):
     <overview>{OVERVIEW}</overview>
     <reaction>{REACTION}</reaction>
     """
+
     @staticmethod
-    def process_document(summary_path: str, forum_path: str, divide:str|None=None) -> List[Dict]|Dict:
-        with open(summary_path, 'r') as file:
-            content = file.read()
-            
-        sections = content.split("\n\n--------------------------------------------------------------------------------\n\n")
-        data = []
+    def retrieve() -> List:
+        out_db = connect_db.retrieve_data(f'select url, tldr, about, overview, reaction from "{FORUM_SUMMARY_DB}"')
 
-        url_pattern = re.compile(r"URL: (https?://[^\s]+)")
-        xml_tag_pattern = re.compile(r"<(\w+)>(.+?)</\1>", re.DOTALL)
-
-        for section in sections:
-            entry = defaultdict(lambda: None)  # Use defaultdict to handle missing keys gracefully
-
-            # Extract the URL
-            url_match = url_pattern.search(section)
-            if url_match:
-                entry["URL"] = url_match.group(1)
-            
-            # Extract all XML tags and their content
-            for match in xml_tag_pattern.findall(section):
-                tag, content = match
-                entry[tag.lower()] = content.strip()  # Capitalize tag names for uniform keys
-
-            data.append(dict(entry))  # Convert defaultdict back to regular dict before appending
-
-        threads = ForumPostsProcessingStrategy.return_threads(forum_path)
+        ret = []
+        for o in out_db:
+            str_summary = SummaryProcessingStrategy.template_summary.format(
+                TLDR=o[1],
+                ABOUT=o[2],
+                OVERVIEW=o[3],
+                REACTION=o[4],
+            )
+            item = {
+                "content": str_summary,
+                "url": o[0],
+                "classification": ""
+            }
+            ret.append(item)
+        
+        return ret 
+    
+    @staticmethod
+    def langchain_process(divide: str|None = None) -> Dict[str, List[Document]]:
+        data = SummaryProcessingStrategy.retrieve()
+        threads = ForumPostsProcessingStrategy.return_threads()
 
         for entry in data:
-            try:
-                url = entry["URL"]
-                thread = next((t for t in threads if t.metadata["url"] == url), None)
-                entry['metadata'] = thread.metadata
-                entry['metadata']['whole_thread'] = thread.page_content
-                entry['metadata']['classification'] = entry['classification']
-                entry['metadata']['type_db_info'] = 'forum_thread_summary'
-            except:
-                entry = None
+            url = entry["url"]
+            thread = next((t for t in threads if t[1]["url"] == url), None)
+            entry['metadata'] = thread[1]
+            entry['metadata']['whole_thread'] = thread[0]
+            entry['metadata']['classification'] = entry['classification']
+            entry['metadata']['type_db_info'] = 'forum_thread_summary'
 
         data = [x for x in data if x is not None]
         data = [x for x in data if 'metadata' in x.keys()]
@@ -352,27 +306,17 @@ class SummaryProcessingStrategy(DocumentProcessingStrategy):
                 c = entry['metadata'][divide]
                 docs[c].append(
                     Document(
-                        page_content=SummaryProcessingStrategy.template_summary.format(
-                            TLDR=entry["tldr"] if "tldr" in entry else "",
-                            ABOUT=entry["about"] if "about" in entry else "",
-                            OVERVIEW=entry["overview"] if "overview" in entry else "",
-                            REACTION=entry["reaction"] if "reaction" in entry else "",
-                        ),
-                        metadata=entry["metadata"] if "metadata" in entry else {},
+                        page_content = entry["content"],
+                        metadata = entry["metadata"]
                     )
                 )
             return docs
         else:
             docs = [
                 Document(
-                    page_content=SummaryProcessingStrategy.template_summary.format(
-                        TLDR=entry["tldr"] if "tldr" in entry else "",
-                        ABOUT=entry["about"] if "about" in entry else "",
-                        OVERVIEW=entry["overview"] if "overview" in entry else "",
-                        REACTION=entry["reaction"] if "reaction" in entry else "",
-                    ),
-                    metadata=entry["metadata"] if "metadata" in entry else {},
-                )
+                        page_content = entry["content"],
+                        metadata = entry["metadata"]
+                    )
                 for entry in data
             ]
             
@@ -394,3 +338,7 @@ class OptimismDocumentProcessorFactory(DocumentProcessorFactory):
             "fragments": "001-initial-dataset-governance-docs/file.txt",
             "forum_posts": "002-governance-forum-202406014/dataset/_out.jsonl",
         }
+
+
+if __name__ == "__main__":
+    print(SummaryProcessingStrategy.langchain_process(divide="category_name").keys())

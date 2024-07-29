@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Iterator, List, Dict, Any, Callable, Tuple
 import time, json, faiss, re
 import numpy as np
 import pandas as pd
@@ -6,32 +6,30 @@ import pandas as pd
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
-TODAY = time.strftime("%Y-%m-%d")
-scope="Optimism Governance/Optimism Collective/Optimism L2"
-source="Optimism Governance Forum"
+from op_chat_brains.retriever import faiss
 
 class Prompt:
-    responder = f"""
-You are a helpful assistant that provides information about {scope}. Your goal is to give polite, informative, assertive, objective, and brief answers. Avoid jargon and explain any technical terms, as the user may not be a specialist.
+    responder = """
+You are a helpful assistant that provides information about {SCOPE}. Your goal is to give polite, informative, assertive, objective, and brief answers. Avoid jargon and explain any technical terms, as the user may not be a specialist.
 
 An user inserted the following query:
 <query>
-{{QUERY}}
+{QUERY}
 <query>
 
-You have the following context information, retrieved from the {source}:
+You have the following context information, retrieved from the {SOURCE}:
 <context>
-{{CONTEXT}}
+{CONTEXT}
 </context>
 
 The user seems to know the following:
 <user_knowledge>
-{{USER_KNOWLEDGE}}
+{USER_KNOWLEDGE}
 </user_knowledge>
 
 From past interactions, you have the following knowledge:
 <your_previous_knowledge>
-{{SUMMARY_OF_EXPLORED_CONTEXTS}}
+{SUMMARY_OF_EXPLORED_CONTEXTS}
 </your_previous_knowledge>
 
 Today's date is {TODAY}. Be aware of information that might be outdated.
@@ -89,27 +87,27 @@ When formulating questions, adhere to these guidelines:
 Remember to be helpful, polite, and informative while maintaining assertiveness, objectivity, and brevity in your response.
 """
 
-    final_responder = f"""
-You are a helpful assistant that provides information about {scope}. Your goal is to give polite, informative, assertive, objective, and brief answers. Avoid jargon and explain any technical terms, as the user may not be a specialist.
+    final_responder = """
+You are a helpful assistant that provides information about {SCOPE}. Your goal is to give polite, informative, assertive, objective, and brief answers. Avoid jargon and explain any technical terms, as the user may not be a specialist.
 
 An user inserted the following query:
 <query>
-{{QUERY}}
+{QUERY}
 <query>
 
-You have the following context information, retrieved from the {source}:
+You have the following context information, retrieved from the {SOURCE}:
 <context>
-{{CONTEXT}}
+{CONTEXT}
 </context>
 
 The user seems to know the following:
 <user_knowledge>
-{{USER_KNOWLEDGE}}
+{USER_KNOWLEDGE}
 </user_knowledge>
 
 From past interactions, you have the following knowledge:
 <your_previous_knowledge>
-{{SUMMARY_OF_EXPLORED_CONTEXTS}}
+{SUMMARY_OF_EXPLORED_CONTEXTS}
 </your_previous_knowledge>
 
 Today's date is {TODAY}. Be aware of information that might be outdated.
@@ -155,27 +153,27 @@ Follow these steps:
 Remember to be helpful, polite, and informative while maintaining assertiveness, objectivity, and brevity in your response.
 """
     
-    preprocessor = f"""
-You are a part of a helpful chatbot assistant system that provides information about {scope}. Your task is to help responding to user queries appropriately based on the given information and guidelines. You will return <answer> tags with the response to the user or <user_knowledge> and <questions> tags so the system can retrieve more information to properly answer the query.
+    preprocessor = """
+You are a part of a helpful chatbot assistant system that provides information about {SCOPE}. Your task is to help responding to user queries appropriately based on the given information and guidelines. You will return <answer> tags with the response to the user or <user_knowledge> and <questions> tags so the system can retrieve more information to properly answer the query.
 
 <user_query>
-{{query}}
+{query}
 </user_query>
 
 <conversation_history>
-{{conversation_history}}
+{conversation_history}
 </conversation_history>
 
-First, determine if this query is within the scope of {scope} and if you have enough information to answer it based on the conversation history.
+First, determine if this query is within the scope of {SCOPE} and if you have enough information to answer it based on the conversation history.
 
-If you are absolutely sure that the query has no relation with {scope}, its forum or its documentation, respond with the following message within <answer> tags:
-"I'm sorry, but I can only answer questions about {scope}. Is there anything specific about {scope} you'd like to know?". Most of the time, the user will ask a question related to {scope}. If you are not 100% sure, ask for more information. 
+If you are absolutely sure that the query has no relation with {SCOPE}, its forum or its documentation, respond with the following message within <answer> tags:
+"I'm sorry, but I can only answer questions about {SCOPE}. Is there anything specific about {SCOPE} you'd like to know?". Most of the time, the user will ask a question related to {SCOPE}. If you are not 100% sure, ask for more information. 
 
 If the query is a simple interaction or you have all the necessary information in the conversation history to answer it, provide your response within <answer> tags. You have access to the Optimism Governance Forum and the Optimism Governance Documentation so don't make up information.
 
 If you need additional information to answer the query accurately, do not use <answer> tags. Instead, follow these steps:
 
-1. Analyze the conversation history to determine what the user seems to know well about {scope}. Include this information within <user_knowledge> tags. If you can't assume any knowledge, return just <user_knowledge></user_knowledge>.
+1. Analyze the conversation history to determine what the user seems to know well about {SCOPE}. Include this information within <user_knowledge> tags. If you can't assume any knowledge, return just <user_knowledge></user_knowledge>.
 
 2. Formulate questions that will help you gather the necessary information to answer the user's query. These questions are going to be used by the system to retrieve the information. The user won't see them. Include these questions within <questions> tags, following this format:
 
@@ -195,7 +193,7 @@ When formulating questions, adhere to these guidelines:
   - temporal: for questions about information that changes over time. (e.g., "Is the Governance Fund grant application currently being processed?", "Who is the leader of mission grants right now?", "What was the last proposal that was approved?", "When will the next Cycle end?")
   - other: for questions that don't fit the above categories
 
-Remember, your goal is to provide accurate and helpful information about {scope} while staying within the defined scope and gathering necessary information when required.
+Remember, your goal is to provide accurate and helpful information about {SCOPE} while staying within the defined scope and gathering necessary information when required.
 """
     
 class ContextHandling:
@@ -246,84 +244,61 @@ class ContextHandling:
     def reordering(context:list, query:str, k:int = 5) -> list:
         return context[:k]
 
+class RetrieverBuilder:
+    @staticmethod
+    def build_faiss_retriever(
+        dbs_name: List[str],
+        embeddings_name: str,
+        **retriever_pars,
+    ):
+        db = faiss.DatabaseLoader.load_db(dbs_name, embeddings_name)
+        return lambda query : db.similarity_search(query, **retriever_pars)
 
+    def build_index(index, embeddings_name, k_max = 10, treshold = 0.9):
+        embeddings = OpenAIEmbeddings(model=embeddings_name)
 
-def load_db(dbs, model_embeddings, vectorstore = 'faiss'):
-    embeddings = OpenAIEmbeddings(model=model_embeddings)
-    if vectorstore == 'faiss':
-        dbs = [f"dbs/{name}_db/faiss/{model_embeddings}" for name in dbs]
-        dbs = [FAISS.load_local(db_path, embeddings, allow_dangerous_deserialization=True) for db_path in dbs]
-        db = dbs[0]
-        for db_ in dbs[1:]:
-            db.merge_from(db_)
-    
-    return db
+        # load json index
+        with open(index, "r") as f:
+            index = json.load(f)
+        
+        index_questions = list(index.keys())
+        index_questions_embed = np.array(embeddings.embed_documents(index_questions))
+        index_faiss = faiss.IndexFlatIP(index_questions_embed.shape[1])
+        index_faiss.add(index_questions_embed)
 
-def build_retriever(dbs_name, embeddings_name, **retriever_pars):
-    db = load_db(dbs_name, embeddings_name)
-    return lambda query : db.similarity_search(query, **retriever_pars)
+        data = load_data()
+        context_df = []
+        for key, value in data.items():
+            k = key.strip().replace(" ", "_").replace('"', "").lower()
+            pattern = r'[^A-Za-z0-9_]+'
+            k = re.sub(pattern, '', k)
 
+            for context in value:
+                url = context.metadata['url']
+                content = context
+                context_df.append((url, content))
+        context_df = pd.DataFrame(context_df, columns=["url", "content"])
 
-from op_chat_brains.documents.optimism import SummaryProcessingStrategy, FragmentsProcessingStrategy
-SUMMARY_PATH = "../../data/summaries/all_thread_summaries.txt"
-FORUM_PATH = "../../data/002-governance-forum-202406014/dataset/_out.jsonl"
-DOCS_PATH = "../../data/001-initial-dataset-governance-docs/file.txt"
-def load_data() -> Tuple:
-    summary = SummaryProcessingStrategy.process_document(SUMMARY_PATH, FORUM_PATH, divide="board_name")
-    summary = {f'summary {key}': value for key, value in summary.items()}
-    fragments_loader = FragmentsProcessingStrategy()
-    fragments = fragments_loader.process_document(DOCS_PATH, headers_to_split_on=[])
+        def find_similar_questions(query):
+            query_embed = np.array(embeddings.embed_documents([query]))
+            D, I = index_faiss.search(query_embed, k_max)
 
-    data = {"governance documentation": fragments}
-    data.update(summary)
-    return data
+            similar_questions = [index_questions[i] for i in I[0]]
+            dists = D[0]
 
+            dists = [d for d in dists if d >= treshold]
+            similar_questions = [q for q, d in zip(similar_questions, dists) if d >= treshold]
 
-def build_index(index, embeddings_name, k_max = 10, treshold = 0.9):
-    embeddings = OpenAIEmbeddings(model=embeddings_name)
+            return similar_questions
 
-    # load json index
-    with open(index, "r") as f:
-        index = json.load(f)
-    
-    index_questions = list(index.keys())
-    index_questions_embed = np.array(embeddings.embed_documents(index_questions))
-    index_faiss = faiss.IndexFlatIP(index_questions_embed.shape[1])
-    index_faiss.add(index_questions_embed)
+        def find_contexts(query):
+            similar_questions = find_similar_questions(query)
+            urls = [index[q] for q in similar_questions]
+            urls = [x[0] for xs in urls for x in xs]
 
-    data = load_data()
-    context_df = []
-    for key, value in data.items():
-        k = key.strip().replace(" ", "_").replace('"', "").lower()
-        pattern = r'[^A-Za-z0-9_]+'
-        k = re.sub(pattern, '', k)
+            contexts = context_df[context_df["url"].isin(urls)]
+            content = contexts["content"].tolist()
+            return content
 
-        for context in value:
-            url = context.metadata['url']
-            content = context
-            context_df.append((url, content))
-    context_df = pd.DataFrame(context_df, columns=["url", "content"])
-
-    def find_similar_questions(query):
-        query_embed = np.array(embeddings.embed_documents([query]))
-        D, I = index_faiss.search(query_embed, k_max)
-
-        similar_questions = [index_questions[i] for i in I[0]]
-        dists = D[0]
-
-        dists = [d for d in dists if d >= treshold]
-        similar_questions = [q for q, d in zip(similar_questions, dists) if d >= treshold]
-
-        return similar_questions
-
-    def find_contexts(query):
-        similar_questions = find_similar_questions(query)
-        urls = [index[q] for q in similar_questions]
-        urls = [x[0] for xs in urls for x in xs]
-
-        contexts = context_df[context_df["url"].isin(urls)]
-        content = contexts["content"].tolist()
-        return content
-
-    return find_contexts
+        return find_contexts
 

@@ -26,4 +26,7 @@ SUMMARIZER_MODEL = os.getenv("SUMMARIZER_MODEL", CHAT_MODEL_OPENAI)
 DB_STORAGE_PATH = os.path.join(BASE_PATH, "dbs")
 POSTHOG_API_KEY = os.getenv("POSTHOG_API_KEY", "")
 
+RAW_FORUM_DB = "RawForumPost"
+FORUM_SUMMARY_DB = "ForumPost"
+
 os.makedirs(BASE_PATH, exist_ok=True)
