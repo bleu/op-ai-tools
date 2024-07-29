@@ -17,12 +17,13 @@ interface FilterSelectProps {
     label: string;
     options: { label: string; value: string }[];
   };
-  categoryColor?: string; // Add this prop to pass the color
+  value: string;
+  onChange: (value: string) => void;
 }
 
-export function FilterSelect({ data, categoryColor }: FilterSelectProps) {
+export function FilterSelect({ data, value, onChange }: FilterSelectProps) {
   return (
-    <Select>
+    <Select value={value} onValueChange={onChange}>
       <SelectTrigger className="w-full bg-muted focus:ring-0 focus:ring-offset-0">
         <SelectValue placeholder="All" />
       </SelectTrigger>
