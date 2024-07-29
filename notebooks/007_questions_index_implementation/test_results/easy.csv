@@ -1,0 +1,39 @@
+model,query,answer,time_taken,reasoning_level
+gpt-4o-mini,What are the steps involved in becoming an Optimism Ambassador?,"
+To become an Optimism Ambassador, you would typically need to participate in creating and promoting content about projects funded by Optimism. The ""Thank Optimism - powered by ThriveCoin"" initiative is designed to reward ambassadors for their contributions, focusing on automating the reward process for high-quality content. Engaging with the community and contributing valuable insights or content is essential for this role [1].
+
+References:
+[1] https://gov.optimism.io/t/final-thank-optimism-powered-by-thrivecoin/6104
+",5.313123941421509,1
+gpt-4o-mini,What is an Airdrop?,"['', ""I'm sorry, but I can only answer questions about Optimism Governance/Optimism Collective/Optimism L2. Is there anything specific about Optimism Governance/Optimism Collective/Optimism L2 you'd like to know?""]",1.0227761268615723,0
+gpt-4o-mini,What is required for a non-grant proposal to move to a vote in the Optimism governance process?,"
+For a non-grant proposal to move to a vote in the Optimism governance process, it must receive approval from four of the top 100 delegates. This requirement ensures that there is sufficient support among key community members before a proposal is put to a vote. In contrast, proposals initiated by the Foundation do not need this approval to proceed [1][2].
+
+References:
+[1] https://gov.optimism.io/t/special-voting-cycle-16a-roundup/6946
+[2] https://gov.optimism.io/t/special-voting-cycle-16b-roundup/7046
+",5.650305986404419,1
+gpt-4o-mini,What is required for a proposal to move to a vote in the Optimism governance process?,"
+For a proposal to move to a vote in the Optimism governance process, it must first be submitted through the appropriate channels, such as the grants landing page for grant proposals. After submission, the Council reviews the proposal to ensure it meets the necessary criteria. If approved, the proposal can then proceed to a voting stage where the community can vote on it. This process ensures that all proposals are carefully evaluated before being presented for a vote [1][2].
+
+References:
+[1] https://gov.optimism.io/t/please-allow-me-to-submit-grant-proposal-i-saw-it-is-sept-14th-at-the-latest/6798
+[2] https://gov.optimism.io/t/council-intent-budget-proposal-template/5885
+",7.237465858459473,1
+gpt-4o-mini,What is the purpose of the Code of Conduct Council?,"
+The purpose of the Code of Conduct Council (CoCC) is to uphold community standards within the Optimism ecosystem by enforcing the code of conduct, addressing reports of misconduct, and facilitating conflict resolution. The council plays a crucial role in ensuring a respectful and constructive environment for all community members. Recent discussions have acknowledged its importance while also expressing concerns about budget increases and the scope of its responsibilities [1][2][3][4][5].
+
+References:
+[1] https://gov.optimism.io/t/final-v2-code-of-conduct-council-operating-budget-re-scope-for-season-6-cycle-23b/8271
+[2] https://gov.optimism.io/t/season-6-nominations-code-of-conduct-council/8118
+[3] https://gov.optimism.io/t/code-of-conduct-council-communication-thread/7453
+[4] https://gov.optimism.io/t/code-of-conduct-council-nominations-season-5/6901
+[5] https://gov.optimism.io/t/final-code-of-conduct-council-cocc-operating-budget-for-season-6/8167
+",7.361799955368042,1
+gpt-4o-mini,When does Voting Cycle 22 begin and end?,"
+The specific dates for Voting Cycle #22 have not been provided in the available information. The most recent voting cycles are Special Voting Cycle #16a, which runs from October 12th to October 25th, 2023, and Voting Cycle #17, scheduled from January 4th to January 24th, 2024 [1][2]. Therefore, Voting Cycle #22 will likely occur after these dates, but exact timing is currently unknown.
+
+References:
+[1] https://gov.optimism.io/t/special-voting-cycle-16a-roundup/6946
+[2] https://gov.optimism.io/t/voting-cycle-roundup-17/7474
+",5.274720907211304,1
