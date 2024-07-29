@@ -1,5 +1,3 @@
-from psycopg2.extras import execute_values
-
 from op_forum_agg.src.queries import UPSERT_CATEGORIES
 from op_forum_agg.src.sync.base import DataIngestInterface
 from op_forum_agg.src.utils.db import store_data_in_db

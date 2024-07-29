@@ -1,15 +1,10 @@
 import re
-from dataclasses import dataclass, field
-
-from psycopg2.extras import execute_values
 
 from op_forum_agg.src.queries import (CREATE_FORUM_POSTS, LIST_CATEGORIES,
-                                      RETRIEVE_RAW_THREAD_BY_URL,
-                                      RETRIEVE_RAW_THREADS)
+                                      RETRIEVE_RAW_THREAD_BY_URL)
 from op_forum_agg.src.sync.base import Category, DataIngestInterface, Thread
 from op_forum_agg.src.utils.db import (filter_data_from_db,
-                                       retrieve_data_from_db, store_data_in_db)
-from op_forum_agg.src.utils.helpers import fetch_info
+                                       retrieve_data_from_db)
 
 
 def get_thread(thread_url: str):
@@ -33,7 +28,7 @@ def get_category_by_external_id(categories, category_id):
 
 class ThreadsImport(DataIngestInterface):
     def fetch(self):
-        file_path = "/Users/joaovictorassisdasilveira/Desktop/work/bleu/repositories/op-ai-tools/data/summaries/all_thread_summaries.txt"
+        file_path = "/Users/victor/Documents/GitHub/op-ai-tools/data/summaries/all_thread_summaries.txt"
         with open(file_path, "r", encoding="utf-8") as file:
             data = file.read()
 
