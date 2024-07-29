@@ -19,7 +19,6 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { SnapshotProposal } from "./table-row";
 import { Separator } from "@/components/ui/separator";
 import { FilterSelect } from "./filter-select";
-import { FilterDates } from "./filter-dates";
 import {
   FILTER_OPTIONS,
   ForumPost,
@@ -174,14 +173,15 @@ function ForumInfiniteScrollTable({ title }: { title: string }) {
                   <div className="w-full">
                     <SnapshotProposal
                       id={row.original.id}
-                      about={row.original.about}
-                      status={row.original.status}
+                      url={row.original.url}
+                      title={row.original.title}
+                      username={row.original.username}
+                      displayUsername={row.original.displayUsername}
                       category={row.original.category}
-                      author={row.original.author}
-                      tldr={row.original.tldr}
-                      readTime={row.original.readTime}
-                      created_at={row.original.created_at}
-                      lastActivity={row.original.lastActivity}
+                      about={row.original.about}
+                      createdAt={row.original.createdAt}
+                      updatedAt={row.original.updatedAt}
+                      status={row.original.status}
                     />
                     <Separator
                       orientation="horizontal"
@@ -205,7 +205,7 @@ function ForumInfiniteScrollTable({ title }: { title: string }) {
 
 const queryClient = new QueryClient();
 
-export function InfiniteTable({ title }: { title: string }) {
+export function InfiniteTable({ title }: { title: string; color: string }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ForumInfiniteScrollTable title={title} />

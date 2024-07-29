@@ -1,4 +1,5 @@
 import { InfiniteTable } from "@/components/forum/table";
+import prisma from "@/lib/prisma";
 
 export interface SearchParams {
   [key: string]: string | string[] | undefined;

@@ -2,25 +2,31 @@ export const FILTER_OPTIONS = {
   label: "Filter by category",
   options: [
     { label: "All", value: "all" },
-    { label: "General Discussions", value: "discussion" },
-    { label: "Informative", value: "informative" },
-    { label: "Feedback", value: "feedback" },
-    { label: "Updates and Announcements", value: "announcement" },
-    { label: "Unimportant", value: "unimportant" },
-    { label: "Guide", value: "guide" },
+    { label: "Delegates", value: 41 },
+    { label: "General Discussions", value: 1 },
+    { label: "Mission Grants", value: 69 },
+    { label: "Updates and Announcements", value: 48 },
+    { label: "Retro Funding", value: 46 },
+    { label: "Others", value: "others" },
   ],
 };
 
 export type ForumPost = {
   id?: number;
-  about: string;
-  status?: "Ongoing" | "Completed" | "Pending";
-  category: string;
-  author?: string;
-  tldr: string;
-  readTime?: string;
-  created_at: string;
-  lastActivity?: string;
+  external_id?: string;
+  url?: string;
+  title?: string;
+  username?: string;
+  displayUsername?: string;
+  category?: string;
+  about?: string;
+  firstPost?: string;
+  reaction?: string;
+  overview?: string;
+  tldr?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  status?: string;
 };
 
 export type ForumPostApiResponse = {

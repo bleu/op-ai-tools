@@ -33,14 +33,29 @@ export async function GET(req: NextRequest) {
   //   };
   // }
 
-  const data = await prisma.forumPost.findMany({
+  const forumPosts = await prisma.forumPost.findMany({
     skip: start ? Number(start) : 0,
     take: pageSize ? Number(pageSize) : 10,
     // where: conditions,
     //   orderBy: {
     //     createdAt: 'desc', // Order by created date
     //   },
+    // include: {
+    //   category: {
+    //     select: {
+    //       name: true
+    //     }
+    //   }
+    // }
   });
+
+  const categories = await prisma.forumPostCategory.findMany();
+
+  const data = forumPosts.map((post) => ({
+    ...post,
+    category:
+      categories.find((category) => category.id == post.category)?.name || null,
+  }));
 
   const totalRowCount = await prisma.forumPost.count({
     // where: conditions,
