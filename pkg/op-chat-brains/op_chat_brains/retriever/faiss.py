@@ -29,3 +29,4 @@ class DatabaseLoader:
                 merged_db.merge_from(db)
             return merged_db
         raise ValueError(f"Unsupported vectorstore: {vectorstore}")
+
