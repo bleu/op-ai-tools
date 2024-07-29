@@ -19,7 +19,11 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { SnapshotProposal } from "./table-row";
 import { Separator } from "@/components/ui/separator";
 import { FilterSelect } from "./filter-select";
-import { ForumPost, ForumPostApiResponse } from "./post-options";
+import {
+  FILTER_OPTIONS,
+  ForumPost,
+  ForumPostApiResponse,
+} from "./post-options";
 
 const FETCH_SIZE = 10;
 
@@ -33,22 +37,11 @@ async function getPosts({ pageParam }: { pageParam: number }) {
   return data;
 }
 
-function ForumInfiniteScrollTable({
-  title,
-  categories,
-}: {
-  title: string;
-  categories: Array<{ value: string; label: string }>;
-}) {
+function ForumInfiniteScrollTable({ title }: { title: string }) {
   const tableContainerRef = React.useRef<HTMLDivElement>(null);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-
-  const filterOptions = {
-    label: "Filter by category",
-    options: categories,
-  };
 
   const { data, fetchNextPage, isFetching, isLoading } =
     useInfiniteQuery<ForumPostApiResponse>({
@@ -152,7 +145,7 @@ function ForumInfiniteScrollTable({
       <div className="mx-4">
         <h1 className="text-2xl font-bold mb-6">{title}</h1>
         <div className="w-full flex gap-2 items-center flex-col md:flex-row">
-          <FilterSelect data={filterOptions} />
+          <FilterSelect data={FILTER_OPTIONS} />
           {/* <FilterDates /> */}
         </div>
       </div>
@@ -212,17 +205,10 @@ function ForumInfiniteScrollTable({
 
 const queryClient = new QueryClient();
 
-export function InfiniteTable({
-  title,
-  categories,
-}: {
-  title: string;
-  categories: Array<{ value: string; label: string }>;
-  color: string;
-}) {
+export function InfiniteTable({ title }: { title: string; color: string }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <ForumInfiniteScrollTable title={title} categories={categories} />
+      <ForumInfiniteScrollTable title={title} />
     </QueryClientProvider>
   );
 }

@@ -2,12 +2,12 @@ export const FILTER_OPTIONS = {
   label: "Filter by category",
   options: [
     { label: "All", value: "all" },
-    { label: "General Discussions", value: "discussion" },
-    { label: "Informative", value: "informative" },
-    { label: "Feedback", value: "feedback" },
-    { label: "Updates and Announcements", value: "announcement" },
-    { label: "Unimportant", value: "unimportant" },
-    { label: "Guide", value: "guide" },
+    { label: "Delegates", value: 41 },
+    { label: "General Discussions", value: 1 },
+    { label: "Mission Grants", value: 69 },
+    { label: "Updates and Announcements", value: 48 },
+    { label: "Retro Funding", value: 46 },
+    { label: "Others", value: "others" },
   ],
 };
 
