@@ -9,3 +9,7 @@ seed_topics:
 	@echo "Seeding topics..."
 	prepare
 	$(MAKE) -C pkg/op-forum-agg seed_topics
+
+seed_snapshot:
+	@echo "Seeding snapshot..."
+	$(MAKE) -C pkg/op-forum-agg seed_snapshot

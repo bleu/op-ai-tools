@@ -4,6 +4,7 @@ from op_forum_agg.config import config
 from op_forum_agg.services.categories import CategoriesService
 from op_forum_agg.services.raw_threads import RawThreadsService
 from op_forum_agg.services.threads import ThreadsService
+from op_forum_agg.services.snapshot import SnapshotService
 
 
 async def init_db():
@@ -32,6 +33,12 @@ async def sync_forum_posts():
     await close_db()
 
 
+async def sync_snapshot():
+    await init_db()
+    await SnapshotService.sync_proposals()
+    await close_db()
+
+
 def run_sync_categories():
     asyncio.run(sync_categories())
 
@@ -42,6 +49,10 @@ def run_sync_raw_threads():
 
 def run_sync_forum_posts():
     asyncio.run(sync_forum_posts())
+
+
+def run_sync_snapshot():
+    asyncio.run(sync_snapshot())
 
 
 if __name__ == "__main__":
@@ -55,9 +66,11 @@ if __name__ == "__main__":
             run_sync_raw_threads()
         elif command == "sync_forum_posts":
             run_sync_forum_posts()
+        elif command == "sync_snapshot":
+            run_sync_snapshot()
         else:
             print(f"Unknown command: {command}")
     else:
         print(
-            "Please specify a command: sync_categories, sync_raw_threads, or sync_forum_posts"
+            "Please specify a command: sync_categories, sync_raw_threads, sync_forum_posts, or sync_snapshot"
         )

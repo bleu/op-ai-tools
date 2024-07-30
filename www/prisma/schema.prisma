@@ -8,26 +8,28 @@ datasource db {
 }
 
 model ForumPost {
-  id              Int                @id @default(autoincrement())
-  externalId      String             @unique
-  url             String             @unique
-  title           String
-  username        String
-  displayUsername String
-  categoryId      Int?
-  category        ForumPostCategory? @relation(fields: [categoryId], references: [id])
-  rawForumPostId  Int?
-  rawForumPost    RawForumPost?      @relation(fields: [rawForumPostId], references: [id])
-  about           String?
-  firstPost       String?
-  reaction        String?
-  overview        String?
-  tldr            String?
-  classification  String?
-  lastActivity    DateTime?
-  readTime        String?
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
+  id                 Int                @id @default(autoincrement())
+  externalId         String             @unique
+  url                String             @unique
+  title              String
+  username           String
+  displayUsername    String
+  categoryId         Int?
+  category           ForumPostCategory? @relation(fields: [categoryId], references: [id])
+  rawForumPostId     Int?
+  rawForumPost       RawForumPost?      @relation(fields: [rawForumPostId], references: [id])
+  snapshotProposalId Int?               @unique
+  snapshotProposal   SnapshotProposal?  @relation(fields: [snapshotProposalId], references: [id])
+  about              String?
+  firstPost          String?
+  reaction           String?
+  overview           String?
+  tldr               String?
+  classification     String?
+  lastActivity       DateTime?
+  readTime           String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 }
 
 model ForumPostCategory {
@@ -49,4 +51,29 @@ model RawForumPost {
   type       String
   rawData    Json
   forumPosts ForumPost[] @relation
+}
+
+model SnapshotProposal {
+  id            Int       @id @default(autoincrement())
+  externalId    String    @unique
+  spaceId       String
+  spaceName     String
+  title         String
+  author        String
+  choices       Json
+  state         String
+  votes         Int
+  end           DateTime
+  start         DateTime
+  type          String
+  body          String
+  discussion    String?
+  quorum        Float?
+  quorumType    String?
+  snapshot      String
+  scores        Json
+  winningOption String?
+  forumPost     ForumPost?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
