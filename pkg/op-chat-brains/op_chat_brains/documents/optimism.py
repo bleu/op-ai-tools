@@ -280,15 +280,9 @@ class SummaryProcessingStrategy(DocumentProcessingStrategy):
                 "classification": ""
             }
             ret.append(item)
-        
-        return ret 
-    
-    @staticmethod
-    def langchain_process(divide: str|None = None) -> Dict[str, List[Document]]:
-        data = SummaryProcessingStrategy.retrieve()
         threads = ForumPostsProcessingStrategy.return_threads()
 
-        for entry in data:
+        for entry in ret:
             url = entry["url"]
             thread = next((t for t in threads if t[1]["url"] == url), None)
             entry['metadata'] = thread[1]
@@ -296,8 +290,14 @@ class SummaryProcessingStrategy(DocumentProcessingStrategy):
             entry['metadata']['classification'] = entry['classification']
             entry['metadata']['type_db_info'] = 'forum_thread_summary'
 
-        data = [x for x in data if x is not None]
-        data = [x for x in data if 'metadata' in x.keys()]
+        ret = [x for x in ret if x is not None]
+        ret = [x for x in ret if 'metadata' in x.keys()]
+        
+        return ret 
+    
+    @staticmethod
+    def langchain_process(divide: str|None = None) -> Dict[str, List[Document]]:
+        data = SummaryProcessingStrategy.retrieve()
 
         if isinstance(divide, str):
             classes = set([entry['metadata'][divide] for entry in data])
@@ -338,7 +338,3 @@ class OptimismDocumentProcessorFactory(DocumentProcessorFactory):
             "fragments": "001-initial-dataset-governance-docs/file.txt",
             "forum_posts": "002-governance-forum-202406014/dataset/_out.jsonl",
         }
-
-
-if __name__ == "__main__":
-    print(SummaryProcessingStrategy.langchain_process(divide="category_name").keys())

@@ -6,30 +6,38 @@ import pandas as pd
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
-from op_chat_brains.retriever import faiss
+from op_chat_brains.retriever import connect_faiss
+from op_chat_brains.config import (
+    QUESTIONS_INDEX,
+    DOCS_PATH,
+    SCOPE
+)
+from op_chat_brains.documents import optimism
+
+TODAY = time.strftime("%Y-%m-%d")
 
 class Prompt:
-    responder = """
+    responder = f"""
 You are a helpful assistant that provides information about {SCOPE}. Your goal is to give polite, informative, assertive, objective, and brief answers. Avoid jargon and explain any technical terms, as the user may not be a specialist.
 
 An user inserted the following query:
 <query>
-{QUERY}
+{{QUERY}}
 <query>
 
-You have the following context information, retrieved from the {SOURCE}:
+You have the following context information:
 <context>
-{CONTEXT}
+{{CONTEXT}}
 </context>
 
 The user seems to know the following:
 <user_knowledge>
-{USER_KNOWLEDGE}
+{{USER_KNOWLEDGE}}
 </user_knowledge>
 
 From past interactions, you have the following knowledge:
 <your_previous_knowledge>
-{SUMMARY_OF_EXPLORED_CONTEXTS}
+{{SUMMARY_OF_EXPLORED_CONTEXTS}}
 </your_previous_knowledge>
 
 Today's date is {TODAY}. Be aware of information that might be outdated.
@@ -38,7 +46,7 @@ Follow these steps:
 
 1. Analyze the user's question, the provided context and your previous knowledge. Keep in mind the user's knowledge.
 
-2. Summarize the information you have, from the context and your previous knowledge, that is relevant to the user's query. Include this summary inside <knowledge_summary></knowledge_summary> tags. Cite the source URL using the format [1] within the text and list the url references at the end.
+2. Summarize the information you have, from the context and your previous knowledge, that is relevant to the user's query. Include this summary inside <knowledge_summary></knowledge_summary> tags. Cite the source URL using the format [1] within the text and list the url references at the end. Every claim should be supported by a reference.
 
 3. Check if you have enough information to answer the user's query. 
 
@@ -46,6 +54,7 @@ Follow these steps:
    - Directly address the user's question without saying "according to the context", "based on the provided context" or similar phrases.
    - Cite the source URL using the format [1] within the text.
    - List the url references at the end of the answer.
+   - Write the complete URL of the source, not just the domain.
    - Be polite, informative, assertive, objective, and brief.
    - Avoid jargon and explain any technical terms.
 
@@ -87,27 +96,27 @@ When formulating questions, adhere to these guidelines:
 Remember to be helpful, polite, and informative while maintaining assertiveness, objectivity, and brevity in your response.
 """
 
-    final_responder = """
+    final_responder = f"""
 You are a helpful assistant that provides information about {SCOPE}. Your goal is to give polite, informative, assertive, objective, and brief answers. Avoid jargon and explain any technical terms, as the user may not be a specialist.
 
 An user inserted the following query:
 <query>
-{QUERY}
+{{QUERY}}
 <query>
 
-You have the following context information, retrieved from the {SOURCE}:
+You have the following context information:
 <context>
-{CONTEXT}
+{{CONTEXT}}
 </context>
 
 The user seems to know the following:
 <user_knowledge>
-{USER_KNOWLEDGE}
+{{USER_KNOWLEDGE}}
 </user_knowledge>
 
 From past interactions, you have the following knowledge:
 <your_previous_knowledge>
-{SUMMARY_OF_EXPLORED_CONTEXTS}
+{{SUMMARY_OF_EXPLORED_CONTEXTS}}
 </your_previous_knowledge>
 
 Today's date is {TODAY}. Be aware of information that might be outdated.
@@ -116,7 +125,7 @@ Follow these steps:
 
 1. Analyze the user's question, the provided context and your previous knowledge. Keep in mind the user's knowledge.
 
-2. Summarize the information you have, from the context and your previous knowledge, that is relevant to the user's query. Include this summary inside <knowledge_summary></knowledge_summary> tags. Cite the source URL using the format [1] within the text and list the url references at the end.
+2. Summarize the information you have, from the context and your previous knowledge, that is relevant to the user's query. Include this summary inside <knowledge_summary></knowledge_summary> tags. Cite the source URL using the format [1] within the text and list the url references at the end. Every claim should be supported by a reference.
 
 3. Check if you have enough information to answer the user's query. 
 
@@ -124,6 +133,7 @@ Follow these steps:
    - Directly address the user's question without saying "according to the context", "based on the provided context" or similar phrases.
    - Cite the source URL using the format [1] within the text.
    - List the url references at the end of the answer.
+   - Write the complete URL of the source, not just the domain.
    - Be polite, informative, assertive, objective, and brief.
    - Avoid jargon and explain any technical terms.
 
@@ -153,15 +163,15 @@ Follow these steps:
 Remember to be helpful, polite, and informative while maintaining assertiveness, objectivity, and brevity in your response.
 """
     
-    preprocessor = """
+    preprocessor = f"""
 You are a part of a helpful chatbot assistant system that provides information about {SCOPE}. Your task is to help responding to user queries appropriately based on the given information and guidelines. You will return <answer> tags with the response to the user or <user_knowledge> and <questions> tags so the system can retrieve more information to properly answer the query.
 
 <user_query>
-{query}
+{{QUERY}}
 </user_query>
 
 <conversation_history>
-{conversation_history}
+{{conversation_history}}
 </conversation_history>
 
 First, determine if this query is within the scope of {SCOPE} and if you have enough information to answer it based on the conversation history.
@@ -251,14 +261,14 @@ class RetrieverBuilder:
         embeddings_name: str,
         **retriever_pars,
     ):
-        db = faiss.DatabaseLoader.load_db(dbs_name, embeddings_name)
+        db = connect_faiss.DatabaseLoader.load_db(dbs_name, embeddings_name)
         return lambda query : db.similarity_search(query, **retriever_pars)
 
-    def build_index(index, embeddings_name, k_max = 10, treshold = 0.9):
+    def build_index(embeddings_name, k_max = 10, treshold = 0.92):
         embeddings = OpenAIEmbeddings(model=embeddings_name)
 
         # load json index
-        with open(index, "r") as f:
+        with open(QUESTIONS_INDEX, "r") as f:
             index = json.load(f)
         
         index_questions = list(index.keys())
@@ -266,18 +276,16 @@ class RetrieverBuilder:
         index_faiss = faiss.IndexFlatIP(index_questions_embed.shape[1])
         index_faiss.add(index_questions_embed)
 
-        data = load_data()
-        context_df = []
-        for key, value in data.items():
-            k = key.strip().replace(" ", "_").replace('"', "").lower()
-            pattern = r'[^A-Za-z0-9_]+'
-            k = re.sub(pattern, '', k)
-
-            for context in value:
-                url = context.metadata['url']
-                content = context
-                context_df.append((url, content))
-        context_df = pd.DataFrame(context_df, columns=["url", "content"])
+        summaries = optimism.SummaryProcessingStrategy.langchain_process(divide="category_name")
+        pattern = r'[^A-Za-z0-9_]+'
+        summaries = [(s.metadata['url'], s, re.sub(pattern, '', k)) for k, v in summaries.items() for s in v]
+        
+        fragments_loader = optimism.FragmentsProcessingStrategy()
+        fragments = fragments_loader.process_document(DOCS_PATH, headers_to_split_on=[])
+        
+        data = [(f.metadata['url'], f, "fragments_docs") for f in fragments]
+        data.extend(summaries)
+        context_df = pd.DataFrame(data, columns=["url", "content", "type_db_info"])
 
         def find_similar_questions(query):
             query_embed = np.array(embeddings.embed_documents([query]))
@@ -291,12 +299,16 @@ class RetrieverBuilder:
 
             return similar_questions
 
-        def find_contexts(query):
+        def find_contexts(query, db_type_info = None):
             similar_questions = find_similar_questions(query)
             urls = [index[q] for q in similar_questions]
             urls = [x[0] for xs in urls for x in xs]
 
-            contexts = context_df[context_df["url"].isin(urls)]
+            contexts = context_df
+            if db_type_info is not None:
+                contexts = contexts[contexts["type_db_info"] == db_type_info]
+
+            contexts = contexts[contexts["url"].isin(urls)]
             content = contexts["content"].tolist()
             return content
 

@@ -24,7 +24,7 @@ def get_llm(model:str = "gpt-4o-mini"):
 
 
 def load_data(SUMMARY_PATH: str, FORUM_PATH: str, DOCS_PATH: str) -> Tuple:
-    summary = SummaryProcessingStrategy.process_document(SUMMARY_PATH, FORUM_PATH, divide="board_name")
+    summary = SummaryProcessingStrategy.langchain_process(divide='category_name')
     summary = {f'summary of a forum thread from "{key}" board at the optimism governance forum': value for key, value in summary.items()}
     fragments_loader = FragmentsProcessingStrategy()
     fragments = fragments_loader.process_document(DOCS_PATH, headers_to_split_on=[])

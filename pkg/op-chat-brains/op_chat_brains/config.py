@@ -23,10 +23,14 @@ API_RATE_LIMIT = int(os.getenv("API_RATE_LIMIT", "100"))
 API_SECRET_KEY = os.getenv("API_SECRET_KEY", "your-secret-key-here")
 SUMMARIZER_MODEL = os.getenv("SUMMARIZER_MODEL", CHAT_MODEL_OPENAI)
 
-DB_STORAGE_PATH = os.path.join(BASE_PATH, "dbs")
+DB_STORAGE_PATH = "dbs"#os.path.join(BASE_PATH, "dbs")
 POSTHOG_API_KEY = os.getenv("POSTHOG_API_KEY", "")
 
 RAW_FORUM_DB = "RawForumPost"
 FORUM_SUMMARY_DB = "ForumPost"
+
+QUESTIONS_INDEX = "questions_index.json"
+
+SCOPE = "OPTIMISM GOVERNANCE/OPTIMISM COLLECTIVE/OPTIMISM L2"
 
 os.makedirs(BASE_PATH, exist_ok=True)
