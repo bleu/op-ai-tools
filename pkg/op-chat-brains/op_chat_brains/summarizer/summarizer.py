@@ -11,6 +11,7 @@ from op_chat_brains.summarizer.utils import Prompt
 
 threads = ForumPostsProcessingStrategy.return_threads(FORUM_PATH)
 
+
 def get_thread_from_url(url: str) -> Document:
     thread = next((t for t in threads if t.metadata["url"] == url), None)
     if not thread:
@@ -34,4 +35,6 @@ def summarize_thread(url: str, model_name: str) -> str:
 
     if thread.metadata["url"] in "\t".join(snapshot_proposals.keys()):
         return Prompt.proposal(llm, thread, snapshot_proposals)
-    return llm.invoke(Prompt.default_summarizer.format(THREAD_CONTENT=thread.page_content)).content
+    return llm.invoke(
+        Prompt.default_summarizer.format(THREAD_CONTENT=thread.page_content)
+    ).content

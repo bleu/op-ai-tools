@@ -2,12 +2,18 @@ import re
 from dataclasses import dataclass, field
 import os
 
-from op_forum_agg.src.queries import (CREATE_FORUM_POSTS, LIST_CATEGORIES,
-                                      RETRIEVE_RAW_THREAD_BY_URL,
-                                      RETRIEVE_RAW_THREADS)
+from op_forum_agg.src.queries import (
+    CREATE_FORUM_POSTS,
+    LIST_CATEGORIES,
+    RETRIEVE_RAW_THREAD_BY_URL,
+    RETRIEVE_RAW_THREADS,
+)
 from op_forum_agg.src.sync.base import Category, DataIngestInterface, Thread
-from op_forum_agg.src.utils.db import (filter_data_from_db,
-                                       retrieve_data_from_db, store_data_in_db)
+from op_forum_agg.src.utils.db import (
+    filter_data_from_db,
+    retrieve_data_from_db,
+    store_data_in_db,
+)
 from op_forum_agg.src.utils.helpers import fetch_info
 
 
@@ -50,7 +56,11 @@ def concatenate_strings(*args):
 class ThreadsImport(DataIngestInterface):
     def fetch(self):
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        relative_summaries_path = os.path.normpath(os.path.join(current_dir, '../../../../../data/summaries/all_thread_summaries.txt'))
+        relative_summaries_path = os.path.normpath(
+            os.path.join(
+                current_dir, "../../../../../data/summaries/all_thread_summaries.txt"
+            )
+        )
         with open(relative_summaries_path, "r", encoding="utf-8") as file:
             data = file.read()
 

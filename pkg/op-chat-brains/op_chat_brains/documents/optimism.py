@@ -60,7 +60,7 @@ class FragmentsProcessingStrategy(DocumentProcessingStrategy):
 
 class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
     @staticmethod
-    def process_document(file_path: str, return_types:str = "posts") -> Any:
+    def process_document(file_path: str, return_types: str = "posts") -> Any:
         with open(file_path, "r") as file:
             boards, threads, posts = {}, {}, {}
             for line in file:
@@ -110,7 +110,7 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
                 post["thread_id"] = id_thread
             except:
                 post["thread_title"] = None
-        
+
         if return_types == "posts":
             return posts
         elif return_types == "posts_threads":
@@ -220,20 +220,25 @@ trust_level (0-4): {TRUST_LEVEL}
 {CONTENT}
 <\content_user_input>
     """
+
     @staticmethod
     def return_threads(file_path: str) -> List[Document]:
-        posts, threads_info = ForumPostsProcessingStrategy.process_document(file_path, return_types="posts_threads")
+        posts, threads_info = ForumPostsProcessingStrategy.process_document(
+            file_path, return_types="posts_threads"
+        )
         df_posts = pd.DataFrame(posts).T
-        threads =[]
-        for t in df_posts['thread_id'].unique():
-            posts_thread = df_posts[df_posts['thread_id'] == t].sort_values(by='created_at')
+        threads = []
+        for t in df_posts["thread_id"].unique():
+            posts_thread = df_posts[df_posts["thread_id"] == t].sort_values(
+                by="created_at"
+            )
             try:
-                url = posts_thread['url'].iloc[0]
+                url = posts_thread["url"].iloc[0]
                 url = url.split("/")[:-1]
                 url = "/".join(url)
-                board = posts_thread['board_name'].iloc[0]
+                board = posts_thread["board_name"].iloc[0]
                 t_i = threads_info[int(t)]
-                
+
                 str_thread = ForumPostsProcessingStrategy.template_thread.format(
                     BOARD_NAME=board,
                     THREAD_TITLE=t_i["title"],
@@ -247,15 +252,19 @@ trust_level (0-4): {TRUST_LEVEL}
                 )
                 for i, post in posts_thread.iterrows():
                     str_thread += ForumPostsProcessingStrategy.template_post.format(
-                        POST_NUMBER=post['post_number'],
-                        USERNAME=post['username'],
-                        CREATED_AT=post['created_at'],
-                        TRUST_LEVEL=post['trust_level'],
-                        IS_REPLY=f"(reply to post #{post['reply_to_post_number']})\n" if post['reply_to_post_number'] != None else "",
-                        CONTENT=post['content'].replace("<\content_user_input>", "").replace("<content_user_input>", ""),
-                        MODERATOR=post['moderator'],
-                        ADMIN=post['admin'],
-                        STAFF=post['staff'],
+                        POST_NUMBER=post["post_number"],
+                        USERNAME=post["username"],
+                        CREATED_AT=post["created_at"],
+                        TRUST_LEVEL=post["trust_level"],
+                        IS_REPLY=f"(reply to post #{post['reply_to_post_number']})\n"
+                        if post["reply_to_post_number"] != None
+                        else "",
+                        CONTENT=post["content"]
+                        .replace("<\content_user_input>", "")
+                        .replace("<content_user_input>", ""),
+                        MODERATOR=post["moderator"],
+                        ADMIN=post["admin"],
+                        STAFF=post["staff"],
                     )
 
                 metadata = {
@@ -271,19 +280,14 @@ trust_level (0-4): {TRUST_LEVEL}
                     "board_name": board,
                     "url": url,
                     "num_posts": len(posts_thread),
-                    "users": list(posts_thread['username'].unique()),
-                    'length_str_thread': len(str_thread),
+                    "users": list(posts_thread["username"].unique()),
+                    "length_str_thread": len(str_thread),
                 }
                 threads.append([str_thread, metadata])
             except:
                 None
 
-        threads_forum = [
-            Document(
-                page_content = t[0],
-                metadata = t[1]
-            ) for t in threads
-        ]
+        threads_forum = [Document(page_content=t[0], metadata=t[1]) for t in threads]
 
         return threads_forum
 

@@ -14,11 +14,14 @@ from op_chat_brains.structured_logger import StructuredLogger
 logger = StructuredLogger()
 threads = ForumPostsProcessingStrategy.return_threads(FORUM_PATH)
 
-def get_some_thread_urls(proportion : float) -> List[str]:
-    all_threads = [thread.metadata["url"] for thread in threads if thread.metadata["url"]]
+
+def get_some_thread_urls(proportion: float) -> List[str]:
+    all_threads = [
+        thread.metadata["url"] for thread in threads if thread.metadata["url"]
+    ]
 
     random.shuffle(all_threads)
-    return all_threads[:int(len(all_threads) * proportion)]
+    return all_threads[: int(len(all_threads) * proportion)]
 
 
 def summarize_single_thread(url: str, model_name: str) -> Dict[str, str]:
@@ -31,7 +34,9 @@ def summarize_single_thread(url: str, model_name: str) -> Dict[str, str]:
         return {url: f"Error: {str(e)}"}
 
 
-def summarize_some_threads(proportion: float, model_name: str = SUMMARIZER_MODEL) -> Dict[str, str]:
+def summarize_some_threads(
+    proportion: float, model_name: str = SUMMARIZER_MODEL
+) -> Dict[str, str]:
     thread_urls = get_some_thread_urls(proportion)
     summaries = {}
 
@@ -61,7 +66,9 @@ def summarize_some_threads(proportion: float, model_name: str = SUMMARIZER_MODEL
 
     return summaries
 
+
 summarize_all_threads = lambda model_name: summarize_some_threads(1.0, model_name)
+
 
 def save_summaries(summaries: Dict[str, str], output_file: str):
     with open(output_file, "w", encoding="utf-8") as f:
