@@ -1,5 +1,6 @@
 import re
 from dataclasses import dataclass, field
+import os
 
 from op_forum_agg.src.queries import (CREATE_FORUM_POSTS, LIST_CATEGORIES,
                                       RETRIEVE_RAW_THREAD_BY_URL,
@@ -48,8 +49,9 @@ def concatenate_strings(*args):
 
 class ThreadsImport(DataIngestInterface):
     def fetch(self):
-        file_path = "/Users/joaovictorassisdasilveira/Desktop/work/bleu/repositories/op-ai-tools/data/summaries/all_thread_summaries.txt"
-        with open(file_path, "r", encoding="utf-8") as file:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        relative_summaries_path = os.path.normpath(os.path.join(current_dir, '../../../../../data/summaries/all_thread_summaries.txt'))
+        with open(relative_summaries_path, "r", encoding="utf-8") as file:
             data = file.read()
 
         posts = [

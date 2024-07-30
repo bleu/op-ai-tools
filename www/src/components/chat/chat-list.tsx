@@ -1,7 +1,7 @@
 import type { Message } from "@/app/data";
 import type { ChatData } from "@/lib/chat-utils";
 import { cn } from "@/lib/utils";
-import { Clipboard, RotateCcw, ThumbsDown } from "lucide-react";
+import { Clipboard, ThumbsDown } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
 import React, { useEffect, useRef, useState } from "react";
 import { Avatar, AvatarImage, BoringAvatar } from "../ui/avatar";
