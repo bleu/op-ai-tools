@@ -11,3 +11,10 @@ seed_topics:
 	@poetry install
 	@poetry run sync_raw_posts
 	@poetry run sync_topics
+
+seed_snapshot:
+	@poetry install
+	@poetry run sync_snapshot
+
+seed_all:
+	seed_categories seed_topics seed_snapshot

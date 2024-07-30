@@ -103,5 +103,42 @@ class ForumPost(Model):
     createdAt = NaiveDatetimeField(auto_now_add=True)
     updatedAt = NaiveDatetimeField(auto_now=True)
 
+    snapshotProposal = fields.OneToOneField(
+        "models.SnapshotProposal",
+        related_name="forumPost",
+        null=True,
+        source_field="snapshotProposalId",
+        to_field="id",
+    )
+
     class Meta:
         table = "ForumPost"
+
+
+class SnapshotProposal(Model):
+    id = fields.IntField(pk=True)
+    externalId = fields.CharField(max_length=255, unique=True)
+    spaceId = fields.CharField(max_length=255)
+    spaceName = fields.CharField(max_length=255)
+    title = fields.CharField(max_length=255)
+    author = fields.CharField(max_length=255)
+    choices = fields.JSONField()
+    state = fields.CharField(max_length=255)
+    votes = fields.IntField()
+    end = NaiveDatetimeField()
+    start = NaiveDatetimeField()
+    type = fields.CharField(max_length=255)
+    body = fields.TextField()
+    discussion = fields.CharField(max_length=255, null=True)
+    quorum = fields.FloatField(null=True)
+    quorumType = fields.CharField(max_length=255, null=True)
+    snapshot = fields.CharField(max_length=255)
+    scores = fields.JSONField()
+    winningOption = fields.CharField(max_length=255, null=True)
+    createdAt = NaiveDatetimeField(auto_now_add=True)
+    updatedAt = NaiveDatetimeField(auto_now=True)
+
+    forumPost: fields.ReverseRelation["ForumPost"]
+
+    class Meta:
+        table = "SnapshotProposal"
