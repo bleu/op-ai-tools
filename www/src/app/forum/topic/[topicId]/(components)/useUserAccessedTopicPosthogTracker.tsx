@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect } from "react";
+import type { TopicPageProps } from "@/app/forum/topic/[topicId]/page";
 import { usePostHog } from "posthog-js/react";
-import { TopicPageProps } from "@/app/forum/topic/[topicId]/page";
+import React, { useEffect } from "react";
 
 export function useUserAccessedTopicPosthogTracker(
-  topic?: TopicPageProps["topic"]
+  topic?: TopicPageProps["topic"],
 ) {
   const posthog = usePostHog();
 

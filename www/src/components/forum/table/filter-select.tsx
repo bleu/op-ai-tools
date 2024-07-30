@@ -1,4 +1,3 @@
-import * as React from "react";
 import {
   Select,
   SelectContent,
@@ -9,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import * as React from "react";
 import { Octagram } from "../Octagram";
 import { CATEGORY_COLORS } from "../categoryColors";
 
@@ -39,7 +39,7 @@ export function FilterSelect({ data, value, onChange }: FilterSelectProps) {
                   className={cn(
                     "size-4 fill-current",
                     //@ts-ignore
-                    CATEGORY_COLORS[item.label]
+                    CATEGORY_COLORS[item.label],
                   )}
                   // @ts-ignore
                   style={{ color: `#${item.color}` }} // Pass the color to the style

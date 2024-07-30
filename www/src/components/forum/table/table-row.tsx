@@ -1,15 +1,15 @@
 import { Octagram } from "@/components/forum/Octagram";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { cn, formatDate } from "@/lib/utils";
 import Link from "next/link";
-import React from "react";
-import { FILTER_OPTIONS, ForumPost } from "./post-options";
-import { Badge } from "@/components/ui/badge";
+import type React from "react";
 import { CATEGORY_COLORS } from "../categoryColors";
-import { Separator } from "@/components/ui/separator";
+import { FILTER_OPTIONS, type ForumPost } from "./post-options";
 
 export function getColor(categoryValue: string) {
   const categoryLabel = FILTER_OPTIONS.options.find(
-    (option) => option.value === categoryValue
+    (option) => option.value === categoryValue,
   )?.label;
 
   if (!categoryLabel) {
@@ -67,7 +67,7 @@ export const SnapshotProposal = ({
               className={cn(
                 /* @ts-ignore-next-line */
                 { [getColor(category?.externalId)]: true },
-                "size-4 fill-current"
+                "size-4 fill-current",
               )}
             />
             <span className="text-muted-foreground">{category?.name}</span>

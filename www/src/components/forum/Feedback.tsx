@@ -1,7 +1,4 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { ThumbsDownIcon, ThumbsUpIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -9,11 +6,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import { usePostHog } from "posthog-js/react";
 import { useToast } from "@/components/ui/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { ThumbsDownIcon, ThumbsUpIcon } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 
 type FeedbackReason = "incomplete" | "unrelated" | "outdated" | "incorrect";
 
@@ -58,7 +58,7 @@ export function Feedback({
     setSelectedReasons((prev) =>
       prev.includes(reason)
         ? prev.filter((r) => r !== reason)
-        : [...prev, reason]
+        : [...prev, reason],
     );
     setValidationError(null);
   };
@@ -66,7 +66,7 @@ export function Feedback({
   const onSubmit = (data: FeedbackFormData) => {
     if (selectedReasons.length === 0 && !data.details.trim()) {
       setValidationError(
-        "Please select at least one reason or provide details."
+        "Please select at least one reason or provide details.",
       );
       return;
     }
@@ -134,7 +134,7 @@ export function Feedback({
                   className={cn(
                     "justify-start hover:bg-[#FFDBDF]",
                     selectedReasons.includes(reason.value as FeedbackReason) &&
-                      "bg-optimism hover:text-optimism"
+                      "bg-optimism hover:text-optimism",
                   )}
                 >
                   {reason.label}

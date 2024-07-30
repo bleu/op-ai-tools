@@ -1,13 +1,13 @@
 "use client";
 
-import Link from "next/link";
-import { PropsWithChildren } from "react";
+import { Feedback } from "@/components/forum/Feedback";
 import { Octagram } from "@/components/forum/Octagram";
+import { getColor } from "@/components/forum/table/table-row";
 import { Separator } from "@/components/ui/separator";
 import { cn, formatDate } from "@/lib/utils";
-import { Feedback } from "@/components/forum/Feedback";
-import { getColor } from "@/components/forum/table/table-row";
-import { TopicPageProps } from "../page";
+import Link from "next/link";
+import type { PropsWithChildren } from "react";
+import type { TopicPageProps } from "../page";
 import { useUserAccessedTopicPosthogTracker } from "./useUserAccessedTopicPosthogTracker";
 
 const Section = ({ title, children }: PropsWithChildren<{ title: string }>) => (
@@ -53,7 +53,7 @@ export function TopicPage({ topic }: TopicPageProps) {
             label={topic?.category?.name || ""}
             className={cn(
               { [getColor(topic?.category?.externalId || "all")]: true },
-              "size-4 fill-current"
+              "size-4 fill-current",
             )}
           />
           <span className="text-muted-foreground">{topic?.category?.name}</span>

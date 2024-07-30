@@ -1,12 +1,18 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
-import { BarChart2, Clock, Menu, ExternalLink, LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import {
+  BarChart2,
+  Clock,
+  ExternalLink,
+  type LucideIcon,
+  Menu,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import React from "react";
 import { Octagram } from "./Octagram";
 import { CATEGORY_COLORS } from "./categoryColors";
 import { categoryBySlug } from "./table/post-options";
@@ -116,13 +122,13 @@ function NavLink({
         !isCategory && className,
         isSelected
           ? "bg-[#FFDBDF] text-optimism font-semibold"
-          : "hover:bg-gray-100"
+          : "hover:bg-gray-100",
       )}
     >
       <Icon
         className={cn(
           isMobile ? "h-5 w-5" : "h-4 w-4",
-          isCategory && className
+          isCategory && className,
         )}
         label={label}
       />
@@ -142,7 +148,7 @@ function NavContent({ isMobile }: NavContentProps) {
             <h2
               className={cn(
                 "mb-2 px-3 font-semibold",
-                isMobile ? "text-xl" : "text-lg"
+                isMobile ? "text-xl" : "text-lg",
               )}
             >
               {section.title}
@@ -166,7 +172,7 @@ function NavContent({ isMobile }: NavContentProps) {
         <h2
           className={cn(
             "mb-2 px-3 font-semibold",
-            isMobile ? "text-xl" : "text-lg"
+            isMobile ? "text-xl" : "text-lg",
           )}
         >
           Have any questions?
@@ -174,7 +180,7 @@ function NavContent({ isMobile }: NavContentProps) {
         <Link
           href="/"
           className={cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-gray-100 text-gray-700 text-sm"
+            "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-gray-100 text-gray-700 text-sm",
           )}
         >
           Ask GovGPT{" "}
