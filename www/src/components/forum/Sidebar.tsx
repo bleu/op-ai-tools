@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Octagram } from "./Octagram";
 import { CATEGORY_COLORS } from "./categoryColors";
+import { categoryBySlug } from "./table/post-options";
 
 interface NavSection {
   title: string;
@@ -31,7 +32,6 @@ interface NavLinkProps extends NavItem {
 interface NavContentProps {
   isMobile: boolean;
 }
-
 const navSections: NavSection[] = [
   {
     title: "Feeds",
@@ -54,43 +54,43 @@ const navSections: NavSection[] = [
     title: "Categories",
     items: [
       {
-        href: "#",
+        href: `?category=${categoryBySlug("all")}`,
         icon: Octagram,
         label: "All",
         className: CATEGORY_COLORS["All"],
       },
       {
-        href: "#",
+        href: `?category=${categoryBySlug("delegates")}`,
         icon: Octagram,
         label: "Delegates",
         className: CATEGORY_COLORS["Delegates"],
       },
       {
-        href: "#",
+        href: `?category=${categoryBySlug("general")}`,
         icon: Octagram,
         label: "General Discussions",
         className: CATEGORY_COLORS["General Discussions"],
       },
       {
-        href: "#",
+        href: `?category=${categoryBySlug("grants")}`,
         icon: Octagram,
         label: "Mission Grants",
         className: CATEGORY_COLORS["Mission Grants"],
       },
       {
-        href: "#",
+        href: `?category=${categoryBySlug("updates")}`,
         icon: Octagram,
         label: "Updates and Announcements",
         className: CATEGORY_COLORS["Updates and Announcements"],
       },
       {
-        href: "#",
+        href: `?category=${categoryBySlug("retro-funding")}`,
         icon: Octagram,
         label: "Retro Funding",
         className: CATEGORY_COLORS["Retro Funding"],
       },
       {
-        href: "#",
+        href: `?category=${categoryBySlug("others")}`,
         icon: Octagram,
         label: "Others",
         className: CATEGORY_COLORS["Others"],

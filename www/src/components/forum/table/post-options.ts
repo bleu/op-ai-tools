@@ -1,32 +1,43 @@
 export const FILTER_OPTIONS = {
   label: "Filter by category",
   options: [
-    { label: "All", value: "all" },
-    { label: "Delegates", value: 41 },
-    { label: "General Discussions", value: 1 },
-    { label: "Mission Grants", value: 69 },
-    { label: "Updates and Announcements", value: 48 },
-    { label: "Retro Funding", value: 46 },
-    { label: "Others", value: "others" },
+    { label: "All", value: "all", slug: "all" },
+    { label: "Delegates", value: "41", slug: "delegates" },
+    { label: "General Discussions", value: "1", slug: "general" },
+    { label: "Mission Grants", value: "69", slug: "grants" },
+    { label: "Updates and Announcements", value: "48", slug: "updates" },
+    { label: "Retro Funding", value: "46", slug: "retro-funding" },
+    { label: "Others", value: "others", slug: "others" },
   ],
+};
+
+export const categoryBySlug = (slug: string) => {
+  return FILTER_OPTIONS.options.find((option) => option.slug === slug)?.value;
 };
 
 export type ForumPost = {
   id?: number;
-  external_id?: string;
+  externalId?: string;
   url?: string;
   title?: string;
   username?: string;
   displayUsername?: string;
-  category?: string;
+  categoryId?: number;
+  rawForumPostId?: number;
   about?: string;
-  firstPost?: string;
   reaction?: string;
   overview?: string;
   tldr?: string;
   createdAt?: string;
   updatedAt?: string;
+  category?: {
+    id: number;
+    name: string;
+    externalId: string;
+  };
   status?: string;
+  readTime?: string;
+  lastActivity?: string;
 };
 
 export type ForumPostApiResponse = {
