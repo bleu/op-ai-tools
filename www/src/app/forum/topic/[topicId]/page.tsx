@@ -2,7 +2,7 @@
 import prisma from "@/lib/prisma";
 import { TopicPage } from "./(components)/topic-page";
 import { Prisma } from "@prisma/client";
-import { TopicTracker } from "@/components/forum/topic-tracker";
+import { useUserAccessedTopicPosthogTracker } from "./(components)/useUserAccessedTopicPosthogTracker";
 
 export type TopicPageProps = {
   topic: Prisma.ForumPostGetPayload<{
@@ -30,9 +30,5 @@ export default async function Page({ params }: { params: any }) {
     },
   })) as TopicPageProps["topic"];
 
-  return (
-    <TopicTracker topic={topic}>
-      <TopicPage topic={topic} />
-    </TopicTracker>
-  );
+  return <TopicPage topic={topic} />;
 }

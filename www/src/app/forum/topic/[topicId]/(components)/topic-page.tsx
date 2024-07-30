@@ -8,6 +8,7 @@ import { cn, formatDate } from "@/lib/utils";
 import { Feedback } from "@/components/forum/Feedback";
 import { getColor } from "@/components/forum/table/table-row";
 import { TopicPageProps } from "../page";
+import { useUserAccessedTopicPosthogTracker } from "./useUserAccessedTopicPosthogTracker";
 
 const Section = ({ title, children }: PropsWithChildren<{ title: string }>) => (
   <div className="space-y-4">
@@ -17,6 +18,8 @@ const Section = ({ title, children }: PropsWithChildren<{ title: string }>) => (
 );
 
 export function TopicPage({ topic }: TopicPageProps) {
+  useUserAccessedTopicPosthogTracker(topic);
+
   return (
     <div className="p-6 space-y-8">
       <div className="flex flex-col">
