@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { CATEGORY_COLORS } from "../categoryColors";
 import { Separator } from "@/components/ui/separator";
 
-function getColor(categoryValue: string) {
+export function getColor(categoryValue: string) {
   const categoryLabel = FILTER_OPTIONS.options.find(
     (option) => option.value === categoryValue
   )?.label;
@@ -79,7 +79,7 @@ export const SnapshotProposal = ({
               <>
                 <Separator
                   orientation="vertical"
-                  className="h-4 bg-muted-foreground w-[2px]"
+                  className="h-4 bg-muted-foreground w-[1.5px]"
                 />
                 <Link
                   href={`https://gov.optimism.io/u/${username}/summary`}
