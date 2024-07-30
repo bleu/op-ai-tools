@@ -16,10 +16,10 @@ export const categoryBySlug = (slug: string) => {
 };
 
 export type ForumPost = {
-  id?: number;
+  id: number;
   externalId?: string;
   url?: string;
-  title?: string;
+  title: string;
   username?: string;
   displayUsername?: string;
   categoryId?: number;

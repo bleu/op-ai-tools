@@ -1,30 +1,30 @@
 "use client";
 import React, { useCallback, useEffect } from "react";
 
+import { Separator } from "@/components/ui/separator";
 import {
-  getCoreRowModel,
-  getSortedRowModel,
-  OnChangeFn,
-  Row,
-  ColumnFiltersState,
-  useReactTable,
-} from "@tanstack/react-table";
-import {
-  keepPreviousData,
   QueryClient,
   QueryClientProvider,
+  keepPreviousData,
   useInfiniteQuery,
 } from "@tanstack/react-query";
+import {
+  type ColumnFiltersState,
+  type OnChangeFn,
+  type Row,
+  getCoreRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { SnapshotProposal } from "./table-row";
-import { Separator } from "@/components/ui/separator";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { FilterSelect } from "./filter-select";
 import {
   FILTER_OPTIONS,
-  ForumPost,
-  ForumPostApiResponse,
+  type ForumPost,
+  type ForumPostApiResponse,
 } from "./post-options";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { SnapshotProposal } from "./table-row";
 
 const FETCH_SIZE = 10;
 
@@ -102,7 +102,7 @@ function ForumInfiniteScrollTable({
   // flatten the array of arrays from the useInfiniteQuery hook
   const flatData = React.useMemo(
     () => data?.pages?.flatMap((page) => page.data) ?? [],
-    [data]
+    [data],
   );
 
   const totalDBRowCount = data?.pages?.[0]?.meta?.totalRowCount ?? 0;
@@ -123,7 +123,7 @@ function ForumInfiniteScrollTable({
         }
       }
     },
-    [fetchNextPage, isFetching, totalFetched, totalDBRowCount]
+    [fetchNextPage, isFetching, totalFetched, totalDBRowCount],
   );
 
   // a check on mount and after a fetch to see if the table is already scrolled to the bottom and immediately needs to fetch more data
@@ -149,7 +149,7 @@ function ForumInfiniteScrollTable({
 
   // scroll to top of table when sorting changes
   const handleColumnFilterChange: OnChangeFn<ColumnFiltersState> = (
-    updater
+    updater,
   ) => {
     setColumnFilters(updater);
     if (!!table.getRowModel().rows.length) {
@@ -186,10 +186,10 @@ function ForumInfiniteScrollTable({
 
       return params.toString();
     },
-    [searchParams]
+    [searchParams],
   );
 
-  const onCategoryFilterChange = (value: string, setParams: boolean = true) => {
+  const onCategoryFilterChange = (value: string, setParams = true) => {
     if (setParams) {
       router.push(pathname + "?" + createQueryString("category", value));
     }

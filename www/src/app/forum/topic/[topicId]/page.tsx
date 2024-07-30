@@ -1,7 +1,8 @@
 "use server";
 import prisma from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
 import { TopicPage } from "./(components)/topic-page";
-import { Prisma } from "@prisma/client";
+import { useUserAccessedTopicPosthogTracker } from "./(components)/useUserAccessedTopicPosthogTracker";
 
 export type TopicPageProps = {
   topic: Prisma.ForumPostGetPayload<{
