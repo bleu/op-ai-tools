@@ -25,9 +25,11 @@ type FeedbackFormData = {
 export function Feedback({
   id,
   title,
+  url,
   categoryId,
 }: {
   id: number;
+  url: string;
   title: string;
   categoryId?: number;
 }) {
@@ -42,6 +44,7 @@ export function Feedback({
     posthog.capture("USER_REACTED_POSITIVELY_TO_SUMMARY", {
       topicId: id,
       topicTitle: title,
+      topicUrl: url,
       categoryId,
     });
 
@@ -73,6 +76,7 @@ export function Feedback({
       feedbackDetails: data.details,
       username: data.username,
       topicId: id,
+      topicUrl: url,
       topicTitle: title,
       categoryId,
     });

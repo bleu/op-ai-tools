@@ -101,6 +101,7 @@ export function TopicPage({ topic }: TopicPageProps) {
             id={topic.id}
             title={topic.title}
             categoryId={topic.category?.id}
+            url={topic.url}
           />
         </div>
         <Separator orientation="horizontal" />

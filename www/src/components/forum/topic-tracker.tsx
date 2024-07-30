@@ -17,6 +17,7 @@ export function TopicTracker({
       categoryName: topic.category?.name,
       topicId: topic.id,
       topicTitle: topic.title,
+      topicUrl: topic.url,
     });
   }, []);
 
