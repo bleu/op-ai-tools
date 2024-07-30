@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { usePostHog } from "posthog-js/react";
+import { useToast } from "@/components/ui/hooks/use-toast";
 
 type FeedbackReason = "incomplete" | "unrelated" | "outdated" | "incorrect";
 
@@ -18,14 +20,33 @@ type FeedbackFormData = {
   details: string;
 };
 
-export function Feedback() {
+export function Feedback({
+  id,
+  title,
+  categoryId,
+}: {
+  id: number;
+  title: string;
+  categoryId?: number;
+}) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedReasons, setSelectedReasons] = useState<FeedbackReason[]>([]);
   const [validationError, setValidationError] = useState<string | null>(null);
   const { register, handleSubmit, reset } = useForm<FeedbackFormData>();
+  const posthog = usePostHog();
+  const { toast } = useToast();
 
   const handlePositiveFeedback = () => {
-    console.log("Positive feedback received");
+    posthog.capture("USER_REACTED_POSITIVELY_TO_SUMMARY", {
+      topicId: id,
+      topicTitle: title,
+      categoryId,
+    });
+
+    toast({
+      title: "Thank you for your feedback!",
+      description: "We're glad you found this helpful.",
+    });
   };
 
   const toggleReason = (reason: FeedbackReason) => {
@@ -45,11 +66,20 @@ export function Feedback() {
       return;
     }
 
-    const feedbackData = {
-      ...data,
+    posthog.capture("USER_REACTED_NEGATIVELY_TO_SUMMARY", {
       reasons: selectedReasons,
-    };
-    console.log("Feedback submitted:", feedbackData);
+      details: data.details,
+      topicId: id,
+      topicTitle: title,
+      categoryId,
+    });
+
+    toast({
+      title: "Thank you for your feedback!",
+      description:
+        "We appreciate your input and will carefully look into this.",
+    });
+
     setIsDialogOpen(false);
     setSelectedReasons([]);
     setValidationError(null);

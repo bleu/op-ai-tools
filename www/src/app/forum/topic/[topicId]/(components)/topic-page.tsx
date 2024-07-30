@@ -97,7 +97,11 @@ export function TopicPage({ topic }: TopicPageProps) {
 
       <div>
         <div className="flex items-center justify-end gap-x-4 text-optimism">
-          <Feedback />
+          <Feedback
+            id={topic.id}
+            title={topic.title}
+            categoryId={topic.category?.id}
+          />
         </div>
         <Separator orientation="horizontal" />
       </div>
