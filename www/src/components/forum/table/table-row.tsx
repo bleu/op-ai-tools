@@ -6,7 +6,6 @@ import { FILTER_OPTIONS, ForumPost } from "./post-options";
 import { Badge } from "@/components/ui/badge";
 import { CATEGORY_COLORS } from "../categoryColors";
 import { Separator } from "@/components/ui/separator";
-import { TopicLink } from "@/components/forum/topic-link";
 
 export function getColor(categoryValue: string) {
   const categoryLabel = FILTER_OPTIONS.options.find(
@@ -34,17 +33,7 @@ export const SnapshotProposal = ({
   status,
 }: ForumPost) => {
   return (
-    <TopicLink
-      id={id}
-      title={title}
-      category={
-        category as {
-          externalId: string;
-          name: string;
-          id: number;
-        }
-      }
-    >
+    <Link href={`/forum/topic/${id}`}>
       <div className="p-4 max-w-7xl mx-auto rounded-md hover:bg-gray-100">
         <div className="flex justify-between items-center">
           <div className="flex items-center justify-left mb-2 gap-2">
@@ -104,6 +93,6 @@ export const SnapshotProposal = ({
         </div>
         {about && <p className="text-gray-700 mb-2">{about}</p>}
       </div>
-    </TopicLink>
+    </Link>
   );
 };

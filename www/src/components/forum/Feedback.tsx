@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { usePostHog } from "posthog-js/react";
 import { useToast } from "@/components/ui/hooks/use-toast";
@@ -18,6 +19,7 @@ type FeedbackReason = "incomplete" | "unrelated" | "outdated" | "incorrect";
 
 type FeedbackFormData = {
   details: string;
+  username?: string;
 };
 
 export function Feedback({
@@ -68,7 +70,8 @@ export function Feedback({
 
     posthog.capture("USER_REACTED_NEGATIVELY_TO_SUMMARY", {
       reasons: selectedReasons,
-      details: data.details,
+      feedbackDetails: data.details,
+      username: data.username,
       topicId: id,
       topicTitle: title,
       categoryId,
@@ -134,6 +137,12 @@ export function Feedback({
                 </Button>
               ))}
             </div>
+            <Input
+              {...register("username")}
+              placeholder="Your username (optional)"
+              className="mt-4"
+              onChange={() => setValidationError(null)}
+            />
             <Textarea
               {...register("details")}
               placeholder="Give us some more details"
