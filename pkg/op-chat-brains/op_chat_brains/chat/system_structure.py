@@ -47,7 +47,7 @@ class RAG_system:
             LLM = self.llm[0]
 
         output_LLM = LLM.invoke(self.system_prompt_preprocessor.format(
-            query = query,
+            QUERY = query,
             conversation_history = self.memory
         )).content
 
@@ -115,8 +115,6 @@ class RAG_system:
 
             return tags["answer"], True
                 
-
-
     def predict(self, query : str, verbose : bool = False) -> str:
         needs_info, preprocess_reasoning = self.query_preprocessing_LLM(query)
         history_reasoning = {"query": query, "needs_info": needs_info, "preprocess_reasoning": preprocess_reasoning, "reasoning" : {}}
@@ -154,3 +152,5 @@ class RAG_system:
             answer = preprocess_reasoning
         history_reasoning["answer"] = answer
         return history_reasoning
+    
+    

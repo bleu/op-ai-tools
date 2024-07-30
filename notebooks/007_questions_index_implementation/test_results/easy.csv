@@ -1,39 +1,42 @@
 model,query,answer,time_taken,reasoning_level
 gpt-4o-mini,What are the steps involved in becoming an Optimism Ambassador?,"
-To become an Optimism Ambassador, you would typically need to participate in creating and promoting content about projects funded by Optimism. The ""Thank Optimism - powered by ThriveCoin"" initiative is designed to reward ambassadors for their contributions, focusing on automating the reward process for high-quality content. Engaging with the community and contributing valuable insights or content is essential for this role [1].
+To become an Optimism Ambassador, you should follow these steps: 
+
+1. Familiarize yourself with the Optimism ecosystem, including its values and goals.
+2. Apply through the official application process, demonstrating your commitment and potential contributions to the community.
+3. Engage with the community via social media or forums to build connections.
+4. Once accepted, participate in activities that promote Optimism and support its initiatives [1].
 
 References:
-[1] https://gov.optimism.io/t/final-thank-optimism-powered-by-thrivecoin/6104
-",5.313123941421509,1
-gpt-4o-mini,What is an Airdrop?,"['', ""I'm sorry, but I can only answer questions about Optimism Governance/Optimism Collective/Optimism L2. Is there anything specific about Optimism Governance/Optimism Collective/Optimism L2 you'd like to know?""]",1.0227761268615723,0
+[1] https://optimism.io/ambassadors
+",11.33800482749939,2
+gpt-4o-mini,What is an Airdrop?,"('', ""I'm sorry, but I can only answer questions about OPTIMISM GOVERNANCE/OPTIMISM COLLECTIVE/OPTIMISM L2. Is there anything specific about OPTIMISM GOVERNANCE/OPTIMISM COLLECTIVE/OPTIMISM L2 you'd like to know?"")",1.2784299850463867,0
 gpt-4o-mini,What is required for a non-grant proposal to move to a vote in the Optimism governance process?,"
-For a non-grant proposal to move to a vote in the Optimism governance process, it must receive approval from four of the top 100 delegates. This requirement ensures that there is sufficient support among key community members before a proposal is put to a vote. In contrast, proposals initiated by the Foundation do not need this approval to proceed [1][2].
+For a non-grant proposal to move to a vote in the Optimism governance process, it must receive approval from four of the top 100 delegates. This requirement ensures that there is sufficient support among key stakeholders before a proposal is considered for voting. In contrast, proposals initiated by the Foundation do not need this approval to proceed to a vote [1][2].
 
 References:
 [1] https://gov.optimism.io/t/special-voting-cycle-16a-roundup/6946
 [2] https://gov.optimism.io/t/special-voting-cycle-16b-roundup/7046
-",5.650305986404419,1
+",6.820768117904663,1
 gpt-4o-mini,What is required for a proposal to move to a vote in the Optimism governance process?,"
-For a proposal to move to a vote in the Optimism governance process, it must first be submitted through the appropriate channels, such as the grants landing page for grant proposals. After submission, the Council reviews the proposal to ensure it meets the necessary criteria. If approved, the proposal can then proceed to a voting stage where the community can vote on it. This process ensures that all proposals are carefully evaluated before being presented for a vote [1][2].
+For a proposal to move to a vote in the Optimism governance process, it must first undergo community feedback and delegate feedback phases. After these discussions, the proposal enters a voting period. This process is part of a structured three-week cycle, ensuring that all stakeholders have the opportunity to evaluate and discuss the proposal before it is voted on. The Optimism Foundation oversees this process and implements the approved proposals [1][2].
 
 References:
-[1] https://gov.optimism.io/t/please-allow-me-to-submit-grant-proposal-i-saw-it-is-sept-14th-at-the-latest/6798
-[2] https://gov.optimism.io/t/council-intent-budget-proposal-template/5885
-",7.237465858459473,1
+[1] https://gov.optimism.io/t/operating-manual-of-the-optimism-collective-v0-2-0/3370
+[2] https://gov.optimism.io/t/what-is-your-evaluation-criteria-for-phase-1-proposals/2715
+",7.640825033187866,1
 gpt-4o-mini,What is the purpose of the Code of Conduct Council?,"
-The purpose of the Code of Conduct Council (CoCC) is to uphold community standards within the Optimism ecosystem by enforcing the code of conduct, addressing reports of misconduct, and facilitating conflict resolution. The council plays a crucial role in ensuring a respectful and constructive environment for all community members. Recent discussions have acknowledged its importance while also expressing concerns about budget increases and the scope of its responsibilities [1][2][3][4][5].
+The purpose of the Code of Conduct Council (CoCC) is to manage violations of the community's code of conduct within the Optimism governance framework. It aims to decentralize the handling of these violations, taking enforcement responsibilities away from Token House delegates. The council seeks to provide a structured and transparent approach to addressing misconduct, although there are ongoing discussions about its effectiveness and the need for clearer guidelines and processes for reporting violations [1][2][3][4].
 
 References:
-[1] https://gov.optimism.io/t/final-v2-code-of-conduct-council-operating-budget-re-scope-for-season-6-cycle-23b/8271
-[2] https://gov.optimism.io/t/season-6-nominations-code-of-conduct-council/8118
-[3] https://gov.optimism.io/t/code-of-conduct-council-communication-thread/7453
-[4] https://gov.optimism.io/t/code-of-conduct-council-nominations-season-5/6901
-[5] https://gov.optimism.io/t/final-code-of-conduct-council-cocc-operating-budget-for-season-6/8167
-",7.361799955368042,1
+[1] https://gov.optimism.io/t/code-of-conduct-councils/6888
+[2] https://gov.optimism.io/t/nownlater309-observation-of-c-o-c-violation/7280
+[3] https://gov.optimism.io/t/final-v2-code-of-conduct-council-operating-budget-re-scope-for-season-6-cycle-23b/8271
+[4] https://gov.optimism.io/t/retropgf-3-conflicts-of-interest-season-5-citizens/7506
+",8.615490198135376,1
 gpt-4o-mini,When does Voting Cycle 22 begin and end?,"
-The specific dates for Voting Cycle #22 have not been provided in the available information. The most recent voting cycles are Special Voting Cycle #16a, which runs from October 12th to October 25th, 2023, and Voting Cycle #17, scheduled from January 4th to January 24th, 2024 [1][2]. Therefore, Voting Cycle #22 will likely occur after these dates, but exact timing is currently unknown.
+Voting Cycle 22 began on April 18, 2024, at 19:00 GMT and will end on May 8, 2024, at 19:00 GMT. This cycle does not include any protocol upgrade votes or enforcement decisions, and there are no proposals requiring delegate votes [1].
 
 References:
-[1] https://gov.optimism.io/t/special-voting-cycle-16a-roundup/6946
-[2] https://gov.optimism.io/t/voting-cycle-roundup-17/7474
-",5.274720907211304,1
+[1] https://gov.optimism.io/t/voting-cycle-roundup-22/8053
+",6.205591917037964,1
