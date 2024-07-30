@@ -17,13 +17,18 @@ celery = "^5.4.0"
 flower = "^2.0.1"
 forum-dl = "^0.3.0"
 python-dotenv = "^1.0.1"
+tortoise-orm = { extras = ["psycopg"], version = "^0.21.5" }
 psycopg = "^3.2.1"
 
+
 [tool.poetry.group.dev.dependencies]
-black = "^24.4.2"
-flake8 = "^7.1.0"
-isort = "^5.13.2"
+ruff = "^0.5.5"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+sync_categories = "op_forum_agg.cli:run_sync_categories"
+sync_raw_posts = "op_forum_agg.cli:run_sync_raw_threads"
+sync_topics = "op_forum_agg.cli:run_sync_forum_posts"

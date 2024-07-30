@@ -1,6 +1,13 @@
-preseed:
+init:
 	@poetry install
 	@poetry shell
-	@python op_forum_agg/src/sync/categories.py
-	@python op_forum_agg/src/sync/raw_threads.py
-	@python op_forum_agg/src/sync/threads.py
+	@aerich init -t op_forum_agg.config.TORTOISE_ORM
+
+seed_categories:
+	@poetry install
+	@poetry run sync_categories
+
+seed_topics:
+	@poetry install
+	@poetry run sync_raw_posts
+	@poetry run sync_topics

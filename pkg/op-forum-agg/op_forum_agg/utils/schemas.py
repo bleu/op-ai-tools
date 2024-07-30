@@ -1,27 +1,6 @@
+import inspect
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Union
-
-from op_forum_agg.src.utils.db import store_data_in_db
-
-
-class DataIngestInterface:
-    def __init__(self, query, url):
-        self.query = query
-        self.url = url
-
-    def fetch(self):
-        raise NotImplementedError
-
-    def transform(self, data):
-        raise NotImplementedError
-
-    def store(self, data):
-        store_data_in_db(data, self.query)
-
-    def execute(self):
-        data = self.fetch()
-        transformed_data = self.transform(data)
-        self.store(transformed_data)
+from typing import Dict, List, Optional
 
 
 @dataclass
@@ -77,6 +56,12 @@ class ThreadDetails:
     last_poster_username: Optional[str] = None
     visibility_reason_id: Optional[int] = None
 
+    @classmethod
+    def from_dict(cls, env):
+        return cls(
+            **{k: v for k, v in env.items() if k in inspect.signature(cls).parameters}
+        )
+
 
 @dataclass
 class ThreadPost:
@@ -131,23 +116,8 @@ class ThreadPost:
     can_view_edit_history: Optional[bool] = None
     topic_accepted_answer: Optional[bool] = None
 
-
-@dataclass
-class Thread:
-    externalId: str
-    url: str
-    type: str
-    rawData: Union[ThreadDetails, ThreadPost]
-    id: Optional[int] = None
-
-
-@dataclass
-class Category:
-    id: int
-    externalId: str
-    name: str
-    color: str
-    slug: str
-    description: str
-    topicUrl: str
-    filterable: Optional[bool] = None
+    @classmethod
+    def from_dict(cls, env):
+        return cls(
+            **{k: v for k, v in env.items() if k in inspect.signature(cls).parameters}
+        )
