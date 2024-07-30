@@ -1,13 +1,11 @@
 from datetime import datetime, timezone
 
-from forum_dl import (ExtractorOptions, ForumDl, SessionOptions, WriterOptions,
-                      extractors, logging)
+from forum_dl import (
+    WriterOptions,
+)
 from forum_dl.extractors.common import Extractor
 from forum_dl.version import __version__
-from forum_dl.writers.common import (Board, Entry, File, Item, Post, Thread,
-                                     Writer)
-
-from op_forum_agg.config import config
+from forum_dl.writers.common import Board, Entry, File, Item, Post, Thread, Writer
 
 
 class ReadWriter(Writer):

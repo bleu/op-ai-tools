@@ -7,7 +7,6 @@
     "build": "next build",
     "start": "next start",
     "lint:fix": "yarn biome check --write ./src",
-    "prisma:seed": "ts-node prisma/seed.ts",
     "prisma:reset": "ts-node prisma/reset.ts",
     "prisma:migrate": "prisma migrate dev",
     "prisma:console": "prisma-repl",

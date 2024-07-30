@@ -1,9 +1,14 @@
+from op_forum_agg.tasks.sync import (
+    sync_all,
+    sync_categories,
+    sync_raw_threads,
+    sync_forum_posts,
+)
+
 from celery import Celery
 from celery.schedules import crontab
-
 from op_forum_agg.app import create_worker_app
 from op_forum_agg.config import config
-from op_forum_agg.src.sync.categories import execute_categories_import
 
 
 def create_celery(app):
@@ -13,7 +18,7 @@ def create_celery(app):
         broker=config["CELERY"]["BROKER_URL"],
     )
     celery.conf.update(app.config)
-    celery.conf.timezone = "UTC"
+    celery.timezone = "UTC"
     TaskBase = celery.Task
 
     class ContextTask(TaskBase):
@@ -33,18 +38,18 @@ celery = create_celery(flask_app)
 
 @celery.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
+    # Sync all data every day at midnight
+    sender.add_periodic_task(
+        crontab(hour=0, minute=0), sync_all.s(), name="sync all forum data"
+    )
 
-    # Executes every Monday morning at 7:30 a.m.
-    # sender.add_periodic_task(
-    #     crontab(hour=7, minute=30, day_of_week=1),
-    #     long_task,
-    # )
+    # Sync categories every hour
+    sender.add_periodic_task(
+        crontab(minute=0), sync_categories.s(), name="sync categories"
+    )
 
-    # each 10 seconds
-    sender.add_periodic_task(10, long_task.s(), name="sync categories")
+    # Sync raw threads every 30 minutes
+    sender.add_periodic_task(30 * 60, sync_raw_threads.s(), name="sync raw threads")
 
-
-@celery.task
-def long_task():
-    #   execute_categories_import()
-    pass
+    # Sync forum posts every 15 minutes
+    sender.add_periodic_task(15 * 60, sync_forum_posts.s(), name="sync forum posts")

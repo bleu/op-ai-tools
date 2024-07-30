@@ -22,10 +22,10 @@ export const CATEGORY_BY_SLUG: { [key: string]: string } = FILTER_OPTIONS.option
 export const categoryBySlug = (slug: string): string => CATEGORY_BY_SLUG[slug] || "";
 
 export type ForumPost = {
-  id?: number;
+  id: number;
   externalId?: string;
   url?: string;
-  title?: string;
+  title: string;
   username?: string;
   displayUsername?: string;
   categoryId?: number;

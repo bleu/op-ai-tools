@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 const parseCategory = (
   categoryExternalId: string,
-  filterableCategories: Number[]
+  filterableCategories: number[],
 ) => {
   if (categoryExternalId === "all") {
     return undefined;
