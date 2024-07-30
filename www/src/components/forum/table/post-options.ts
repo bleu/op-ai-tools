@@ -11,15 +11,21 @@ export const FILTER_OPTIONS = {
   ],
 };
 
-export const categoryBySlug = (slug: string) => {
-  return FILTER_OPTIONS.options.find((option) => option.slug === slug)?.value;
-};
+export const CATEGORY_BY_SLUG: { [key: string]: string } = FILTER_OPTIONS.options.reduce(
+  (acc, option) => ({
+    ...acc,
+    [option.slug]: option.value,
+  }),
+  {}
+);
+
+export const categoryBySlug = (slug: string): string => CATEGORY_BY_SLUG[slug] || "";
 
 export type ForumPost = {
-  id?: number;
+  id: number;
   externalId?: string;
   url?: string;
-  title?: string;
+  title: string;
   username?: string;
   displayUsername?: string;
   categoryId?: number;

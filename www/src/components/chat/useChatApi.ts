@@ -19,7 +19,7 @@ export function useChatApi() {
             "x-user-id": posthog.get_distinct_id(),
           },
           body: JSON.stringify({ question: message }),
-        }
+        },
       );
 
       if (!response.body) {
@@ -28,7 +28,7 @@ export function useChatApi() {
 
       return response.body.getReader();
     },
-    [posthog]
+    [posthog],
   );
 
   return { sendMessage };

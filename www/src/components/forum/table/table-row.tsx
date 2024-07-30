@@ -1,15 +1,15 @@
 import { Octagram } from "@/components/forum/Octagram";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { cn, formatDate } from "@/lib/utils";
 import Link from "next/link";
-import React from "react";
-import { FILTER_OPTIONS, ForumPost } from "./post-options";
-import { Badge } from "@/components/ui/badge";
+import type React from "react";
 import { CATEGORY_COLORS } from "../categoryColors";
-import { Separator } from "@/components/ui/separator";
+import { FILTER_OPTIONS, type ForumPost } from "./post-options";
 
-function getColor(categoryValue: string) {
+export function getColor(categoryValue: string) {
   const categoryLabel = FILTER_OPTIONS.options.find(
-    (option) => option.value === categoryValue
+    (option) => option.value === categoryValue,
   )?.label;
 
   if (!categoryLabel) {
@@ -32,10 +32,6 @@ export const SnapshotProposal = ({
   category,
   status,
 }: ForumPost) => {
-  const handleUserLinkClick = (event: React.MouseEvent) => {
-    event.stopPropagation();
-  };
-
   return (
     <Link href={`/forum/topic/${id}`}>
       <div className="p-4 max-w-7xl mx-auto rounded-md hover:bg-gray-100">
@@ -71,7 +67,7 @@ export const SnapshotProposal = ({
               className={cn(
                 /* @ts-ignore-next-line */
                 { [getColor(category?.externalId)]: true },
-                "size-4 fill-current"
+                "size-4 fill-current",
               )}
             />
             <span className="text-muted-foreground">{category?.name}</span>
@@ -79,13 +75,15 @@ export const SnapshotProposal = ({
               <>
                 <Separator
                   orientation="vertical"
-                  className="h-4 bg-muted-foreground w-[2px]"
+                  className="h-4 bg-muted-foreground w-[1.5px]"
                 />
                 <Link
                   href={`https://gov.optimism.io/u/${username}/summary`}
                   target="_blank"
                   className="text-blue-500 underline"
-                  onClick={handleUserLinkClick}
+                  onClick={(event: React.MouseEvent) => {
+                    event.stopPropagation();
+                  }}
                 >
                   {displayUsername || username}
                 </Link>
