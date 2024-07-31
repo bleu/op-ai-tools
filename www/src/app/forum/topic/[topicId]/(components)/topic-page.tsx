@@ -19,7 +19,7 @@ export function TopicPage({ topic }: TopicPageProps) {
   useUserAccessedTopicPosthogTracker(topic);
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-1 md:p-4 space-y-8">
       <TopicHeader
         id={topic.id}
         title={topic.title}
