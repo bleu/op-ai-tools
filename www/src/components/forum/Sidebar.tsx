@@ -33,10 +33,12 @@ interface NavLinkProps extends NavItem {
   isMobile: boolean;
   isSelected: boolean;
   isCategory?: boolean;
+  onClick?: () => void;
 }
 
 interface NavContentProps {
   isMobile: boolean;
+  setSheetOpen?: (open: boolean) => void;
 }
 const navSections: NavSection[] = [
   {
@@ -107,6 +109,7 @@ function NavLink({
   isMobile,
   isSelected,
   isCategory,
+  onClick = () => {},
 }: NavLinkProps) {
   return (
     <Link
@@ -118,6 +121,7 @@ function NavLink({
           ? "bg-[#FFDBDF] text-optimism font-semibold"
           : "hover:bg-gray-100"
       )}
+      onClick={onClick}
     >
       <Icon
         className={cn(
@@ -131,7 +135,7 @@ function NavLink({
   );
 }
 
-function NavContent({ isMobile }: NavContentProps) {
+function NavContent({ isMobile, setSheetOpen = () => {} }: NavContentProps) {
   const pathname = usePathname();
   return (
     <div className={cn("flex flex-col gap-y-2", isMobile && "py-2")}>
@@ -155,6 +159,9 @@ function NavContent({ isMobile }: NavContentProps) {
                   isMobile={isMobile}
                   isSelected={pathname === item.href}
                   isCategory={section.title === "Categories"}
+                  onClick={() => {
+                    setSheetOpen(false);
+                  }}
                 />
               ))}
             </nav>
@@ -197,8 +204,10 @@ export function DesktopSidebar() {
 }
 
 export function MobileSidebar() {
+  const [open, setOpen] = React.useState(false);
+
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="outline" size="icon" className="shrink-0 md:hidden">
           <Menu className="h-5 w-5" />
@@ -207,7 +216,7 @@ export function MobileSidebar() {
       </SheetTrigger>
       <SheetContent side="left" className="flex flex-col w-[280px] p-0">
         <div className="overflow-y-auto px-4 py-6">
-          <NavContent isMobile={true} />
+          <NavContent isMobile={true} setSheetOpen={setOpen} />
         </div>
       </SheetContent>
     </Sheet>
