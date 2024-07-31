@@ -1,14 +1,12 @@
 "use client";
 
 import { Feedback } from "@/components/forum/Feedback";
-import { Octagram } from "@/components/forum/Octagram";
-import { getColor } from "@/components/forum/table/table-row";
 import { Separator } from "@/components/ui/separator";
-import { cn, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
 import type { TopicPageProps } from "../page";
 import { useUserAccessedTopicPosthogTracker } from "./useUserAccessedTopicPosthogTracker";
+import { TopicHeader } from "@/components/forum/topic-header";
 
 const Section = ({ title, children }: PropsWithChildren<{ title: string }>) => (
   <div className="space-y-4">
@@ -22,58 +20,16 @@ export function TopicPage({ topic }: TopicPageProps) {
 
   return (
     <div className="p-6 space-y-8">
-      <div className="flex flex-col">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center justify-left mb-2 gap-2">
-            <h1 className="text-2xl font-semibold">{topic.title}</h1>
-            {/* {topic.status && <Badge>{topic.status}</Badge>} */}
-          </div>
-          <div className="flex items-center text-sm text-gray-500">
-            {topic.readTime && (
-              <>
-                <span>{topic.readTime} read</span>
-                <span className="mx-2">•</span>
-              </>
-            )}
-            {topic.createdAt && (
-              <>
-                <span>{formatDate(topic.createdAt)}</span>
-              </>
-            )}
-            {topic.lastActivity && (
-              <>
-                <span className="mx-2">•</span>
-                <span>Last activity: {formatDate(topic.lastActivity)}</span>
-              </>
-            )}
-          </div>
-        </div>
-        <div className="font-semibold flex gap-1 items-center">
-          <Octagram
-            label={topic?.category?.name || ""}
-            className={cn(
-              { [getColor(topic?.category?.externalId || "all")]: true },
-              "size-4 fill-current",
-            )}
-          />
-          <span className="text-muted-foreground">{topic?.category?.name}</span>
-          {(topic.displayUsername || topic.username) && (
-            <>
-              <Separator
-                orientation="vertical"
-                className="h-4 bg-muted-foreground w-[1.5px]"
-              />
-              <Link
-                href={`https://gov.optimism.io/u/${topic.username}/summary`}
-                target="_blank"
-                className="text-blue-500 underline"
-              >
-                {topic.displayUsername || topic.username}
-              </Link>
-            </>
-          )}
-        </div>
-      </div>
+      <TopicHeader
+        id={topic.id}
+        title={topic.title}
+        username={topic.username}
+        createdAt={topic.createdAt.toISOString()}
+        lastActivity={topic.lastActivity?.toISOString()}
+        displayUsername={topic.displayUsername}
+        readTime={topic.readTime as string}
+        category={topic.category as any}
+      />
 
       <Section title="TLDR">
         <div>{topic?.tldr}</div>
