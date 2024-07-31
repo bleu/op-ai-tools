@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 const parseCategory = (
   categoryExternalId: string,
-  filterableCategories: number[],
+  filterableCategories: number[]
 ) => {
   if (categoryExternalId === "all") {
     return undefined;
@@ -77,6 +77,9 @@ export async function GET(req: NextRequest) {
       },
     },
     where: conditions,
+    orderBy: {
+      lastActivity: "desc",
+    },
   });
 
   const totalRowCount = await prisma.forumPost.count({
