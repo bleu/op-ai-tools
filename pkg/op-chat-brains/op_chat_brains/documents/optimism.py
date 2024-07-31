@@ -183,14 +183,15 @@ trust_level (0-4): {TRUST_LEVEL}
         posts, threads_info = ForumPostsProcessingStrategy.retrieve()
         df_posts = pd.DataFrame(posts).T
         threads =[]
+        category_names = connect_db.retrieve_data(f'select "external_id", "name" from "ForumPostCategory"')
+        category_names = {int(c[0]): c[1] for c in category_names}
         for t in df_posts['thread_id'].unique():
             posts_thread = df_posts[df_posts['thread_id'] == t].sort_values(by='created_at')
             url = posts_thread['url'].iloc[0]
             url = url.split("/")[:-1]
             url = "/".join(url)
             t_i = threads_info[int(t)]
-            category_name = connect_db.retrieve_data(f'select "name" from "ForumPostCategory" where CAST("external_id" AS INT) = {t_i["category_id"]}')[0][0]
-            
+            category_name = category_names[t_i["category_id"]]
             
             str_thread = ForumPostsProcessingStrategy.template_thread.format(
                 CATEGORY_NAME=category_name,

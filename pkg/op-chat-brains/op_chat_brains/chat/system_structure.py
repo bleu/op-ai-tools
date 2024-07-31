@@ -1,7 +1,5 @@
 from typing import Tuple, Any, Callable
-
-from langchain_openai import ChatOpenAI
-from langchain_anthropic import ChatAnthropic
+from op_chat_brains.chat import model_utils
 
 import re
 
@@ -18,7 +16,6 @@ class RAG_system:
 
     llm: list = []
     number_of_models: int = 2
-    memory: list = []
 
     def __init__(self, **kwargs):
             self.REASONING_LIMIT = kwargs.get("REASONING_LIMIT", 3)
@@ -35,20 +32,15 @@ class RAG_system:
 
             for m in self.models_to_use:
                 m, pars = m
-                if "gpt" in m:
-                    self.llm += [ChatOpenAI(model=m, **pars)]
-                elif "claude" in m:
-                    self.llm += [ChatAnthropic(model=m, **pars)]
-                else:
-                    raise ValueError(f"Model {m} not recognized")
+                self.llm += [model_utils.access_APIs.get_llm(m, **pars)]
 
-    def query_preprocessing_LLM(self, query : str, LLM : Any = None) -> Tuple[bool, str|Tuple[str, list]]:
+    def query_preprocessing_LLM(self, query : str, memory : list, LLM : Any = None) -> Tuple[bool, str|Tuple[str, list]]:
         if LLM is None:
             LLM = self.llm[0]
 
         output_LLM = LLM.invoke(self.system_prompt_preprocessor.format(
             QUERY = query,
-            conversation_history = self.memory
+            conversation_history = memory
         )).content
 
         xml_tag_pattern = re.compile(r"<(\w+)(\s[^>]*)?>(.*?)</\1>", re.DOTALL)
@@ -67,7 +59,10 @@ class RAG_system:
 
     def Retriever(self, query : str, info_type : str, reasoning_level) -> list:
         if reasoning_level == 0:
-            return self.index_retriever(query)
+            context = self.index_retriever(query)
+            if len(context) == 0:
+                return self.factual_retriever(query)
+            return context
         else:
             return self.factual_retriever(query)
 
@@ -115,8 +110,8 @@ class RAG_system:
 
             return tags["answer"], True
                 
-    def predict(self, query : str, verbose : bool = False) -> str:
-        needs_info, preprocess_reasoning = self.query_preprocessing_LLM(query)
+    def predict(self, query : str, memory : list = [], verbose : bool = False) -> str:
+        needs_info, preprocess_reasoning = self.query_preprocessing_LLM(query, memory=memory)
         history_reasoning = {"query": query, "needs_info": needs_info, "preprocess_reasoning": preprocess_reasoning, "reasoning" : {}}
         if verbose:
             print(f"-------------------\nQuery: {query}\nNeeds info: {needs_info}\nPreprocess reasoning: {preprocess_reasoning}\n")

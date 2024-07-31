@@ -12,7 +12,7 @@ from op_chat_brains.exceptions import OpChatBrainsException
 from op_chat_brains.structured_logger import StructuredLogger
 
 logger = StructuredLogger()
-threads = ForumPostsProcessingStrategy.return_threads(FORUM_PATH)
+threads = ForumPostsProcessingStrategy.get_threads_documents()
 
 def get_some_thread_urls(proportion : float) -> List[str]:
     all_threads = [thread.metadata["url"] for thread in threads if thread.metadata["url"]]
