@@ -54,37 +54,60 @@ class AgoraProposalsService:
             proposals = await AgoraProposalsService.fetch_all_proposals()
             print(f"Total proposals fetched: {len(proposals)}")
 
+            proposal_objects = []
             for proposal in proposals:
-                await AgoraProposal.update_or_create(
-                    externalId=proposal["id"],
-                    defaults={
-                        "proposer": proposal["proposer"],
-                        "snapshotBlockNumber": proposal["snapshotBlockNumber"],
-                        "createdTime": proposal["createdTime"],
-                        "startTime": proposal["startTime"],
-                        "endTime": proposal["endTime"],
-                        "cancelledTime": proposal.get("cancelledTime"),
-                        "executedTime": proposal.get("executedTime"),
-                        "markdownTitle": proposal["markdowntitle"],
-                        "description": proposal["description"],
-                        "quorum": proposal["quorum"],
-                        "approvalThreshold": proposal.get("approvalThreshold"),
-                        "proposalData": proposal["proposalData"],
-                        "unformattedProposalData": proposal["unformattedProposalData"],
-                        "proposalResults": proposal["proposalResults"],
-                        "proposalType": proposal["proposalType"],
-                        "status": proposal["status"],
-                        "createdTransactionHash": proposal.get(
-                            "createdTransactionHash"
-                        ),
-                        "cancelledTransactionHash": proposal.get(
+                proposal_objects.append(
+                    AgoraProposal(
+                        externalId=proposal["id"],
+                        proposer=proposal["proposer"],
+                        snapshotBlockNumber=proposal["snapshotBlockNumber"],
+                        createdTime=proposal["createdTime"],
+                        startTime=proposal["startTime"],
+                        endTime=proposal["endTime"],
+                        cancelledTime=proposal.get("cancelledTime"),
+                        executedTime=proposal.get("executedTime"),
+                        markdownTitle=proposal["markdowntitle"],
+                        description=proposal["description"],
+                        quorum=proposal["quorum"],
+                        approvalThreshold=proposal.get("approvalThreshold"),
+                        proposalData=proposal["proposalData"],
+                        unformattedProposalData=proposal["unformattedProposalData"],
+                        proposalResults=proposal["proposalResults"],
+                        proposalType=proposal["proposalType"],
+                        status=proposal["status"],
+                        createdTransactionHash=proposal.get("createdTransactionHash"),
+                        cancelledTransactionHash=proposal.get(
                             "cancelledTransactionHash"
                         ),
-                        "executedTransactionHash": proposal.get(
-                            "executedTransactionHash"
-                        ),
-                    },
+                        executedTransactionHash=proposal.get("executedTransactionHash"),
+                    )
                 )
+
+            await AgoraProposal.bulk_create(
+                proposal_objects,
+                update_fields=[
+                    "proposer",
+                    "snapshotBlockNumber",
+                    "createdTime",
+                    "startTime",
+                    "endTime",
+                    "cancelledTime",
+                    "executedTime",
+                    "markdownTitle",
+                    "description",
+                    "quorum",
+                    "approvalThreshold",
+                    "proposalData",
+                    "unformattedProposalData",
+                    "proposalResults",
+                    "proposalType",
+                    "status",
+                    "createdTransactionHash",
+                    "cancelledTransactionHash",
+                    "executedTransactionHash",
+                ],
+                on_conflict=["externalId"],
+            )
 
             print("Proposals synced successfully")
 
