@@ -12,6 +12,7 @@ from op_chat_brains.summarizer.utils import Prompt
 threads = ForumPostsProcessingStrategy.get_threads_documents()
 
 
+
 def get_thread_from_url(url: str) -> Document:
     thread = next((t for t in threads if t.metadata["url"] == url), None)
     if not thread:

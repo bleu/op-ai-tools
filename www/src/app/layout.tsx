@@ -32,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="op-logo.svg" type="image/x-icon" />
+        {/* TODO OP-67: fix - this is requesting the route for a logo <link rel="icon" href="op-logo.svg" type="image/x-icon" /> */}
       </head>
       <CSPostHogProvider>
         <body className={GeistSans.className}>

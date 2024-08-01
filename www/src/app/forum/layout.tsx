@@ -1,6 +1,6 @@
-import { PropsWithChildren } from "react";
 import { Header } from "@/components/forum/Header";
 import { DesktopSidebar } from "@/components/forum/Sidebar";
+import type { PropsWithChildren } from "react";
 
 export default function Layout({ children }: PropsWithChildren<{}>) {
   return (

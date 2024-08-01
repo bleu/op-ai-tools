@@ -1,54 +1,100 @@
 "use client";
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 
+import { Separator } from "@/components/ui/separator";
 import {
-  getCoreRowModel,
-  getSortedRowModel,
-  OnChangeFn,
-  Row,
-  ColumnFiltersState,
-  useReactTable,
-} from "@tanstack/react-table";
-import {
-  keepPreviousData,
   QueryClient,
   QueryClientProvider,
+  keepPreviousData,
   useInfiniteQuery,
 } from "@tanstack/react-query";
+import {
+  type ColumnFiltersState,
+  type OnChangeFn,
+  type Row,
+  getCoreRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { SnapshotProposal } from "./table-row";
-import { Separator } from "@/components/ui/separator";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { FilterSelect } from "./filter-select";
 import {
   FILTER_OPTIONS,
-  ForumPost,
-  ForumPostApiResponse,
+  type ForumPost,
+  type ForumPostApiResponse,
 } from "./post-options";
+import { SnapshotProposal } from "./table-row";
 
 const FETCH_SIZE = 10;
 
-async function getPosts({ pageParam }: { pageParam: number }) {
-  const start = (pageParam as number) * FETCH_SIZE;
+async function getPosts({
+  pageParam,
+}: {
+  pageParam: {
+    page: number;
+    category: string;
+    startDate: string;
+    endDate: string;
+  };
+}) {
+  const { page, category, startDate, endDate } = pageParam;
+  const start = page * FETCH_SIZE;
 
-  const response = await fetch(
-    "/api/forum-posts?start=" + start + "&size=" + FETCH_SIZE
-  );
+  const params = new URLSearchParams({
+    start: start.toString(),
+    size: FETCH_SIZE.toString(),
+    category,
+    ...(startDate && { startDate }),
+    ...(endDate && { endDate }),
+  });
+
+  const response = await fetch(`/api/forum-posts?${params.toString()}`);
   const data = await response.json();
   return data;
 }
 
-function ForumInfiniteScrollTable({ title }: { title: string }) {
+function ForumInfiniteScrollTable({
+  title,
+  category,
+  startDate,
+  endDate,
+}: {
+  title: string;
+  category?: string;
+  startDate?: string;
+  endDate?: string;
+}) {
   const tableContainerRef = React.useRef<HTMLDivElement>(null);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([
+    {
+      id: "category",
+      value: category || "all",
+    },
+  ]);
 
   const { data, fetchNextPage, isFetching, isLoading } =
     useInfiniteQuery<ForumPostApiResponse>({
-      queryKey: ["forumPosts"],
+      queryKey: ["forumPosts", columnFilters], // refetch when filters changes
       queryFn: getPosts as any,
-      initialPageParam: 0,
-      getNextPageParam: (_lastGroup, groups) => groups.length,
+      initialPageParam: {
+        page: 0,
+        category: columnFilters.find((f) => f.id === "category")?.value,
+        startDate: startDate,
+        endDate: endDate,
+      },
+      getNextPageParam: (_lastGroup, groups) => {
+        return {
+          page: groups.length,
+          category: columnFilters.find((f) => f.id === "category")?.value,
+          startDate: startDate,
+          endDate: endDate,
+        };
+      },
       refetchOnWindowFocus: false,
       placeholderData: keepPreviousData,
     });
@@ -56,7 +102,7 @@ function ForumInfiniteScrollTable({ title }: { title: string }) {
   // flatten the array of arrays from the useInfiniteQuery hook
   const flatData = React.useMemo(
     () => data?.pages?.flatMap((page) => page.data) ?? [],
-    [data]
+    [data],
   );
 
   const totalDBRowCount = data?.pages?.[0]?.meta?.totalRowCount ?? 0;
@@ -77,7 +123,7 @@ function ForumInfiniteScrollTable({ title }: { title: string }) {
         }
       }
     },
-    [fetchNextPage, isFetching, totalFetched, totalDBRowCount]
+    [fetchNextPage, isFetching, totalFetched, totalDBRowCount],
   );
 
   // a check on mount and after a fetch to see if the table is already scrolled to the bottom and immediately needs to fetch more data
@@ -103,7 +149,7 @@ function ForumInfiniteScrollTable({ title }: { title: string }) {
 
   // scroll to top of table when sorting changes
   const handleColumnFilterChange: OnChangeFn<ColumnFiltersState> = (
-    updater
+    updater,
   ) => {
     setColumnFilters(updater);
     if (!!table.getRowModel().rows.length) {
@@ -132,6 +178,35 @@ function ForumInfiniteScrollTable({ title }: { title: string }) {
     overscan: 5,
   });
 
+  // https://nextjs.org/docs/app/api-reference/functions/use-search-params#updating-searchparams
+  const createQueryString = useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(name, value);
+
+      return params.toString();
+    },
+    [searchParams],
+  );
+
+  const onCategoryFilterChange = (value: string, setParams = true) => {
+    if (setParams) {
+      router.push(pathname + "?" + createQueryString("category", value));
+    }
+    setColumnFilters([
+      {
+        id: "category",
+        value,
+      },
+    ]);
+  };
+
+  useEffect(() => {
+    if (category) {
+      onCategoryFilterChange(category, false);
+    }
+  }, [category]);
+
   if (isLoading) {
     return <>Loading...</>;
   }
@@ -145,7 +220,13 @@ function ForumInfiniteScrollTable({ title }: { title: string }) {
       <div className="mx-4">
         <h1 className="text-2xl font-bold mb-6">{title}</h1>
         <div className="w-full flex gap-2 items-center flex-col md:flex-row">
-          <FilterSelect data={FILTER_OPTIONS} />
+          <FilterSelect
+            data={FILTER_OPTIONS}
+            value={
+              columnFilters.find((f) => f.id === "category")?.value as string
+            }
+            onChange={onCategoryFilterChange}
+          />
           {/* <FilterDates /> */}
         </div>
       </div>
@@ -177,6 +258,8 @@ function ForumInfiniteScrollTable({ title }: { title: string }) {
                       title={row.original.title}
                       username={row.original.username}
                       displayUsername={row.original.displayUsername}
+                      readTime={row.original.readTime}
+                      lastActivity={row.original.lastActivity}
                       category={row.original.category}
                       about={row.original.about}
                       createdAt={row.original.createdAt}
@@ -205,10 +288,25 @@ function ForumInfiniteScrollTable({ title }: { title: string }) {
 
 const queryClient = new QueryClient();
 
-export function InfiniteTable({ title }: { title: string; color: string }) {
+export function InfiniteTable({
+  title,
+  category,
+  startDate,
+  endDate,
+}: {
+  title: string;
+  category?: string;
+  startDate?: string;
+  endDate?: string;
+}) {
   return (
     <QueryClientProvider client={queryClient}>
-      <ForumInfiniteScrollTable title={title} />
+      <ForumInfiniteScrollTable
+        title={title}
+        category={category}
+        startDate={startDate}
+        endDate={endDate}
+      />
     </QueryClientProvider>
   );
 }

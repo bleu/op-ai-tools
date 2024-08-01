@@ -6049,6 +6049,7 @@ __metadata:
     postcss: "npm:^8"
     posthog-js: "npm:^1.145.0"
     prisma: "npm:^5.17.0"
+    prisma-repl: "npm:^1.4.0"
     prop-types: "npm:^15.8.1"
     reablocks: "npm:^8.0.3"
     react: "npm:19.0.0-rc-1434af3d22-20240618"
@@ -6379,6 +6380,15 @@ __metadata:
   version: 1.2.1
   resolution: "prelude-ls@npm:1.2.1"
   checksum: 10c0/b00d617431e7886c520a6f498a2e14c75ec58f6d93ba48c3b639cf241b54232d90daa05d83a9e9b9fef6baa63cb7e1e4602c2372fea5bc169668401eb127d0cd
+  languageName: node
+  linkType: hard
+
+"prisma-repl@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "prisma-repl@npm:1.4.0"
+  bin:
+    prisma-repl: dist/cli-wrapper.js
+  checksum: 10c0/f16a8d7001b962cd576e87a3d7ea9dc75e22a4c63702fdab5ecbd770e3fb2f2a5040a41c5952e8dd4df3c554ba695971434fb1399ab8391861f5f1be42be94a4
   languageName: node
   linkType: hard
 

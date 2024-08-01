@@ -4,40 +4,103 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:postgres@localhost:5432/op-ai-tools"
+  url      = env("DATABASE_URL")
 }
 
 model ForumPost {
-  id              Int      @id @default(autoincrement())
-  external_id     String   @unique
-  url             String   @unique
-  title           String
-  username        String
-  displayUsername String
-  category        String
-  about           String
-  firstPost       String
-  reaction        String
-  overview        String
-  tldr            String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                 Int                @id @default(autoincrement())
+  externalId         String             @unique
+  url                String             @unique
+  title              String
+  username           String
+  displayUsername    String
+  categoryId         Int?
+  category           ForumPostCategory? @relation(fields: [categoryId], references: [id])
+  rawForumPostId     Int?
+  rawForumPost       RawForumPost?      @relation(fields: [rawForumPostId], references: [id])
+  snapshotProposalId Int?               @unique
+  snapshotProposal   SnapshotProposal?  @relation(fields: [snapshotProposalId], references: [id])
+  about              String?
+  firstPost          String?
+  reaction           String?
+  overview           String?
+  tldr               String?
+  classification     String?
+  lastActivity       DateTime?
+  readTime           String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 }
 
 model ForumPostCategory {
-  id          Int     @id @default(autoincrement())
-  external_id String  @unique
+  id          Int         @id @default(autoincrement())
+  externalId  String      @unique
   name        String?
   color       String?
   slug        String?
   description String?
-  topic_url   String?
+  topicUrl    String?
+  filterable  Boolean     @default(false)
+  forumPosts  ForumPost[] @relation
 }
 
 model RawForumPost {
-  id          Int    @id @default(autoincrement())
-  external_id String @unique
-  url         String @unique
-  type        String
-  rawData     Json
+  id         Int         @id @default(autoincrement())
+  externalId String      @unique
+  url        String      @unique
+  type       String
+  rawData    Json
+  forumPosts ForumPost[] @relation
+}
+
+model SnapshotProposal {
+  id            Int       @id @default(autoincrement())
+  externalId    String    @unique
+  spaceId       String
+  spaceName     String
+  title         String
+  author        String
+  choices       Json
+  state         String
+  votes         Int
+  end           DateTime
+  start         DateTime
+  type          String
+  body          String
+  discussion    String?
+  quorum        Float?
+  quorumType    String?
+  snapshot      String
+  scores        Json
+  winningOption String?
+  forumPost     ForumPost?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+
+model AgoraProposal {
+  id                     Int       @id @default(autoincrement())
+  externalId             String    @unique
+  proposer               String
+  snapshotBlockNumber    Int
+  createdTime            DateTime
+  startTime              DateTime
+  endTime                DateTime
+  cancelledTime          DateTime?
+  executedTime           DateTime?
+  markdownTitle          String
+  description            String
+  quorum                 String
+  approvalThreshold      String?
+  proposalData           Json
+  unformattedProposalData String?
+  proposalResults        Json
+  proposalType           String
+  status                 String
+  createdTransactionHash String?
+  cancelledTransactionHash String?
+  executedTransactionHash String?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
 }

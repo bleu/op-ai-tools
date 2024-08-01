@@ -9,7 +9,7 @@ export function formatDate(date: Date | string | number | undefined) {
   if (!date) return "";
   return Intl.DateTimeFormat("en", {
     year: "numeric",
-    month: "long",
+    month: "short",
     day: "numeric",
   }).format(new Date(date));
 }

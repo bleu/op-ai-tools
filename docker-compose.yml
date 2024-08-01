@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: op-ai-tools-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: op-ai-tools
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - op-network
+
+  redis:
+    image: redis:6-alpine
+    container_name: op-ai-tools-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - op-network
+
+volumes:
+  postgres-data:
+
+networks:
+  op-network:
+    driver: bridge

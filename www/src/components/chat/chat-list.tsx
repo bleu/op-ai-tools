@@ -1,7 +1,7 @@
 import type { Message } from "@/app/data";
 import type { ChatData } from "@/lib/chat-utils";
 import { cn } from "@/lib/utils";
-import { Clipboard, RotateCcw, ThumbsDown } from "lucide-react";
+import { Clipboard, ThumbsDown } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
 import React, { useEffect, useRef, useState } from "react";
 import { Avatar, AvatarImage, BoringAvatar } from "../ui/avatar";
@@ -96,7 +96,7 @@ export function ChatList({
           key={message.timestamp}
           className={cn(
             "flex flex-col gap-2 p-4",
-            message.name !== "Optimism GovGPT" ? "items-end" : "items-start"
+            message.name !== "Optimism GovGPT" ? "items-end" : "items-start",
           )}
         >
           <div className="flex gap-3 items-start">
@@ -114,7 +114,7 @@ export function ChatList({
             <div
               className={cn(
                 "p-3 rounded-md max-w-md overflow-hidden",
-                "bg-accent"
+                "bg-accent",
               )}
             >
               {loadingMessageId === message.id ? (

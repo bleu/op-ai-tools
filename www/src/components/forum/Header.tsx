@@ -1,8 +1,9 @@
 import { Search } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
-import { MobileSidebar } from "./Sidebar";
 import Image from "next/image";
+import { MobileSidebar } from "./Sidebar";
+import Link from "next/link";
 
 export function Header() {
   return (
@@ -11,7 +12,10 @@ export function Header() {
         <MobileSidebar />
       </div>
       <div className="w-full flex-1 flex justify-between items-center">
-        <div className="flex flex-col gap-x-3 md:flex-row">
+        <Link
+          href="/forum/latest-topics"
+          className="flex flex-col gap-x-3 md:flex-row"
+        >
           <Image
             src="/optimism.svg"
             alt="logo"
@@ -20,7 +24,7 @@ export function Header() {
             className="w-[100px] md:w-[150px]"
           />
           <span className="text-xs md:text-sm font-light">GovSummarizer</span>
-        </div>
+        </Link>
         {/* <form className="w-1/2 hidden md:block">
           <div className="relative">
             <Search className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />

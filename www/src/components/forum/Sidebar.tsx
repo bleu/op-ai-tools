@@ -1,14 +1,21 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
-import { BarChart2, Clock, Menu, ExternalLink, LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import {
+  BarChart2,
+  Clock,
+  ExternalLink,
+  type LucideIcon,
+  Menu,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import React from "react";
 import { Octagram } from "./Octagram";
 import { CATEGORY_COLORS } from "./categoryColors";
+import { categoryBySlug } from "./table/post-options";
 
 interface NavSection {
   title: string;
@@ -26,22 +33,17 @@ interface NavLinkProps extends NavItem {
   isMobile: boolean;
   isSelected: boolean;
   isCategory?: boolean;
+  onClick?: () => void;
 }
 
 interface NavContentProps {
   isMobile: boolean;
+  setSheetOpen?: (open: boolean) => void;
 }
-
 const navSections: NavSection[] = [
   {
     title: "Feeds",
     items: [
-      {
-        href: "/forum/trending-topics",
-        icon: BarChart2,
-        label: "Trending topics",
-        className: "bg-gray-100",
-      },
       {
         href: "/forum/latest-topics",
         icon: Clock,
@@ -54,43 +56,43 @@ const navSections: NavSection[] = [
     title: "Categories",
     items: [
       {
-        href: "#",
+        href: `/forum?category=${categoryBySlug("all")}`,
         icon: Octagram,
         label: "All",
         className: CATEGORY_COLORS["All"],
       },
       {
-        href: "#",
+        href: `/forum?category=${categoryBySlug("delegates")}`,
         icon: Octagram,
         label: "Delegates",
         className: CATEGORY_COLORS["Delegates"],
       },
       {
-        href: "#",
+        href: `/forum?category=${categoryBySlug("general")}`,
         icon: Octagram,
         label: "General Discussions",
         className: CATEGORY_COLORS["General Discussions"],
       },
       {
-        href: "#",
+        href: `/forum?category=${categoryBySlug("grants")}`,
         icon: Octagram,
         label: "Mission Grants",
         className: CATEGORY_COLORS["Mission Grants"],
       },
       {
-        href: "#",
+        href: `/forum?category=${categoryBySlug("updates")}`,
         icon: Octagram,
         label: "Updates and Announcements",
         className: CATEGORY_COLORS["Updates and Announcements"],
       },
       {
-        href: "#",
+        href: `/forum?category=${categoryBySlug("retro-funding")}`,
         icon: Octagram,
         label: "Retro Funding",
         className: CATEGORY_COLORS["Retro Funding"],
       },
       {
-        href: "#",
+        href: `/forum?category=${categoryBySlug("others")}`,
         icon: Octagram,
         label: "Others",
         className: CATEGORY_COLORS["Others"],
@@ -107,6 +109,7 @@ function NavLink({
   isMobile,
   isSelected,
   isCategory,
+  onClick = () => {},
 }: NavLinkProps) {
   return (
     <Link
@@ -118,6 +121,7 @@ function NavLink({
           ? "bg-[#FFDBDF] text-optimism font-semibold"
           : "hover:bg-gray-100"
       )}
+      onClick={onClick}
     >
       <Icon
         className={cn(
@@ -131,7 +135,7 @@ function NavLink({
   );
 }
 
-function NavContent({ isMobile }: NavContentProps) {
+function NavContent({ isMobile, setSheetOpen = () => {} }: NavContentProps) {
   const pathname = usePathname();
   return (
     <div className={cn("flex flex-col gap-y-2", isMobile && "py-2")}>
@@ -155,6 +159,9 @@ function NavContent({ isMobile }: NavContentProps) {
                   isMobile={isMobile}
                   isSelected={pathname === item.href}
                   isCategory={section.title === "Categories"}
+                  onClick={() => {
+                    setSheetOpen(false);
+                  }}
                 />
               ))}
             </nav>
@@ -173,6 +180,7 @@ function NavContent({ isMobile }: NavContentProps) {
         </h2>
         <Link
           href="/"
+          target="_blank"
           className={cn(
             "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-gray-100 text-gray-700 text-sm"
           )}
@@ -196,8 +204,10 @@ export function DesktopSidebar() {
 }
 
 export function MobileSidebar() {
+  const [open, setOpen] = React.useState(false);
+
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="outline" size="icon" className="shrink-0 md:hidden">
           <Menu className="h-5 w-5" />
@@ -206,7 +216,7 @@ export function MobileSidebar() {
       </SheetTrigger>
       <SheetContent side="left" className="flex flex-col w-[280px] p-0">
         <div className="overflow-y-auto px-4 py-6">
-          <NavContent isMobile={true} />
+          <NavContent isMobile={true} setSheetOpen={setOpen} />
         </div>
       </SheetContent>
     </Sheet>
