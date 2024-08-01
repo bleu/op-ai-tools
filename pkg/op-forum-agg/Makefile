@@ -5,16 +5,19 @@ init:
 
 seed_categories:
 	@poetry install
-	@poetry run sync_categories
+	@poetry run sync categories
 
 seed_topics:
 	@poetry install
-	@poetry run sync_raw_posts
-	@poetry run sync_topics
+	@poetry run sync raw_posts
+	@poetry run sync topics
 
-seed_snapshot:
+seed_snapshot_proposals:
 	@poetry install
-	@poetry run sync_snapshot
+	@poetry run sync snapshot_proposals
 
-seed_all:
-	seed_categories seed_topics seed_snapshot
+seed_agora_proposals:
+	@poetry install
+	@poetry run sync agora_proposals
+
+seed_all: seed_categories seed_topics seed_snapshot_proposals seed_agora_proposals

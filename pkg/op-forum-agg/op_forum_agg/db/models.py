@@ -142,3 +142,32 @@ class SnapshotProposal(Model):
 
     class Meta:
         table = "SnapshotProposal"
+
+
+class AgoraProposal(Model):
+    id = fields.IntField(pk=True)
+    externalId = fields.CharField(max_length=255, unique=True)
+    proposer = fields.CharField(max_length=255)
+    snapshotBlockNumber = fields.IntField()
+    createdTime = NaiveDatetimeField()
+    startTime = NaiveDatetimeField()
+    endTime = NaiveDatetimeField()
+    cancelledTime = NaiveDatetimeField(null=True)
+    executedTime = NaiveDatetimeField(null=True)
+    markdownTitle = fields.TextField()
+    description = fields.TextField()
+    quorum = fields.CharField(max_length=255)
+    approvalThreshold = fields.CharField(max_length=255, null=True)
+    proposalData = fields.JSONField()
+    unformattedProposalData = fields.TextField(null=True)
+    proposalResults = fields.JSONField()
+    proposalType = fields.CharField(max_length=255)
+    status = fields.CharField(max_length=255)
+    createdTransactionHash = fields.CharField(max_length=255, null=True)
+    cancelledTransactionHash = fields.CharField(max_length=255, null=True)
+    executedTransactionHash = fields.CharField(max_length=255, null=True)
+    createdAt = NaiveDatetimeField(auto_now_add=True)
+    updatedAt = NaiveDatetimeField(auto_now=True)
+
+    class Meta:
+        table = "AgoraProposal"

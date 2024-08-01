@@ -1,6 +1,8 @@
 import asyncio
+from typing import Callable, Dict
 from tortoise import Tortoise
 from op_forum_agg.config import config
+from op_forum_agg.services.agora_proposals import AgoraProposalsService
 from op_forum_agg.services.categories import CategoriesService
 from op_forum_agg.services.raw_threads import RawThreadsService
 from op_forum_agg.services.threads import ThreadsService
@@ -15,62 +17,38 @@ async def close_db():
     await Tortoise.close_connections()
 
 
-async def sync_categories():
+async def generic_sync(sync_function: Callable):
     await init_db()
-    await CategoriesService.sync_categories()
+    await sync_function()
     await close_db()
 
 
-async def sync_raw_threads():
-    await init_db()
-    await RawThreadsService.sync_all_raw_threads()
-    await close_db()
+def run_sync(sync_function: Callable):
+    asyncio.run(generic_sync(sync_function))
 
 
-async def sync_forum_posts():
-    await init_db()
-    await ThreadsService.sync_forum_posts()
-    await close_db()
+# Dictionary mapping command names to their corresponding sync functions
+SYNC_COMMANDS: Dict[str, Callable] = {
+    "categories": CategoriesService.sync_categories,
+    "raw_threads": RawThreadsService.sync_all_raw_threads,
+    "forum_posts": ThreadsService.sync_forum_posts,
+    "snapshot_proposals": SnapshotService.sync_proposals,
+    "agora_proposals": AgoraProposalsService.sync_proposals,
+}
 
 
-async def sync_snapshot():
-    await init_db()
-    await SnapshotService.sync_proposals()
-    await close_db()
-
-
-def run_sync_categories():
-    asyncio.run(sync_categories())
-
-
-def run_sync_raw_threads():
-    asyncio.run(sync_raw_threads())
-
-
-def run_sync_forum_posts():
-    asyncio.run(sync_forum_posts())
-
-
-def run_sync_snapshot():
-    asyncio.run(sync_snapshot())
-
-
-if __name__ == "__main__":
+def main():
     import sys
 
     if len(sys.argv) > 1:
         command = sys.argv[1]
-        if command == "sync_categories":
-            run_sync_categories()
-        elif command == "sync_raw_threads":
-            run_sync_raw_threads()
-        elif command == "sync_forum_posts":
-            run_sync_forum_posts()
-        elif command == "sync_snapshot":
-            run_sync_snapshot()
+        if command in SYNC_COMMANDS:
+            run_sync(SYNC_COMMANDS[command])
         else:
             print(f"Unknown command: {command}")
     else:
-        print(
-            "Please specify a command: sync_categories, sync_raw_threads, sync_forum_posts, or sync_snapshot"
-        )
+        print(f"Please specify a command: {', '.join(SYNC_COMMANDS.keys())}")
+
+
+if __name__ == "__main__":
+    main()
