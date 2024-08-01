@@ -29,8 +29,10 @@ POSTHOG_API_KEY = os.getenv("POSTHOG_API_KEY", "")
 RAW_FORUM_DB = "RawForumPost"
 FORUM_SUMMARY_DB = "ForumPost"
 
-QUESTIONS_INDEX_JSON = "questions_index.json"
-QUESTIONS_INDEX_NPY = "questions_index.npy"
+QUESTIONS_INDEX_JSON = "index/questions.json"
+QUESTIONS_INDEX_NPY = "index/questions.npy"
+
+KEYWORDS_INDEX_JSON = "index/keywords.json"
 
 SCOPE = "OPTIMISM GOVERNANCE/OPTIMISM COLLECTIVE/OPTIMISM L2"
 

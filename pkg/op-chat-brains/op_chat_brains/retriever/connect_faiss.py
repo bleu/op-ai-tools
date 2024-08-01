@@ -4,18 +4,18 @@ import os
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
-from op_chat_brains.config import DB_STORAGE_PATH
+from op_chat_brains.config import DB_STORAGE_PATH, EMBEDDING_MODEL
 
 
 class DatabaseLoader:
     @staticmethod
     def load_db(
-        dbs: Tuple[str, ...], model_embeddings: str, vectorstore: str = "faiss"
+        dbs: Tuple[str, ...], vectorstore: str = "faiss"
     ) -> FAISS:
-        embeddings = OpenAIEmbeddings(model=model_embeddings)
+        embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
         if vectorstore == "faiss":
             db_paths = [
-                os.path.join(DB_STORAGE_PATH, f"{name}_db/faiss/{model_embeddings}")
+                os.path.join(DB_STORAGE_PATH, f"{name}_db/faiss/{EMBEDDING_MODEL}")
                 for name in dbs
             ]
             loaded_dbs = [

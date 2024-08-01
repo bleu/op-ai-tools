@@ -6,9 +6,7 @@ import re
 class RAG_system:
     REASONING_LIMIT : int
     models_to_use : list
-    index_retriever : Callable
-    factual_retriever : Callable
-    temporal_retriever : Callable
+    retriever : Callable
     context_filter : Callable
     system_prompt_preprocessor : str
     system_prompt_responder : str
@@ -20,9 +18,7 @@ class RAG_system:
     def __init__(self, **kwargs):
             self.REASONING_LIMIT = kwargs.get("REASONING_LIMIT", 3)
             self.models_to_use = kwargs.get("models_to_use")
-            self.index_retriever = kwargs.get("index_retriever")
-            self.factual_retriever = kwargs.get("factual_retriever")
-            self.temporal_retriever = kwargs.get("temporal_retriever")
+            self.retriever = kwargs.get("retriever")
             self.context_filter = kwargs.get("context_filter")
             self.system_prompt_preprocessor = kwargs.get("system_prompt_preprocessor")
             self.system_prompt_responder = kwargs.get("system_prompt_responder")
@@ -56,15 +52,6 @@ class RAG_system:
                 user_knowledge = ""
             questions = [{"text": q[2], "type": q[1]} for q in xml_tag_pattern.findall(tags["questions"][1])]
             return True, (user_knowledge, questions)
-
-    def Retriever(self, query : str, info_type : str, reasoning_level) -> list:
-        if reasoning_level == 0:
-            context = self.index_retriever(query)
-            if len(context) == 0:
-                return self.factual_retriever(query)
-            return context
-        else:
-            return self.factual_retriever(query)
 
     def responder_LLM(self, query : str, context : str, user_knowledge : str, summary_of_explored_contexts : str, final : bool = False, LLM : Any = None):# -> Tuple[str|list, bool]:
         if LLM is None:
@@ -119,12 +106,12 @@ class RAG_system:
             is_enough = False
             explored_contexts = []
             user_knowledge, questions = preprocess_reasoning
-            result = None, questions
+            result = "", questions
             reasoning_level = 0
             while not is_enough:
                 summary_of_explored_contexts, questions = result
 
-                context_list = [self.Retriever(q["text"], info_type=q["type"], reasoning_level=reasoning_level) for q in questions]
+                context_list = [self.retriever(q["text"], info_type=q["type"], reasoning_level=reasoning_level) for q in questions]
                 context_dict = {c.metadata['url']:c for cc in context_list for c in cc}
 
                 context, context_urls = self.context_filter(context_dict, explored_contexts, query)

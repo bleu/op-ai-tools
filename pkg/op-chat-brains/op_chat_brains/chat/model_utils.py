@@ -13,7 +13,9 @@ from op_chat_brains.config import (
     QUESTIONS_INDEX_JSON,
     QUESTIONS_INDEX_NPY,
     DOCS_PATH,
-    SCOPE
+    SCOPE,
+    KEYWORDS_INDEX_JSON,
+    EMBEDDING_MODEL
 )
 from op_chat_brains.documents import optimism
 
@@ -219,14 +221,14 @@ class RetrieverBuilder:
     @staticmethod
     def build_faiss_retriever(
         dbs_name: List[str],
-        embeddings_name: str,
         **retriever_pars,
     ):
-        db = connect_faiss.DatabaseLoader.load_db(dbs_name, embeddings_name)
+        db = connect_faiss.DatabaseLoader.load_db(dbs_name)
         return lambda query : db.similarity_search(query, **retriever_pars)
 
-    def build_index(embeddings_name, k_max = 10, treshold = 0.95):
-        embeddings = OpenAIEmbeddings(model=embeddings_name)
+    @staticmethod
+    def build_questions_index(k_max = 10, treshold = 0.95):
+        embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
 
         # load json index
         with open(QUESTIONS_INDEX_JSON, "r") as f:
@@ -272,8 +274,79 @@ class RetrieverBuilder:
             contexts = contexts[contexts["url"].isin(urls)]
             content = contexts["content"].tolist()
             return content
-
+        
         return find_contexts
+        
+
+    def build_keywords_index(k_max = 3, treshold = 0.95):
+        embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
+
+        with open(KEYWORDS_INDEX_JSON, "r") as f:
+            keywords_index = json.load(f)
+
+        keywords = list(keywords_index.keys())
+        keywords_emb = np.array(embeddings.embed_documents(keywords))
+        keywords_faiss = faiss.IndexFlatIP(keywords_emb.shape[1])
+        keywords_faiss.add(keywords_emb)
+
+        def find_similar_keywords(query):
+            query_emb = np.array(embeddings.embed_documents([query]))
+            D, I = keywords_faiss.search(query_emb, k_max)
+            
+            similar_keywords = [keywords[i] for i in I[0]]
+            dists = D[0]
+
+            dists = [d for d in dists if d >= treshold]
+            similar_keywords = [q for q, d in zip(similar_keywords, dists) if d >= treshold]
+
+            return similar_keywords
+        
+        # load json index
+        with open(QUESTIONS_INDEX_JSON, "r") as f:
+            index = json.load(f)
+        
+        index_questions = list(index.keys())
+        index_questions_embed = np.load(QUESTIONS_INDEX_NPY)
+
+        summaries = optimism.SummaryProcessingStrategy.langchain_process(divide="category_name")
+        pattern = r'[^A-Za-z0-9_]+'
+        summaries = [(s.metadata['url'], s, re.sub(pattern, '', k)) for k, v in summaries.items() for s in v]
+        
+        fragments_loader = optimism.FragmentsProcessingStrategy()
+        fragments = fragments_loader.process_document(DOCS_PATH, headers_to_split_on=[])
+        
+        data = [(f.metadata['url'], f, "fragments_docs") for f in fragments]
+        data.extend(summaries)
+        context_df = pd.DataFrame(data, columns=["url", "content", "type_db_info"])
+
+        def find_contexts(query, kw):
+            similar_keywords = find_similar_keywords(kw)
+            questions = [keywords_index[k] for k in similar_keywords]
+            questions = [x for xs in questions for x in xs]
+
+            i_s = [index_questions.index(q) for q in questions]
+            embs = index_questions_embed[i_s]
+            qs_faiss = faiss.IndexFlatIP(embs.shape[1])
+            qs_faiss.add(embs)
+
+            query_embed = np.array(embeddings.embed_documents([query]))
+            D, I = qs_faiss.search(query_embed, k_max)
+
+            similar_qs = [questions[i] for i in I[0]]
+
+            urls = [index[q] for q in similar_qs]
+            urls = set([x[0] for xs in urls for x in xs])
+            print(urls)
+
+            contexts = context_df
+            contexts = contexts[contexts["url"].isin(urls)]
+            content = contexts["content"].tolist()
+
+            return content
+        
+        return find_contexts
+
+    
 
 class access_APIs:
     def get_llm(model:str = "gpt-4o-mini", **kwargs):
