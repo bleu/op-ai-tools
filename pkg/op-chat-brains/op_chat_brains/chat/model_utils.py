@@ -13,11 +13,12 @@ from op_chat_brains.config import (
     QUESTIONS_INDEX_JSON,
     QUESTIONS_INDEX_NPY,
     DOCS_PATH,
-    SCOPE
+    SCOPE,
 )
 from op_chat_brains.documents import optimism
 
 TODAY = time.strftime("%Y-%m-%d")
+
 
 class Prompt:
     responder_start = f"""
@@ -62,7 +63,9 @@ Follow these steps:
    - Avoid jargon and explain any technical terms.
 """
 
-    responder = responder_start+f"""
+    responder = (
+        responder_start
+        + f"""
 5. If you think more information is necessary to fully answer the query, formulate questions about that encompasses the information you think is missing. These questions are going to be used by the system to retrieve the information. The user won't see them. Include these questions within <new_questions> tags, following this format:
     <new_questions>
         <question type="[question_type]">[Your question here]</question>
@@ -98,8 +101,11 @@ When formulating questions, adhere to these guidelines:
 
 Remember to be helpful, polite, and informative while maintaining assertiveness, objectivity, and brevity in your response.
 """
+    )
 
-    final_responder = responder_start+f"""
+    final_responder = (
+        responder_start
+        + f"""
 5. If you don't have enough information, start the <answer> tag with "I couldn't find all the information I wanted to provide a complete answer." And provide some context about the information you have, how it relates to the query and what you think is missing to properly answer the user's query.
 
 6. Format your entire response as follows:
@@ -123,7 +129,8 @@ Remember to be helpful, polite, and informative while maintaining assertiveness,
 
 Remember to be helpful, polite, and informative while maintaining assertiveness, objectivity, and brevity in your response.
 """
-    
+    )
+
     preprocessor = f"""
 You are a part of a helpful chatbot assistant system that provides information about {SCOPE}. Your task is to help responding to user queries appropriately based on the given information and guidelines. You will return <answer> tags with the response to the user or <user_knowledge> and <questions> tags so the system can retrieve more information to properly answer the query.
 
@@ -166,7 +173,8 @@ When formulating questions, adhere to these guidelines:
 
 Remember, your goal is to provide accurate and helpful information about {SCOPE} while staying within the defined scope and gathering necessary information when required.
 """
-    
+
+
 class ContextHandling:
     summary_template = """
 <summary_from_forum_thread>
@@ -179,8 +187,14 @@ class ContextHandling:
 </summary_from_forum_thread>
 
 """
+
     @staticmethod
-    def filter(context_dict:dict, explored_contexts:list, query:str|None = None, k:int = 5) -> Tuple[str, list]:
+    def filter(
+        context_dict: dict,
+        explored_contexts: list,
+        query: str | None = None,
+        k: int = 5,
+    ) -> Tuple[str, list]:
         urls = context_dict.keys()
         context = [c for c in context_dict.values() if c not in explored_contexts]
 
@@ -198,22 +212,25 @@ class ContextHandling:
             type_db = c.metadata["type_db_info"]
             match type_db:
                 case "forum_thread_summary":
-                    out.append(ContextHandling.summary_template.format(
-                        TITLE = c.metadata["thread_title"],
-                        CREATED_AT = c.metadata["created_at"],
-                        LAST_POST_AT = c.metadata["last_posted_at"],
-                        URL = c.metadata["url"],
-                        CONTENT = c.page_content
-                    ))
+                    out.append(
+                        ContextHandling.summary_template.format(
+                            TITLE=c.metadata["thread_title"],
+                            CREATED_AT=c.metadata["created_at"],
+                            LAST_POST_AT=c.metadata["last_posted_at"],
+                            URL=c.metadata["url"],
+                            CONTENT=c.page_content,
+                        )
+                    )
                 case _:
                     pass
 
         urls = [url for url in urls if context_dict[url] in context]
         return "".join(out), urls
-    
+
     @staticmethod
-    def reordering(context:list, query:str, k:int = 5) -> list:
+    def reordering(context: list, query: str, k: int = 5) -> list:
         return context[:k]
+
 
 class RetrieverBuilder:
     @staticmethod
@@ -223,9 +240,9 @@ class RetrieverBuilder:
         **retriever_pars,
     ):
         db = connect_faiss.DatabaseLoader.load_db(dbs_name, embeddings_name)
-        return lambda query : db.similarity_search(query, **retriever_pars)
+        return lambda query: db.similarity_search(query, **retriever_pars)
 
-    def build_index(embeddings_name, k_max = 10, treshold = 0.95):
+    def build_index(embeddings_name, k_max=10, treshold=0.95):
         embeddings = OpenAIEmbeddings(model=embeddings_name)
 
         # load json index
@@ -237,30 +254,38 @@ class RetrieverBuilder:
         index_faiss = faiss.IndexFlatIP(index_questions_embed.shape[1])
         index_faiss.add(index_questions_embed)
 
-        summaries = optimism.SummaryProcessingStrategy.langchain_process(divide="category_name")
-        pattern = r'[^A-Za-z0-9_]+'
-        summaries = [(s.metadata['url'], s, re.sub(pattern, '', k)) for k, v in summaries.items() for s in v]
-        
+        summaries = optimism.SummaryProcessingStrategy.langchain_process(
+            divide="category_name"
+        )
+        pattern = r"[^A-Za-z0-9_]+"
+        summaries = [
+            (s.metadata["url"], s, re.sub(pattern, "", k))
+            for k, v in summaries.items()
+            for s in v
+        ]
+
         fragments_loader = optimism.FragmentsProcessingStrategy()
         fragments = fragments_loader.process_document(DOCS_PATH, headers_to_split_on=[])
-        
-        data = [(f.metadata['url'], f, "fragments_docs") for f in fragments]
+
+        data = [(f.metadata["url"], f, "fragments_docs") for f in fragments]
         data.extend(summaries)
         context_df = pd.DataFrame(data, columns=["url", "content", "type_db_info"])
 
         def find_similar_questions(query):
             query_embed = np.array(embeddings.embed_documents([query]))
             D, I = index_faiss.search(query_embed, k_max)
-            
+
             similar_questions = [index_questions[i] for i in I[0]]
             dists = D[0]
 
             dists = [d for d in dists if d >= treshold]
-            similar_questions = [q for q, d in zip(similar_questions, dists) if d >= treshold]
+            similar_questions = [
+                q for q, d in zip(similar_questions, dists) if d >= treshold
+            ]
 
             return similar_questions
 
-        def find_contexts(query, db_type_info = None):
+        def find_contexts(query, db_type_info=None):
             similar_questions = find_similar_questions(query)
             urls = [s[1] for s in similar_questions]
             urls = [x[0] for xs in urls for x in xs]
@@ -275,8 +300,9 @@ class RetrieverBuilder:
 
         return find_contexts
 
+
 class access_APIs:
-    def get_llm(model:str = "gpt-4o-mini", **kwargs):
+    def get_llm(model: str = "gpt-4o-mini", **kwargs):
         if "gpt" in model:
             return ChatOpenAI(model=model, **kwargs)
         elif "claude" in model:

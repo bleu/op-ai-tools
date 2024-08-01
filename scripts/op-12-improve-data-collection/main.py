@@ -3,8 +3,10 @@ import csv
 import sys
 import os
 
+
 def get_folder_docs(link):
     None
+
 
 def process_all_txt(repo_name, all_txt_file):
     # Read the content of all.txt

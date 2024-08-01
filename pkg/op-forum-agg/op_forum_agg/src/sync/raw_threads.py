@@ -1,8 +1,7 @@
 import json
 from datetime import datetime, timezone
 
-from forum_dl import (ExtractorOptions, SessionOptions, WriterOptions,
-                      extractors)
+from forum_dl import ExtractorOptions, SessionOptions, WriterOptions, extractors
 
 from op_forum_agg.src.queries import UPSERT_THREADS
 from op_forum_agg.src.sync.base import DataIngestInterface

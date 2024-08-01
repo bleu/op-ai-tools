@@ -1,4 +1,5 @@
 import pandas as pd
+
 TODAY = pd.to_datetime("today").strftime("%Y-%m-%d")
 
 from langchain_openai import ChatOpenAI
@@ -11,7 +12,13 @@ forum_path = "../../data/002-governance-forum-202406014/dataset/_out.jsonl"
 snapshot_path = "../../data/003-snapshot-spaces-proposals-20240711/dataset.jsonl"
 
 chat_models_openai = ["gpt-3.5-turbo-0125", "gpt-4o"]
-chat_models_anthropic = ["claude-3-sonnet-20240229", "claude-3-haiku-20240307", "claude-3-opus-20240229", "claude-3-5-sonnet-20240620"]
+chat_models_anthropic = [
+    "claude-3-sonnet-20240229",
+    "claude-3-haiku-20240307",
+    "claude-3-opus-20240229",
+    "claude-3-5-sonnet-20240620",
+]
+
 
 def llm_builder(model_name):
     if model_name in chat_models_openai:
@@ -167,7 +174,8 @@ class Prompt:
 
     Begin your analysis and provide the structured summary now.
     """
-    
+
+
 class InternalDialogue:
     @staticmethod
     def proposal(llm: Any, thread: Document, snapshot_proposals: Dict[str, Any]):
@@ -175,10 +183,12 @@ class InternalDialogue:
         for k in snapshot_proposals.keys():
             if url in k:
                 url = k
-                
-        summary = llm.invoke(Prompt.proposal_summarizer.format(
-            PROPOSAL=snapshot_proposals[url]['str'],
-            FORUM_THREAD=thread.page_content
-        )).content
+
+        summary = llm.invoke(
+            Prompt.proposal_summarizer.format(
+                PROPOSAL=snapshot_proposals[url]["str"],
+                FORUM_THREAD=thread.page_content,
+            )
+        ).content
 
         return summary

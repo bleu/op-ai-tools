@@ -1,10 +1,12 @@
 import re
 
-from op_forum_agg.src.queries import (CREATE_FORUM_POSTS, LIST_CATEGORIES,
-                                      RETRIEVE_RAW_THREAD_BY_URL)
+from op_forum_agg.src.queries import (
+    CREATE_FORUM_POSTS,
+    LIST_CATEGORIES,
+    RETRIEVE_RAW_THREAD_BY_URL,
+)
 from op_forum_agg.src.sync.base import Category, DataIngestInterface, Thread
-from op_forum_agg.src.utils.db import (filter_data_from_db,
-                                       retrieve_data_from_db)
+from op_forum_agg.src.utils.db import filter_data_from_db, retrieve_data_from_db
 
 
 def get_thread(thread_url: str):

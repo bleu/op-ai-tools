@@ -5,15 +5,15 @@ import streamlit as st
 with st.echo():
     list_dbs = os.listdir("dbs")
     list_dbs = [db[:-3] for db in list_dbs if db[-3:] == "_db"]
-    filter_out_dbs = ["summaries", 'ARCHIVED  & OLD Missions']
+    filter_out_dbs = ["summaries", "ARCHIVED  & OLD Missions"]
     dbs = [db for db in list_dbs if db not in filter_out_dbs]
 
     embedding_model = "text-embedding-ada-002"
 
     retriever = model_utils.build_retriever(
-        dbs, 
+        dbs,
         embedding_model,
-        k = 20,
+        k=20,
     )
 
     test_queries = [
@@ -26,12 +26,11 @@ with st.echo():
 
     models2test = [
         "gpt-4o-mini",
-        #"gpt-4o",
-        "claude-3-sonnet-20240229"
-        #"claude-3-opus-20240229",
+        # "gpt-4o",
+        "claude-3-sonnet-20240229",
+        # "claude-3-opus-20240229",
     ]
 
-    
 
 if st.button("Run test queries"):
     with st.echo():
@@ -44,20 +43,20 @@ if st.button("Run test queries"):
                     "max_retries": 5,
                     "max_tokens": 1024,
                     "timeout": 60,
-                }
+                },
             )
 
             system = system_structure.RAG_system(
-                REASONING_LIMIT = 1,
-                models_to_use = [chat_model, chat_model],
-                factual_retriever = retriever,
-                temporal_retriever = retriever,
-                context_filter = model_utils.ContextHandling.filter,
-                system_prompt_preprocessor = model_utils.Prompt.preprocessor,
-                system_prompt_responder = model_utils.Prompt.responder,
-                system_prompt_final_responder = model_utils.Prompt.final_responder
+                REASONING_LIMIT=1,
+                models_to_use=[chat_model, chat_model],
+                factual_retriever=retriever,
+                temporal_retriever=retriever,
+                context_filter=model_utils.ContextHandling.filter,
+                system_prompt_preprocessor=model_utils.Prompt.preprocessor,
+                system_prompt_responder=model_utils.Prompt.responder,
+                system_prompt_final_responder=model_utils.Prompt.final_responder,
             )
-            
+
             answers[m] = []
             for query in test_queries:
                 start = time.time()
@@ -72,5 +71,5 @@ if st.button("Run test queries"):
         label="Download results",
         data=json.dumps(answers),
         file_name="results.json",
-        mime="application/json"
+        mime="application/json",
     )
