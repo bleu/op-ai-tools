@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import Dict, Any
 import httpx
 import asyncio
 from op_forum_agg.db.models import AgoraProposal
@@ -25,7 +25,7 @@ class AgoraProposalsService:
             return response.json()
 
     @staticmethod
-    async def fetch_all_proposals() -> List[Dict[str, Any]]:
+    async def acquire_and_save():
         headers = {
             "Authorization": f"Bearer {BEARER_TOKEN}",
             "Accept": "application/json",
@@ -46,70 +46,62 @@ class AgoraProposalsService:
             else:
                 next_url = None
 
-        return all_proposals
-
-    @staticmethod
-    async def sync_proposals():
-        try:
-            proposals = await AgoraProposalsService.fetch_all_proposals()
-            print(f"Total proposals fetched: {len(proposals)}")
-
-            proposal_objects = []
-            for proposal in proposals:
-                proposal_objects.append(
-                    AgoraProposal(
-                        externalId=proposal["id"],
-                        proposer=proposal["proposer"],
-                        snapshotBlockNumber=proposal["snapshotBlockNumber"],
-                        createdTime=proposal["createdTime"],
-                        startTime=proposal["startTime"],
-                        endTime=proposal["endTime"],
-                        cancelledTime=proposal.get("cancelledTime"),
-                        executedTime=proposal.get("executedTime"),
-                        markdownTitle=proposal["markdowntitle"],
-                        description=proposal["description"],
-                        quorum=proposal["quorum"],
-                        approvalThreshold=proposal.get("approvalThreshold"),
-                        proposalData=proposal["proposalData"],
-                        unformattedProposalData=proposal["unformattedProposalData"],
-                        proposalResults=proposal["proposalResults"],
-                        proposalType=proposal["proposalType"],
-                        status=proposal["status"],
-                        createdTransactionHash=proposal.get("createdTransactionHash"),
-                        cancelledTransactionHash=proposal.get(
-                            "cancelledTransactionHash"
-                        ),
-                        executedTransactionHash=proposal.get("executedTransactionHash"),
-                    )
+        proposal_objects = []
+        for proposal in all_proposals:
+            proposal_objects.append(
+                AgoraProposal(
+                    externalId=proposal["id"],
+                    proposer=proposal["proposer"],
+                    snapshotBlockNumber=proposal["snapshotBlockNumber"],
+                    createdTime=proposal["createdTime"],
+                    startTime=proposal["startTime"],
+                    endTime=proposal["endTime"],
+                    cancelledTime=proposal.get("cancelledTime"),
+                    executedTime=proposal.get("executedTime"),
+                    markdownTitle=proposal["markdowntitle"],
+                    description=proposal["description"],
+                    quorum=proposal["quorum"],
+                    approvalThreshold=proposal.get("approvalThreshold"),
+                    proposalData=proposal["proposalData"],
+                    unformattedProposalData=proposal["unformattedProposalData"],
+                    proposalResults=proposal["proposalResults"],
+                    proposalType=proposal["proposalType"],
+                    status=proposal["status"],
+                    createdTransactionHash=proposal.get("createdTransactionHash"),
+                    cancelledTransactionHash=proposal.get("cancelledTransactionHash"),
+                    executedTransactionHash=proposal.get("executedTransactionHash"),
                 )
-
-            await AgoraProposal.bulk_create(
-                proposal_objects,
-                update_fields=[
-                    "proposer",
-                    "snapshotBlockNumber",
-                    "createdTime",
-                    "startTime",
-                    "endTime",
-                    "cancelledTime",
-                    "executedTime",
-                    "markdownTitle",
-                    "description",
-                    "quorum",
-                    "approvalThreshold",
-                    "proposalData",
-                    "unformattedProposalData",
-                    "proposalResults",
-                    "proposalType",
-                    "status",
-                    "createdTransactionHash",
-                    "cancelledTransactionHash",
-                    "executedTransactionHash",
-                ],
-                on_conflict=["externalId"],
             )
 
-            print("Proposals synced successfully")
+        await AgoraProposal.bulk_create(
+            proposal_objects,
+            update_fields=[
+                "proposer",
+                "snapshotBlockNumber",
+                "createdTime",
+                "startTime",
+                "endTime",
+                "cancelledTime",
+                "executedTime",
+                "markdownTitle",
+                "description",
+                "quorum",
+                "approvalThreshold",
+                "proposalData",
+                "unformattedProposalData",
+                "proposalResults",
+                "proposalType",
+                "status",
+                "createdTransactionHash",
+                "cancelledTransactionHash",
+                "executedTransactionHash",
+            ],
+            on_conflict=["externalId"],
+        )
 
-        except httpx.RequestError as e:
-            print(f"An error occurred while fetching proposals: {e}")
+        print(f"Acquired and saved {len(proposal_objects)} Agora proposals")
+
+    @staticmethod
+    async def update_relationships():
+        # If there are any relationships to update, implement them here
+        pass
