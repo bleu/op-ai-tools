@@ -16,7 +16,8 @@ from op_chat_brains.config import (
     MAX_RETRIES,
     K_RETRIEVER,
 )
-from op_chat_brains.chat.utils import process_question_stream, process_question
+#from op_chat_brains.chat.utils import process_question_stream, process_question
+from op_chat_brains.chat.system_structure import RAGModel
 from flask_cors import CORS
 from posthog import Posthog
 from functools import wraps

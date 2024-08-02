@@ -4,7 +4,7 @@ from op_chat_brains.chat import model_utils
 import re
 
 
-class RAG_system:
+class RAGModel:
     REASONING_LIMIT: int
     models_to_use: list
     index_retriever: Callable
@@ -64,7 +64,7 @@ class RAG_system:
             ]
             return True, (user_knowledge, questions)
 
-    def Retriever(self, query: str, info_type: str, reasoning_level) -> list:
+    def retrivier(self, query: str, info_type: str, reasoning_level) -> list:
         if reasoning_level == 0:
             context = self.index_retriever(query)
             if len(context) == 0:
@@ -156,7 +156,7 @@ class RAG_system:
                 summary_of_explored_contexts, questions = result
 
                 context_list = [
-                    self.Retriever(
+                    self.retrivier(
                         q["text"], info_type=q["type"], reasoning_level=reasoning_level
                     )
                     for q in questions
@@ -196,3 +196,69 @@ class RAG_system:
             answer = preprocess_reasoning
         history_reasoning["answer"] = answer
         return history_reasoning
+
+    def predict_stream(self, query: str, verbose: bool = False, memory: list = []) -> str:
+        needs_info, preprocess_reasoning = self.query_preprocessing_LLM(
+            query, memory=memory
+        )
+        history_reasoning = {
+            "query": query,
+            "needs_info": needs_info,
+            "preprocess_reasoning": preprocess_reasoning,
+            "reasoning": {},
+        }
+        if verbose:
+            print(
+                f"-------------------\nQuery: {query}\nNeeds info: {needs_info}\nPreprocess reasoning: {preprocess_reasoning}\n"
+            )
+        if needs_info:
+            is_enough = False
+            explored_contexts = []
+            user_knowledge, questions = preprocess_reasoning
+            result = None, questions
+            reasoning_level = 0
+            while not is_enough:
+                summary_of_explored_contexts, questions = result
+
+                context_list = [
+                    self.retrivier(
+                        q["text"], info_type=q["type"], reasoning_level=reasoning_level
+                    )
+                    for q in questions
+                ]
+                context_dict = {c.metadata["url"]: c for cc in context_list for c in cc}
+
+                context, context_urls = self.context_filter(
+                    context_dict, explored_contexts, query
+                )
+                explored_contexts.extend(context_urls)
+
+                if verbose:
+                    print(
+                        f"-------Reasoning level {reasoning_level}\nExplored Context URLS: {context_urls}"
+                    )
+
+                result, is_enough = self.responder_LLM(
+                    query,
+                    context,
+                    user_knowledge,
+                    summary_of_explored_contexts,
+                    final=reasoning_level > self.REASONING_LIMIT,
+                )
+
+                if verbose:
+                    print(f"-------Result: {result}\n")
+                    if is_enough:
+                        print(f"END!!!\n")
+
+                reasoning_level += 1
+                history_reasoning["reasoning"][reasoning_level] = {
+                    "context": context,
+                    "result": result,
+                }
+                answer = result
+        else:
+            answer = preprocess_reasoning
+        
+        history_reasoning["answer"] = answer
+        yield history_reasoning
