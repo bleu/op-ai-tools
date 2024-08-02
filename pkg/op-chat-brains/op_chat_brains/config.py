@@ -33,8 +33,8 @@ POSTHOG_API_KEY = os.getenv("POSTHOG_API_KEY", "")
 RAW_FORUM_DB = "RawForumPost"
 FORUM_SUMMARY_DB = "ForumPost"
 
-QUESTIONS_INDEX_JSON =  os.path.join(BASE_PATH, "questions_index.json")
-QUESTIONS_INDEX_NPY =  os.path.join(BASE_PATH, "questions_index.npy")
+QUESTIONS_INDEX_JSON = os.path.join(BASE_PATH, "questions_index.json")
+QUESTIONS_INDEX_NPY = os.path.join(BASE_PATH, "questions_index.npy")
 
 SCOPE = "OPTIMISM GOVERNANCE/OPTIMISM COLLECTIVE/OPTIMISM L2"
 

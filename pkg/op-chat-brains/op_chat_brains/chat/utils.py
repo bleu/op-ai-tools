@@ -1,23 +1,67 @@
 from op_chat_brains.chat.system_structure import RAGModel
-from op_chat_brains.chat.model_utils import ContextHandling, access_APIs, RetrieverBuilder
-from typing import Dict, Any
+from op_chat_brains.chat.model_utils import (
+    ContextHandling,
+    access_APIs,
+    RetrieverBuilder,
+)
+from typing import Dict, Any, List, Tuple
 from op_chat_brains.chat.prompts import Prompt
 from op_chat_brains.config import DB_STORAGE_PATH
 import os
+from op_chat_brains.structured_logger import StructuredLogger
 
-
-def process_question(question: str) -> Dict[str, Any]:
+def transform_memory_entries(entries: List[Dict[str, str]]) -> List[Tuple[str, str]]:
     """
-    TODO: add docstring
+    Transforms a list of dictionaries containing 'name' and 'message' keys
+    into a list of tuples with the same values.
+
+    Args:
+        entries (List[Dict[str, str]]): A list of dictionaries, each with 'name' and 'message' keys.
+
+    Returns:
+        List[Tuple[str, str]]: A list of tuples, each containing the 'name' and 'message' values.
+    """
+    return [(entry["name"], entry["message"]) for entry in entries]
+
+
+def process_question(
+    question: str,
+    memory: List[Dict[str, str]],
+    rag_structure,
+    # logger: StructuredLogger,
+    # config: Dict[str, Any],
+) -> Dict[str, Any]:
+    """
+    Processes a given question using a RAG model,
+    leveraging contextual memory and retrievers for enhanced response generation.
+
+    Args:
+        question (str): The input question to be processed.
+        memory (List[Dict[str, str]], optional): A list of dictionaries containing
+            previous interactions, each with 'name' (being 'user' or 'chat') and 'message' keys.
+            Defaults to an empty list.
+
+    Returns:
+        A dict containing the response to the question.
+            The dictionary has the following keys:
+            - "answer" (str): The generated answer from the RAG model.
+            - "error" (str): An error message if an exception occurred, otherwise None.
+
+    Raises:
+        Exception: Any unexpected error that occurs during the prediction process
+            is caught and logged, with a user-friendly error message returned in the dictionary.
     """
 
     embedding_model = "text-embedding-ada-002"
-    chat_model = ("gpt-4o-mini", {
-                "temperature": 0.0,
-                "max_retries": 5,
-                "max_tokens": 1024,
-                "timeout": 60,
-            })
+    chat_model = (
+        "gpt-4o-mini",
+        {
+            "temperature": 0.0,
+            "max_retries": 5,
+            "max_tokens": 1024,
+            "timeout": 60,
+        },
+    )
 
     try:
         list_dbs = os.listdir(DB_STORAGE_PATH)
@@ -48,21 +92,14 @@ def process_question(question: str) -> Dict[str, Any]:
             system_prompt_final_responder=Prompt.final_responder,
         )
 
-        sample_memory = []
-        result = rag_model.predict(question, memory=sample_memory, verbose=True)
+        formatted_memory = transform_memory_entries(memory)
+        result = rag_model.predict(question, memory=formatted_memory, verbose=False)
 
-        return {
-            "answer": result,
-            "error": None,
-        }
-
+        # logger.log_query(question, result)
+        return {"answer": result["answer"], "error": None}
     except Exception as e:
         # logger.logger.error(f"Unexpected error during prediction: {str(e)}")
-        print(f"Unexpected error during prediction: {str(e)}")
         return {
             "answer": None,
             "error": "An unexpected error occurred during prediction",
         }
-
-if __name__ == "__main__":
-    print(process_question("Can Optimism currently censor user transactions?"))

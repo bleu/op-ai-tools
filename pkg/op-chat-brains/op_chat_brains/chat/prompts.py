@@ -5,7 +5,9 @@ from op_chat_brains.config import (
     SCOPE,
 )
 import time, json, faiss, re
+
 TODAY = time.strftime("%Y-%m-%d")
+
 
 class Prompt:
     responder_start = f"""
@@ -160,4 +162,3 @@ When formulating questions, adhere to these guidelines:
 
 Remember, your goal is to provide accurate and helpful information about {SCOPE} while staying within the defined scope and gathering necessary information when required.
 """
-

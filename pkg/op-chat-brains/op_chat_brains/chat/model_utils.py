@@ -19,6 +19,7 @@ from op_chat_brains.documents import optimism
 
 TODAY = time.strftime("%Y-%m-%d")
 
+
 class ContextHandling:
     summary_template = """
 <summary_from_forum_thread>
