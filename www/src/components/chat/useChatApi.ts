@@ -7,7 +7,7 @@ export function useChatApi() {
   const sendMessage = useCallback(
     async (
       message: string,
-      memory: { name: string; message: string }[] = []
+      memory: { name: string; message: string }[] = [],
     ) => {
       if (!process.env.NEXT_PUBLIC_CHAT_API_URL) {
         throw new Error("Chat API URL is not defined");
@@ -28,7 +28,7 @@ export function useChatApi() {
 
       return await response.json();
     },
-    [posthog]
+    [posthog],
   );
 
   return { sendMessage };

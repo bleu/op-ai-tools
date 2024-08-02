@@ -10,6 +10,7 @@ from op_chat_brains.config import DB_STORAGE_PATH
 import os
 from op_chat_brains.structured_logger import StructuredLogger
 
+
 def transform_memory_entries(entries: List[Dict[str, str]]) -> List[Tuple[str, str]]:
     """
     Transforms a list of dictionaries containing 'name' and 'message' keys
@@ -104,5 +105,8 @@ def process_question(
             "error": "An unexpected error occurred during prediction",
         }
 
+
 if __name__ == "__main__":
-    print(process_question("Can the length of the challenge period be changed?", [], ""))
+    print(
+        process_question("Can the length of the challenge period be changed?", [], "")
+    )

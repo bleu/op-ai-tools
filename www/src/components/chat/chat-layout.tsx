@@ -82,7 +82,7 @@ export function ChatLayout({
         }
       }
     },
-    [chats, isMobile]
+    [chats, isMobile],
   );
 
   const handleUpdateMessages = useCallback(
@@ -97,10 +97,10 @@ export function ChatLayout({
                 messages: newMessages,
                 name: getChatName(newMessages),
                 timestamp: getValidTimestamp(
-                  newMessages[newMessages.length - 1]?.timestamp
+                  newMessages[newMessages.length - 1]?.timestamp,
                 ),
               }
-            : chat
+            : chat,
         );
         saveChatsToLocalStorage(updatedChats);
         return updatedChats;
@@ -112,12 +112,12 @@ export function ChatLayout({
           messages: newMessages,
           name: getChatName(newMessages),
           timestamp: getValidTimestamp(
-            newMessages[newMessages.length - 1]?.timestamp
+            newMessages[newMessages.length - 1]?.timestamp,
           ),
         };
       });
     },
-    [selectedChat]
+    [selectedChat],
   );
 
   const toggleSidebar = useCallback(() => {
@@ -129,7 +129,7 @@ export function ChatLayout({
       direction="horizontal"
       onLayout={(sizes: number[]) => {
         document.cookie = `react-resizable-panels:layout=${JSON.stringify(
-          sizes
+          sizes,
         )}`;
       }}
       className="h-full items-stretch"
@@ -152,7 +152,7 @@ export function ChatLayout({
           className={cn(
             isCollapsed &&
               "min-w-[50px] md:min-w-[70px] transition-all duration-300 ease-in-out",
-            isMobile && "absolute z-10 h-full bg-background"
+            isMobile && "absolute z-10 h-full bg-background",
           )}
         >
           <Sidebar

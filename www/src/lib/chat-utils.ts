@@ -28,10 +28,13 @@ export const getValidTimestamp = (timestamp: number | undefined): number => {
 
 export const saveChatsToLocalStorage = (chats: ChatData[]): void => {
   const nonEmptyChats = chats.filter((chat) => chat.messages.length > 0);
-  const chatHistory = nonEmptyChats.reduce((acc, chat) => {
-    acc[`chat-${chat.id}`] = chat.messages;
-    return acc;
-  }, {} as Record<string, Message[]>);
+  const chatHistory = nonEmptyChats.reduce(
+    (acc, chat) => {
+      acc[`chat-${chat.id}`] = chat.messages;
+      return acc;
+    },
+    {} as Record<string, Message[]>,
+  );
   localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
 };
 
@@ -64,7 +67,7 @@ export function generateChatParams(prefix: string): ChatData {
 export function generateMessageParams(
   chatId: string,
   message: string,
-  name = "anonymous"
+  name = "anonymous",
 ): Message {
   const now = Date.now();
 
@@ -77,7 +80,7 @@ export function generateMessageParams(
 }
 
 export function generateMessagesMemory(
-  messages: Message[]
+  messages: Message[],
 ): { name: string; message: string }[] {
   return messages.map((message) => {
     return {

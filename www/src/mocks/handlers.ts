@@ -9,7 +9,7 @@ const randomDelay = (min: number, max: number) =>
 
 const streamText = async (
   text: string,
-  controller: ReadableStreamDefaultController
+  controller: ReadableStreamDefaultController,
 ) => {
   const words = text.split(" ");
   for (const word of words) {
@@ -77,7 +77,7 @@ In summary, Optimism is an Ethereum Layer 2 focused on scalability through optim
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 

@@ -96,7 +96,7 @@ export function ChatList({
           key={message.timestamp}
           className={cn(
             "flex flex-col gap-2 p-4",
-            message.name !== "Optimism GovGPT" ? "items-end" : "items-start"
+            message.name !== "Optimism GovGPT" ? "items-end" : "items-start",
           )}
         >
           <div className="flex gap-3 items-start">
@@ -114,7 +114,7 @@ export function ChatList({
             <div
               className={cn(
                 "p-3 rounded-md max-w-md overflow-hidden",
-                "bg-accent"
+                "bg-accent",
               )}
             >
               {loadingMessageId === message.id ? (
