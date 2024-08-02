@@ -1,11 +1,15 @@
 import type { Message } from "@/app/data";
-import { type ChatData, generateMessageParams } from "@/lib/chat-utils";
+import {
+  type ChatData,
+  generateMessageParams,
+  generateMessagesMemory,
+} from "@/lib/chat-utils";
 import { useCallback, useEffect, useState } from "react";
 import { useChatApi } from "./useChatApi";
 
 export function useChatState(
   selectedChat: ChatData,
-  onUpdateMessages: (newMessages: Message[]) => void,
+  onUpdateMessages: (newMessages: Message[]) => void
 ) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [inputMessage, setInputMessage] = useState("");
@@ -30,7 +34,7 @@ export function useChatState(
       const assistantMessage = generateMessageParams(
         selectedChat.id,
         "",
-        "Optimism GovGPT",
+        "Optimism GovGPT"
       );
 
       setLoadingMessageId(assistantMessage.id);
@@ -39,30 +43,24 @@ export function useChatState(
       onUpdateMessages([...updatedMessages]);
 
       try {
-        const reader = await sendMessageApi(newMessage.message);
-        const decoder = new TextDecoder();
+        // DO NOT SEND MEMORY FOR NOW
+        // const messagesMemory = generateMessagesMemory(currentMessages);
+        const messagesMemory = [] as any;
+
+        const response = await sendMessageApi(
+          newMessage.message,
+          messagesMemory
+        );
 
         setLoadingMessageId(null);
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value);
-          if (chunk.trim() === "[DONE]") {
-            setIsStreaming(false);
-            setIsTyping(false);
-            break;
-          }
-          if (chunk.startsWith("error:")) {
-            console.error("Error from server:", chunk.slice(6));
-            setIsStreaming(false);
-            setIsTyping(false);
-            break;
-          }
 
-          updatedMessages[updatedMessages.length - 1].message += chunk;
-          setCurrentMessages([...updatedMessages]);
-          onUpdateMessages([...updatedMessages]);
-        }
+        updatedMessages[updatedMessages.length - 1].message =
+          response["answer"];
+        setCurrentMessages([...updatedMessages]);
+        onUpdateMessages([...updatedMessages]);
+
+        setIsStreaming(false);
+        setIsTyping(false);
       } catch (error) {
         console.error("Error:", error);
         setIsStreaming(false);
@@ -72,14 +70,14 @@ export function useChatState(
         updatedMessages[updatedMessages.length - 1] = generateMessageParams(
           selectedChat.id,
           "Sorry, an error occurred while processing your request.",
-          "Optimism GovGPT",
+          "Optimism GovGPT"
         );
 
         setCurrentMessages([...updatedMessages]);
         onUpdateMessages([...updatedMessages]);
       }
     },
-    [currentMessages, onUpdateMessages, sendMessageApi, selectedChat.id],
+    [currentMessages, onUpdateMessages, sendMessageApi, selectedChat.id]
   );
 
   const handleRegenerateMessage = useCallback(
@@ -96,7 +94,7 @@ export function useChatState(
         sendMessage(userMessage);
       }
     },
-    [currentMessages, onUpdateMessages, sendMessage],
+    [currentMessages, onUpdateMessages, sendMessage]
   );
 
   return {

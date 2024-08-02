@@ -9,7 +9,7 @@ const randomDelay = (min: number, max: number) =>
 
 const streamText = async (
   text: string,
-  controller: ReadableStreamDefaultController,
+  controller: ReadableStreamDefaultController
 ) => {
   const words = text.split(" ");
   for (const word of words) {
@@ -58,6 +58,38 @@ In summary, Optimism is an Ethereum Layer 2 focused on scalability through optim
     return new HttpResponse(stream, {
       headers: {
         "Content-Type": "text/plain",
+      },
+    });
+  }),
+
+  http.post("/predict", async ({ request }) => {
+    // @ts-expect-error
+    const { shouldError, memory, question } = await request.json();
+
+    await delay(1_000);
+
+    if (shouldError) {
+      return new HttpResponse(
+        JSON.stringify({ message: "Simulated error in stream" }),
+        {
+          status: 500,
+          statusText: "Internal Server Error",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    const data = {
+      answer:
+        "\nOptimism, as a decentralized Layer 2 solution, does not have a centralized authority that can outright censor user transactions. However, there is a possibility that individual validators or operators could choose to censor transactions if they wish. The decentralized nature of blockchain technology makes it challenging for any single entity to enforce widespread censorship effectively. \n\nReferences:\n[1] https://optimism.io\n",
+      error: null,
+    };
+
+    return new HttpResponse(JSON.stringify(data), {
+      headers: {
+        "Content-Type": "application/json",
       },
     });
   }),
