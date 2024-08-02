@@ -65,8 +65,6 @@ class RAG_system:
                 SUMMARY_OF_EXPLORED_CONTEXTS = summary_of_explored_contexts
             )).content
 
-            print(output_LLM)
-
             xml_tag_pattern = re.compile(r"<(\w+)(\s[^>]*)?>(.*?)</\1>", re.DOTALL)
             xml_tags = xml_tag_pattern.findall(output_LLM)
             tags = {tag[0]: tag[2] for tag in xml_tags}

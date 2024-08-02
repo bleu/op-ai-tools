@@ -20,7 +20,7 @@ expected = {
 
 models2test = [
     "gpt-4o-mini",
-    "claude-3-sonnet-20240229",
+    #"claude-3-sonnet-20240229",
 ]
 
 
@@ -81,15 +81,18 @@ def main():
         )
 
         query = "when airdrop 3 took place?"
+        print(query)
         context = keywords_index_retriever(query, "airdrop 3")
         result, is_enough = system.responder_LLM(query, context, "", "", final = False)
         print(result)
 
         query = "when airdrop 4 took place?"
+        print(query)
         context = keywords_index_retriever(query, "airdrop 4")
         result, is_enough = system.responder_LLM(query, context, "", "", final = False)
         print(result)
-
+        
+        return 0
         
         answers[m] = {}
         for test_type, test_queries in tests.items():
