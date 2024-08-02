@@ -103,3 +103,6 @@ def process_question(
             "answer": None,
             "error": "An unexpected error occurred during prediction",
         }
+
+if __name__ == "__main__":
+    print(process_question("Can the length of the challenge period be changed?", [], ""))
