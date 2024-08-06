@@ -20,7 +20,7 @@ expected = {
 
 models2test = [
     "gpt-4o-mini",
-    #"claude-3-sonnet-20240229",
+    "claude-3-opus-20240229"
 ]
 
 
@@ -77,7 +77,7 @@ def main():
         )
 
         system = system_structure.RAG_system(
-            REASONING_LIMIT = 1,
+            REASONING_LIMIT = 3,
             models_to_use = [chat_model, chat_model],
             retriever = retriever,
             context_filter = model_utils.ContextHandling.filter,

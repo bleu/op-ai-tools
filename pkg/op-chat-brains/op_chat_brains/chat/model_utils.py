@@ -65,28 +65,34 @@ Follow these steps:
 
 3. Check if you have enough information to answer the user's query. 
 
-4. If you have enough information to respond at least partially the question, provide an answer inside <answer></answer> tags. Your answer should:
+4. If you have enough information to the question, provide an answer inside <answer></answer> tags. Your answer should:
    - Directly address the user's question. Never write "according to the context", "based on the provided context" or similar phrases.
    - Cite the source URL using the format [1] within the text.
    - List the url references at the end of the answer.
    - Write the complete URL of the source, not just the domain.
    - Be polite, informative, assertive, objective, and brief.
    - Avoid jargon and explain any technical terms.
+   - Never refer to past events as if they were happening now or in the future.
 """
 
     responder = responder_start+f"""
 5. If you think more information is necessary to fully answer the query, formulate questions about that encompasses the information you think is missing. These questions are going to be used by the system to retrieve the information. The user won't see them. Include these questions within <new_questions> tags, following this format:
     <new_questions>
-        <question type="[question_type]">[Your question here]</question>
-        <question type="[question_type]">[Your question here]</question>
+        <question>[Your question here]</question>
+        <question>[Your question here]</question>
+        ...
+        <type_search>[type_search]</type_search>
     </new_questions>
 When formulating questions, adhere to these guidelines:
     - Try to divide the lack of information into the smallest possible parts
     - Make questions concise and not redundant
     - Focus on gathering information directly related to answering the user's query
     - Avoid unnecessary questions
-    - Do not ask questions that you already know the answer to
-    - Classify each question as one of the following types: factual, temporal or other.
+    - Do not ask questions that you already know the answer to (considering the context and your previous knowledge)
+    - Classify the search as one of the following types:
+        - "factual": the default case, will search the definition of terms and concepts
+        - "ocurrence": in the case of question about a specific event or ocurrence that happened
+        - "recent": in the case of questions about recent events, the current state of something or the most recent information available
 
 6. Format your entire response as follows:
    <knowledge_summary>

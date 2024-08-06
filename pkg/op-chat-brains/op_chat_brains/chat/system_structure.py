@@ -92,15 +92,23 @@ class RAG_system:
             if "answer" in tags.keys():
                 return tags["answer"], True
             else:
+                print(tags)
                 knowledge_summary = ""
                 new_questions = ""
+                type_search = ""
                 if "knowledge_summary" in tags.keys():
                     knowledge_summary = tags["knowledge_summary"]
                 if "new_questions" in tags.keys():
-                    new_questions = tags["new_questions"]
-                    new_questions = [{"text": q[2], "type": q[1]} for q in xml_tag_pattern.findall(new_questions)]
+                    queries_tags = tags["new_questions"]
+                    queries_tags = xml_tag_pattern.findall(queries_tags)
 
-                return [knowledge_summary, new_questions], False
+                    questions = [q[2] for q in queries_tags if q[0] == "question"]
+                    if len(questions) > 0:
+                        questions = [{"question": q} for q in questions]
+            
+                    type_search = [q[2] for q in queries_tags if q[0] == "type_search"][0]
+
+                return [knowledge_summary, new_questions, type_search], False
         else:
             output_LLM = LLM.invoke(self.system_prompt_final_responder.format(
                 QUERY = query,
@@ -124,10 +132,10 @@ class RAG_system:
             is_enough = False
             explored_contexts = []
             user_knowledge, questions, type_search = preprocess_reasoning
-            result = "", questions
+            result = "", questions, type_search
             reasoning_level = 0
             while not is_enough:
-                summary_of_explored_contexts, questions = result
+                summary_of_explored_contexts, questions, type_search = result
 
                 context_list = [self.retriever(q, reasoning_level=reasoning_level) for q in questions]
                 print(type(context_list))
