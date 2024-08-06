@@ -33,21 +33,17 @@ interface NavLinkProps extends NavItem {
   isMobile: boolean;
   isSelected: boolean;
   isCategory?: boolean;
+  onClick?: () => void;
 }
 
 interface NavContentProps {
   isMobile: boolean;
+  setSheetOpen?: (open: boolean) => void;
 }
 const navSections: NavSection[] = [
   {
     title: "Feeds",
     items: [
-      {
-        href: "/forum/trending-topics",
-        icon: BarChart2,
-        label: "Trending topics",
-        className: "bg-gray-100",
-      },
       {
         href: "/forum/latest-topics",
         icon: Clock,
@@ -60,43 +56,43 @@ const navSections: NavSection[] = [
     title: "Categories",
     items: [
       {
-        href: `?category=${categoryBySlug("all")}`,
+        href: `/forum?category=${categoryBySlug("all")}`,
         icon: Octagram,
         label: "All",
         className: CATEGORY_COLORS["All"],
       },
       {
-        href: `?category=${categoryBySlug("delegates")}`,
+        href: `/forum?category=${categoryBySlug("delegates")}`,
         icon: Octagram,
         label: "Delegates",
         className: CATEGORY_COLORS["Delegates"],
       },
       {
-        href: `?category=${categoryBySlug("general")}`,
+        href: `/forum?category=${categoryBySlug("general")}`,
         icon: Octagram,
         label: "General Discussions",
         className: CATEGORY_COLORS["General Discussions"],
       },
       {
-        href: `?category=${categoryBySlug("grants")}`,
+        href: `/forum?category=${categoryBySlug("grants")}`,
         icon: Octagram,
         label: "Mission Grants",
         className: CATEGORY_COLORS["Mission Grants"],
       },
       {
-        href: `?category=${categoryBySlug("updates")}`,
+        href: `/forum?category=${categoryBySlug("updates")}`,
         icon: Octagram,
         label: "Updates and Announcements",
         className: CATEGORY_COLORS["Updates and Announcements"],
       },
       {
-        href: `?category=${categoryBySlug("retro-funding")}`,
+        href: `/forum?category=${categoryBySlug("retro-funding")}`,
         icon: Octagram,
         label: "Retro Funding",
         className: CATEGORY_COLORS["Retro Funding"],
       },
       {
-        href: `?category=${categoryBySlug("others")}`,
+        href: `/forum?category=${categoryBySlug("others")}`,
         icon: Octagram,
         label: "Others",
         className: CATEGORY_COLORS["Others"],
@@ -113,6 +109,7 @@ function NavLink({
   isMobile,
   isSelected,
   isCategory,
+  onClick = () => {},
 }: NavLinkProps) {
   return (
     <Link
@@ -122,13 +119,14 @@ function NavLink({
         !isCategory && className,
         isSelected
           ? "bg-[#FFDBDF] text-optimism font-semibold"
-          : "hover:bg-gray-100",
+          : "hover:bg-gray-100"
       )}
+      onClick={onClick}
     >
       <Icon
         className={cn(
           isMobile ? "h-5 w-5" : "h-4 w-4",
-          isCategory && className,
+          isCategory && className
         )}
         label={label}
       />
@@ -137,7 +135,7 @@ function NavLink({
   );
 }
 
-function NavContent({ isMobile }: NavContentProps) {
+function NavContent({ isMobile, setSheetOpen = () => {} }: NavContentProps) {
   const pathname = usePathname();
   return (
     <div className={cn("flex flex-col gap-y-2", isMobile && "py-2")}>
@@ -148,7 +146,7 @@ function NavContent({ isMobile }: NavContentProps) {
             <h2
               className={cn(
                 "mb-2 px-3 font-semibold",
-                isMobile ? "text-xl" : "text-lg",
+                isMobile ? "text-xl" : "text-lg"
               )}
             >
               {section.title}
@@ -161,6 +159,9 @@ function NavContent({ isMobile }: NavContentProps) {
                   isMobile={isMobile}
                   isSelected={pathname === item.href}
                   isCategory={section.title === "Categories"}
+                  onClick={() => {
+                    setSheetOpen(false);
+                  }}
                 />
               ))}
             </nav>
@@ -172,15 +173,16 @@ function NavContent({ isMobile }: NavContentProps) {
         <h2
           className={cn(
             "mb-2 px-3 font-semibold",
-            isMobile ? "text-xl" : "text-lg",
+            isMobile ? "text-xl" : "text-lg"
           )}
         >
           Have any questions?
         </h2>
         <Link
           href="/"
+          target="_blank"
           className={cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-gray-100 text-gray-700 text-sm",
+            "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-gray-100 text-gray-700 text-sm"
           )}
         >
           Ask GovGPT{" "}
@@ -202,8 +204,10 @@ export function DesktopSidebar() {
 }
 
 export function MobileSidebar() {
+  const [open, setOpen] = React.useState(false);
+
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="outline" size="icon" className="shrink-0 md:hidden">
           <Menu className="h-5 w-5" />
@@ -212,7 +216,7 @@ export function MobileSidebar() {
       </SheetTrigger>
       <SheetContent side="left" className="flex flex-col w-[280px] p-0">
         <div className="overflow-y-auto px-4 py-6">
-          <NavContent isMobile={true} />
+          <NavContent isMobile={true} setSheetOpen={setOpen} />
         </div>
       </SheetContent>
     </Sheet>

@@ -11,15 +11,17 @@ export const FILTER_OPTIONS = {
   ],
 };
 
-export const CATEGORY_BY_SLUG: { [key: string]: string } = FILTER_OPTIONS.options.reduce(
-  (acc, option) => ({
-    ...acc,
-    [option.slug]: option.value,
-  }),
-  {}
-);
+export const CATEGORY_BY_SLUG: { [key: string]: string } =
+  FILTER_OPTIONS.options.reduce(
+    (acc, option) => ({
+      ...acc,
+      [option.slug]: option.value,
+    }),
+    {}
+  );
 
-export const categoryBySlug = (slug: string): string => CATEGORY_BY_SLUG[slug] || "";
+export const categoryBySlug = (slug: string): string =>
+  CATEGORY_BY_SLUG[slug] || "";
 
 export type ForumPost = {
   id: number;
@@ -38,7 +40,7 @@ export type ForumPost = {
   updatedAt?: string;
   category?: {
     id: number;
-    name: string;
+    name?: string;
     externalId: string;
   };
   status?: string;

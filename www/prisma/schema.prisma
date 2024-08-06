@@ -77,3 +77,30 @@ model SnapshotProposal {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
+
+
+model AgoraProposal {
+  id                     Int       @id @default(autoincrement())
+  externalId             String    @unique
+  proposer               String
+  snapshotBlockNumber    Int
+  createdTime            DateTime
+  startTime              DateTime
+  endTime                DateTime
+  cancelledTime          DateTime?
+  executedTime           DateTime?
+  markdownTitle          String
+  description            String
+  quorum                 String
+  approvalThreshold      String?
+  proposalData           Json
+  unformattedProposalData String?
+  proposalResults        Json
+  proposalType           String
+  status                 String
+  createdTransactionHash String?
+  cancelledTransactionHash String?
+  executedTransactionHash String?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+}

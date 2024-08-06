@@ -39,7 +39,7 @@ export function FilterSelect({ data, value, onChange }: FilterSelectProps) {
                   className={cn(
                     "size-4 fill-current",
                     //@ts-ignore
-                    CATEGORY_COLORS[item.label],
+                    CATEGORY_COLORS[item.label]
                   )}
                   // @ts-ignore
                   style={{ color: `#${item.color}` }} // Pass the color to the style

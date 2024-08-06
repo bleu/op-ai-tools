@@ -15,23 +15,38 @@ class CategoriesService:
         categories = data["categories"]
         return [
             {
-                "external_id": category.get("id"),
+                "externalId": str(category.get("id")),
                 "name": category.get("name", ""),
                 "color": category.get("color", ""),
                 "slug": category.get("slug", ""),
                 "description": category.get("description", ""),
-                "topic_url": category.get("topic_url", ""),
+                "topicUrl": category.get("topic_url", ""),
+                "filterable": category.get("id") in DEFAULT_FILTERABLE_IDS,
             }
             for category in categories
         ]
 
     @staticmethod
-    async def sync_categories():
+    async def acquire_and_save():
         categories = await CategoriesService.fetch_categories()
-        for category_data in categories:
-            category_data["filterable"] = (
-                category_data["external_id"] in DEFAULT_FILTERABLE_IDS
-            )
-            await ForumPostCategory.update_or_create(
-                externalId=category_data["external_id"], defaults=category_data
-            )
+        category_objects = [ForumPostCategory(**category) for category in categories]
+
+        await ForumPostCategory.bulk_create(
+            category_objects,
+            update_fields=[
+                "name",
+                "color",
+                "slug",
+                "description",
+                "topicUrl",
+                "filterable",
+            ],
+            on_conflict=["externalId"],
+        )
+
+        print(f"Acquired and saved {len(categories)} categories")
+
+    @staticmethod
+    async def update_relationships():
+        # If there are any relationships to update, implement them here
+        pass

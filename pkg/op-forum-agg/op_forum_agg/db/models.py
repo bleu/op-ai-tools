@@ -102,7 +102,6 @@ class ForumPost(Model):
     lastActivity = NaiveDatetimeField(null=True)
     createdAt = NaiveDatetimeField(auto_now_add=True)
     updatedAt = NaiveDatetimeField(auto_now=True)
-
     snapshotProposal = fields.OneToOneField(
         "models.SnapshotProposal",
         related_name="forumPost",
@@ -137,8 +136,50 @@ class SnapshotProposal(Model):
     winningOption = fields.CharField(max_length=255, null=True)
     createdAt = NaiveDatetimeField(auto_now_add=True)
     updatedAt = NaiveDatetimeField(auto_now=True)
-
     forumPost: fields.ReverseRelation["ForumPost"]
 
     class Meta:
         table = "SnapshotProposal"
+
+
+class AgoraProposal(Model):
+    id = fields.IntField(pk=True)
+    externalId = fields.CharField(max_length=255, unique=True)
+    proposer = fields.CharField(max_length=255)
+    snapshotBlockNumber = fields.IntField()
+    createdTime = NaiveDatetimeField()
+    startTime = NaiveDatetimeField()
+    endTime = NaiveDatetimeField()
+    cancelledTime = NaiveDatetimeField(null=True)
+    executedTime = NaiveDatetimeField(null=True)
+    markdownTitle = fields.TextField()
+    description = fields.TextField()
+    quorum = fields.CharField(max_length=255)
+    approvalThreshold = fields.CharField(max_length=255, null=True)
+    proposalData = fields.JSONField()
+    unformattedProposalData = fields.TextField(null=True)
+    proposalResults = fields.JSONField()
+    proposalType = fields.CharField(max_length=255)
+    status = fields.CharField(max_length=255)
+    createdTransactionHash = fields.CharField(max_length=255, null=True)
+    cancelledTransactionHash = fields.CharField(max_length=255, null=True)
+    executedTransactionHash = fields.CharField(max_length=255, null=True)
+    createdAt = NaiveDatetimeField(auto_now_add=True)
+    updatedAt = NaiveDatetimeField(auto_now=True)
+
+    class Meta:
+        table = "AgoraProposal"
+
+
+class ThreadSummary(Model):
+    id = fields.IntField(pk=True)
+    url = fields.CharField(max_length=255, unique=True)
+    about = fields.TextField(null=True)
+    first_post = fields.TextField(null=True)
+    reaction = fields.TextField(null=True)
+    overview = fields.TextField(null=True)
+    tldr = fields.TextField(null=True)
+    classification = fields.CharField(max_length=255, null=True)
+
+    class Meta:
+        table = "ThreadSummary"

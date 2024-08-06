@@ -4,6 +4,7 @@ from forum_dl import ExtractorOptions, SessionOptions, WriterOptions, extractors
 from op_forum_agg.db.models import RawForumPost
 from op_forum_agg.utils.forum_dl_reader import ReadWriter
 from op_forum_agg.utils.helpers import fetch_info
+import asyncio
 
 FORUM_URL = "https://gov.optimism.io"
 CATEGORY_URL = f"{FORUM_URL}/c/{{category_slug}}.json"
@@ -17,7 +18,7 @@ class RawThreadsService:
             timeout=5,
             retries=4,
             retry_sleep=1,
-            retry_sleep_multiplier=2,
+            retry_sleep_multiplier=1,
             warc_output="",
             user_agent="Forum-DL",
         )
@@ -51,29 +52,41 @@ class RawThreadsService:
         return thread_data["item"]["data"]
 
     @staticmethod
-    async def sync_raw_threads(category_slug: str):
-        url = CATEGORY_URL.format(category_slug=category_slug)
+    async def acquire_and_save_category(category: Dict):
+        url = CATEGORY_URL.format(category_slug=category["slug"])
         threads_data = await RawThreadsService.fetch_raw_threads(url)
+        raw_posts = []
         for thread_data in threads_data:
             parsed_data = RawThreadsService.parse_thread_data(thread_data)
-            await RawForumPost.update_or_create(
-                externalId=str(parsed_data["id"]),
-                defaults={
-                    "url": thread_data["item"]["url"],
-                    "type": thread_data["type"],
-                    "rawData": thread_data["item"]["data"],
-                },
+            raw_posts.append(
+                RawForumPost(
+                    externalId=str(parsed_data["id"]),
+                    url=thread_data["item"]["url"],
+                    type=thread_data["type"],
+                    rawData=thread_data["item"]["data"],
+                )
             )
 
+        await RawForumPost.bulk_create(
+            raw_posts,
+            update_fields=["url", "type", "rawData"],
+            on_conflict=["externalId"],
+        )
+        print(f"Synced {len(raw_posts)} raw posts for category {category['slug']}")
+
     @staticmethod
-    async def sync_all_raw_threads():
+    async def acquire_and_save_all():
         categories_json = await fetch_info("https://gov.optimism.io/categories.json")
         forum_categories = categories_json["category_list"]["categories"]
-        for category in forum_categories:
-            try:
-                print(f"Starting to fetch threads for {category['slug']}")
-                await RawThreadsService.sync_raw_threads(category["slug"])
-                print(f"Finished fetching threads for {category['slug']}")
-            except Exception as e:
-                print(f"Failed to download {category['slug']}: {e}")
-                raise e
+
+        tasks = [
+            RawThreadsService.acquire_and_save_category(category)
+            for category in forum_categories
+        ]
+        await asyncio.gather(*tasks)
+
+        print(f"Finished syncing raw posts for all {len(forum_categories)} categories")
+
+    @staticmethod
+    async def update_relationships():
+        pass

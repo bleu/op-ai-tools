@@ -10,6 +10,7 @@ seed_topics:
 	prepare
 	$(MAKE) -C pkg/op-forum-agg seed_topics
 
-seed_snapshot:
-	@echo "Seeding snapshot..."
-	$(MAKE) -C pkg/op-forum-agg seed_snapshot
+seed_all:
+	@echo "Seeding all data... This will take a while 😬"
+	$(MAKE) -C pkg/op-forum-agg seed_all
+

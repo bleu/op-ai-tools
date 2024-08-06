@@ -29,7 +29,4 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-sync_categories = "op_forum_agg.cli:run_sync_categories"
-sync_raw_posts = "op_forum_agg.cli:run_sync_raw_threads"
-sync_topics = "op_forum_agg.cli:run_sync_forum_posts"
-sync_snapshot = "op_forum_agg.cli:run_sync_snapshot"
+sync = "op_forum_agg.cli:main"

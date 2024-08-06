@@ -1,3 +1,4 @@
+import asyncio
 import json
 from typing import List, Dict
 import httpx
@@ -56,7 +57,7 @@ class SnapshotService:
         return data
 
     @staticmethod
-    async def sync_proposals():
+    async def acquire_and_save():
         query = f"""
             query {{
                 proposals(first: 1000, skip: 0, where: {{space_in: {json.dumps(SPACE_IDS)}}}, orderBy: "created", orderDirection: desc) {{
@@ -83,8 +84,9 @@ class SnapshotService:
             }}
         """
 
-        proposals = await SnapshotService.get_paginated_data(query)
+        proposals = await SnapshotService.get_query_data(query, 0)
 
+        snapshot_proposals = []
         for proposal in proposals:
             proposal_data = {
                 "externalId": proposal["id"],
@@ -110,16 +112,51 @@ class SnapshotService:
                 winner = proposal["scores"].index(max(proposal["scores"]))
                 proposal_data["winningOption"] = proposal["choices"][winner]
 
-            snapshot_proposal, created = await SnapshotProposal.update_or_create(
-                externalId=proposal_data["externalId"], defaults=proposal_data
+            snapshot_proposals.append(SnapshotProposal(**proposal_data))
+
+        await SnapshotProposal.bulk_create(
+            snapshot_proposals,
+            update_fields=[
+                field
+                for field in SnapshotProposal._meta.fields
+                if field != "id" and field != "forumPost"
+            ],
+            on_conflict=["externalId"],
+        )
+
+        print(f"Acquired and saved {len(snapshot_proposals)} snapshot proposals")
+
+    @staticmethod
+    async def update_relationships():
+        snapshot_proposals = await SnapshotProposal.filter(
+            discussion__isnull=False
+        ).all()
+        forum_post_updates = []
+
+        for proposal in snapshot_proposals:
+            forum_post_updates.append(
+                {
+                    "url": proposal.discussion,
+                    "snapshotProposal": proposal,
+                }
             )
 
-            if proposal_data["discussion"]:
-                forum_post = await ForumPost.get_or_none(
-                    url=proposal_data["discussion"]
-                )
-                if forum_post:
-                    forum_post.snapshotProposal = snapshot_proposal
-                    await forum_post.save()
+        forum_posts_to_update = []
+        if forum_post_updates:
+            forum_posts = await ForumPost.filter(
+                url__in=[u["url"] for u in forum_post_updates]
+            ).all()
 
-        print("Proposals synced successfully")
+            for forum_post in forum_posts:
+                update = next(
+                    (u for u in forum_post_updates if u["url"] == forum_post.url), None
+                )
+                if update:
+                    forum_post.snapshotProposal = update["snapshotProposal"]
+                    forum_posts_to_update.append(forum_post)
+
+        await asyncio.gather(
+            *[forum_post.save() for forum_post in forum_posts_to_update]
+        )
+
+        print(f"Updated {len(forum_post_updates)} forum posts with snapshot proposals")
