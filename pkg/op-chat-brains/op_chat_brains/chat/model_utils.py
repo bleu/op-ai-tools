@@ -1,3 +1,11 @@
+import time
+from ragatouille import RAGPretrainedModel
+start = time.time()
+print("Loading RAG...")
+RAG = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
+RAG = RAG.as_langchain_document_compressor()
+print(f"Time to load RAG: {time.time()-start:.2f}s")
+
 from typing import Iterator, List, Dict, Any, Callable, Tuple
 import time, json, faiss, re
 import numpy as np
@@ -193,14 +201,14 @@ class ContextHandling:
 
 """
     @staticmethod
-    def filter(context_dict:dict, explored_contexts:list, query:str|None = None, k:int = 15) -> Tuple[str, list]:
+    def filter(context_dict:dict, explored_contexts:list, query:str|None = None, type_search:str = "factual", k:int = 5) -> Tuple[str, list]:
         urls = context_dict.keys()
-        context = [c for c in context_dict.values() if c not in explored_contexts]
+        context = [(u, c) for u, c in context_dict.items() if c not in explored_contexts]
 
         if query is not None:
             k = min(k, len(context))
             if k > 0:
-                context = ContextHandling.reordering(context, query, k=k)
+                context = ContextHandling.reordering(context, query, k=k, type_search=type_search)
 
         return ContextHandling.format(context, context_dict, urls)
 
@@ -225,8 +233,17 @@ class ContextHandling:
         return "".join(out), urls
     
     @staticmethod
-    def reordering(context:list, query:str, k:int = 5) -> list:
-        return context[:k]
+    def reordering(context:list, query:str, k:int, type_search:str) -> list:
+        if type_search == "factual" or type_search == "ocurrence":
+            context = [c[1] for c in context]
+            return RAG.compress_documents(query=query, documents=context, k=k)
+        elif type_search == "recent":
+            urls = [c[0] for c in context]
+            print(urls)
+            contexts = all_contexts_df[all_contexts_df["url"].isin(urls)].iloc[:k]
+            print(contexts)
+            return contexts.content.tolist()
+            
 
 class RetrieverBuilder:
     @staticmethod

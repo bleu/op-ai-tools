@@ -133,7 +133,7 @@ class RAG_system:
                 print(type(context_list))
                 context_dict = {c.metadata['url']:c for cc in context_list for c in cc}
 
-                context, context_urls = self.context_filter(context_dict, explored_contexts, query)
+                context, context_urls = self.context_filter(context_dict, explored_contexts, query, type_search)
                 explored_contexts.extend(context_urls)
 
                 if verbose:
