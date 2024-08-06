@@ -1,123 +1,112 @@
-from typing import Dict, Any, Iterator
-from op_chat_brains.chat.model import RAGModel
-from op_chat_brains.exceptions import UnsupportedVectorstoreError, OpChatBrainsException
+from op_chat_brains.chat.system_structure import RAGModel
+from op_chat_brains.chat.model_utils import (
+    ContextHandling,
+    access_APIs,
+    RetrieverBuilder,
+)
+from typing import Dict, Any, List, Tuple
+from op_chat_brains.chat.prompts import Prompt
+from op_chat_brains.config import DB_STORAGE_PATH
+import os
 from op_chat_brains.structured_logger import StructuredLogger
 
 
-def get_rag_model(
-    rag_structure,
-    dbs_name,
-    embeddings_name,
-    retriever_pars,
-    vectorstore,
-    prompt_builder,
-    prompt_builder_expander,
-    chat_pars,
-):
-    rag_classes = {
-        "openai-simple": RAGModel.SimpleOpenAI,
-        "claude-simple": RAGModel.SimpleClaude,
-        "claude-expander": RAGModel.ExpanderClaude,
-    }
+def transform_memory_entries(entries: List[Dict[str, str]]) -> List[Tuple[str, str]]:
+    """
+    Transforms a list of dictionaries containing 'name' and 'message' keys
+    into a list of tuples with the same values.
 
-    rag_class = rag_classes.get(rag_structure)
-    if not rag_class:
-        raise UnsupportedVectorstoreError(f"Unsupported RAG structure: {rag_structure}")
+    Args:
+        entries (List[Dict[str, str]]): A list of dictionaries, each with 'name' and 'message' keys.
 
-    return rag_class(
-        dbs_name=dbs_name,
-        embeddings_name=embeddings_name,
-        retriever_pars=retriever_pars,
-        vectorstore=vectorstore,
-        prompt_builder=prompt_builder,
-        prompt_builder_expander=prompt_builder_expander,
-        chat_pars=chat_pars,
-    )
+    Returns:
+        List[Tuple[str, str]]: A list of tuples, each containing the 'name' and 'message' values.
+    """
+    return [(entry["name"], entry["message"]) for entry in entries]
 
 
 def process_question(
-    question: str, rag_structure: str, logger: StructuredLogger, config: Dict[str, Any]
+    question: str,
+    memory: List[Dict[str, str]],
+    rag_structure,
+    # logger: StructuredLogger,
+    # config: Dict[str, Any],
 ) -> Dict[str, Any]:
     """
-    Process a question using the specified RAG model.
+    Processes a given question using a RAG model,
+    leveraging contextual memory and retrievers for enhanced response generation.
 
-    :param question: The input question
-    :param rag_structure: The RAG structure to use
-    :param logger: The logger instance
-    :param config: A dictionary containing configuration parameters
-    :return: A dictionary containing the answer and any error information
+    Args:
+        question (str): The input question to be processed.
+        memory (List[Dict[str, str]], optional): A list of dictionaries containing
+            previous interactions, each with 'name' (being 'user' or 'chat') and 'message' keys.
+            Defaults to an empty list.
+
+    Returns:
+        A dict containing the response to the question.
+            The dictionary has the following keys:
+            - "answer" (str): The generated answer from the RAG model.
+            - "error" (str): An error message if an exception occurred, otherwise None.
+
+    Raises:
+        Exception: Any unexpected error that occurs during the prediction process
+            is caught and logged, with a user-friendly error message returned in the dictionary.
     """
 
+    embedding_model = "text-embedding-ada-002"
+    chat_model = (
+        "gpt-4o-mini",
+        {
+            "temperature": 0.0,
+            "max_retries": 5,
+            "max_tokens": 1024,
+            "timeout": 60,
+        },
+    )
+
     try:
-        rag = get_rag_model(
-            rag_structure=rag_structure,
-            dbs_name=tuple(config["DEFAULT_DBS"]),
-            embeddings_name=config["EMBEDDING_MODEL"],
-            retriever_pars={"search_kwargs": {"k": config["K_RETRIEVER"]}},
-            vectorstore=config["VECTORSTORE"],
-            prompt_builder=config["PROMPT_BUILDER"],
-            prompt_builder_expander=config["PROMPT_BUILDER_EXPANDER"],
-            chat_pars={
-                "model": config["CHAT_MODEL_CLAUDE"]
-                if "claude" in rag_structure
-                else config["CHAT_MODEL_OPENAI"],
-                "temperature": config["CHAT_TEMPERATURE"],
-                "max_retries": config["MAX_RETRIES"],
-            },
+        list_dbs = os.listdir(DB_STORAGE_PATH)
+        list_dbs = [db[:-3] for db in list_dbs if db[-3:] == "_db"]
+        filter_out_dbs = ["summary_archived___old_missions"]
+        dbs = [db for db in list_dbs if db not in filter_out_dbs]
+
+        index_retriever = RetrieverBuilder.build_index(
+            embedding_model, k_max=2, treshold=0.9
         )
-        output = rag.predict(question)
-        logger.log_query(question, output)
-        return {"answer": output["answer"], "error": None}
-    except OpChatBrainsException as e:
-        logger.logger.error(f"OpChatBrains error during prediction: {str(e)}")
-        return {"answer": None, "error": str(e)}
+
+        default_retriever = RetrieverBuilder.build_faiss_retriever(
+            dbs,
+            embedding_model,
+            k=5,
+        )
+
+        # Instantiate RAGModel with parameters
+        rag_model = RAGModel(
+            REASONING_LIMIT=3,
+            models_to_use=[chat_model, chat_model],
+            index_retriever=index_retriever,
+            factual_retriever=default_retriever,
+            temporal_retriever=default_retriever,
+            context_filter=ContextHandling.filter,
+            system_prompt_preprocessor=Prompt.preprocessor,
+            system_prompt_responder=Prompt.responder,
+            system_prompt_final_responder=Prompt.final_responder,
+        )
+
+        formatted_memory = transform_memory_entries(memory)
+        result = rag_model.predict(question, memory=formatted_memory, verbose=False)
+
+        # logger.log_query(question, result)
+        return {"answer": result["answer"], "error": None}
     except Exception as e:
-        logger.logger.error(f"Unexpected error during prediction: {str(e)}")
+        # logger.logger.error(f"Unexpected error during prediction: {str(e)}")
         return {
             "answer": None,
             "error": "An unexpected error occurred during prediction",
         }
 
 
-def process_question_stream(
-    question: str, rag_structure: str, logger: StructuredLogger, config: Dict[str, Any]
-) -> Iterator[Dict[str, Any]]:
-    try:
-        rag = get_rag_model(
-            rag_structure=rag_structure,
-            dbs_name=tuple(config["DEFAULT_DBS"]),
-            embeddings_name=config["EMBEDDING_MODEL"],
-            retriever_pars={"search_kwargs": {"k": config["K_RETRIEVER"]}},
-            vectorstore=config["VECTORSTORE"],
-            prompt_builder=config["PROMPT_BUILDER"],
-            prompt_builder_expander=config["PROMPT_BUILDER_EXPANDER"],
-            chat_pars={
-                "model": config["CHAT_MODEL_CLAUDE"]
-                if "claude" in rag_structure
-                else config["CHAT_MODEL_OPENAI"],
-                "temperature": config["CHAT_TEMPERATURE"],
-                "max_retries": config["MAX_RETRIES"],
-                "streaming": True,
-            },
-        )
-
-        complete_answer = ""
-        for chunk in rag.stream(question):
-            complete_answer += chunk["content"]
-            yield {"answer": chunk["content"], "error": None}
-
-        # Log the complete answer after streaming
-        logger.log_query(question, {"answer": complete_answer, "context": ""})
-
-    except UnsupportedVectorstoreError as e:
-        logger.logger.error(f"Invalid RAG structure: {str(e)}")
-        yield {"answer": None, "error": f"Invalid RAG structure: {str(e)}"}
-    except OpChatBrainsException as e:
-        logger.logger.error(f"OpChatBrains error during prediction: {str(e)}")
-        yield {"answer": None, "error": str(e)}
-    except Exception as e:
-        logger.logger.error(f"Unexpected error during prediction: {str(e)}")
-        yield {
-            "answer": None,
-            "error": "An unexpected error occurred during prediction",
-        }
+if __name__ == "__main__":
+    print(
+        process_question("Can the length of the challenge period be changed?", [], "")
+    )

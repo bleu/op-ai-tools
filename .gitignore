@@ -2,6 +2,7 @@ api_openai.sh
 export_apis.sh
 
 *.faiss
+!data/dbs/**/*.faiss
 *.pkl
 
 **/.DS_Store

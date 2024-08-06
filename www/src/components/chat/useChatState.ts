@@ -1,5 +1,9 @@
 import type { Message } from "@/app/data";
-import { type ChatData, generateMessageParams } from "@/lib/chat-utils";
+import {
+  type ChatData,
+  generateMessageParams,
+  generateMessagesMemory,
+} from "@/lib/chat-utils";
 import { useCallback, useEffect, useState } from "react";
 import { useChatApi } from "./useChatApi";
 
@@ -39,30 +43,24 @@ export function useChatState(
       onUpdateMessages([...updatedMessages]);
 
       try {
-        const reader = await sendMessageApi(newMessage.message);
-        const decoder = new TextDecoder();
+        // DO NOT SEND MEMORY FOR NOW
+        // const messagesMemory = generateMessagesMemory(currentMessages);
+        const messagesMemory = [] as any;
+
+        const response = await sendMessageApi(
+          newMessage.message,
+          messagesMemory,
+        );
 
         setLoadingMessageId(null);
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value);
-          if (chunk.trim() === "[DONE]") {
-            setIsStreaming(false);
-            setIsTyping(false);
-            break;
-          }
-          if (chunk.startsWith("error:")) {
-            console.error("Error from server:", chunk.slice(6));
-            setIsStreaming(false);
-            setIsTyping(false);
-            break;
-          }
 
-          updatedMessages[updatedMessages.length - 1].message += chunk;
-          setCurrentMessages([...updatedMessages]);
-          onUpdateMessages([...updatedMessages]);
-        }
+        updatedMessages[updatedMessages.length - 1].message =
+          response["answer"];
+        setCurrentMessages([...updatedMessages]);
+        onUpdateMessages([...updatedMessages]);
+
+        setIsStreaming(false);
+        setIsTyping(false);
       } catch (error) {
         console.error("Error:", error);
         setIsStreaming(false);
