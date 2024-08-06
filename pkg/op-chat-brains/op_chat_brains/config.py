@@ -33,6 +33,7 @@ QUESTIONS_INDEX_JSON = "index/questions.json"
 QUESTIONS_INDEX_NPY = "index/questions.npy"
 
 KEYWORDS_INDEX_JSON = "index/keywords.json"
+KEYWORDS_INDEX_NPY = "index/keywords.npy"
 
 SCOPE = "OPTIMISM GOVERNANCE/OPTIMISM COLLECTIVE/OPTIMISM L2"
 

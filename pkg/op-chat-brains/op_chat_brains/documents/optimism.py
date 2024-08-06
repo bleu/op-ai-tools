@@ -1,4 +1,4 @@
-import re, json
+import re, json, time
 import pandas as pd
 from typing import Any, Dict, List
 from collections import defaultdict
@@ -14,9 +14,11 @@ from op_chat_brains.retriever import connect_db
 
 from op_chat_brains.config import (
     RAW_FORUM_DB,
-    FORUM_SUMMARY_DB
+    FORUM_SUMMARY_DB,
+    DOCS_PATH,
 )
 
+NOW = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
 
 class FragmentsProcessingStrategy(DocumentProcessingStrategy):
     def process_document(self, file_path: str, headers_to_split_on: List|None = None) -> List[Document]:
@@ -339,3 +341,21 @@ class OptimismDocumentProcessorFactory(DocumentProcessorFactory):
             "fragments": "001-initial-dataset-governance-docs/file.txt",
             "forum_posts": "002-governance-forum-202406014/dataset/_out.jsonl",
         }
+
+class DataframeBuilder:
+    @staticmethod
+    def build_dataframes():
+        summaries = SummaryProcessingStrategy.langchain_process(divide="category_name")
+        pattern = r'[^A-Za-z0-9_]+'
+        summaries = [(s.metadata['url'], s.metadata["last_posted_at"], s, re.sub(pattern, '', k)) for k, v in summaries.items() for s in v]
+
+        fragments_loader = FragmentsProcessingStrategy()
+        fragments = fragments_loader.process_document(DOCS_PATH, headers_to_split_on=[])
+        
+        data = [(f.metadata['url'], NOW, f, "fragments_docs") for f in fragments]
+        data.extend(summaries)
+        context_df = pd.DataFrame(data, columns=["url", "last_date", "content", "type_db_info"])
+
+        context_df = context_df.sort_values(by="last_date", ascending=False)
+    
+        return context_df

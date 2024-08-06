@@ -37,26 +37,32 @@ def main():
     
     keywords_index_retriever = model_utils.RetrieverBuilder.build_keywords_index(
         k_max=5,
-        treshold=0.93
+        treshold=0.9
     )
+
+    def contains(must_contain):
+        return lambda similar : [s for s in similar if must_contain in s]
 
     default_retriever = model_utils.RetrieverBuilder.build_faiss_retriever(
         dbs, 
         k = 5,
     )
 
-    def retriever(query : str, info_type : str, reasoning_level : int) -> list:
-        if reasoning_level == 0:
-            context = keywords_index_retriever(query)
-            if len(context) > 0:
-                return context
-            
-        if reasoning_level < 2:
-            context = questions_index_retriever(query)
-            if len(context) > 0:
-                return context
+    def retriever(query : dict, reasoning_level : int) -> list:
+        if reasoning_level < 2 and "keyword" in query:
+            if "instance" in query:
+                context = keywords_index_retriever(query["keyword"], criteria=contains(query["instance"]))
+            else:
+                context = keywords_index_retriever(query["keyword"])
+            return context
         
-        return default_retriever(query)
+        if "question" in query:
+            if reasoning_level < 2:
+                context = questions_index_retriever(query["question"])
+                if len(context) > 0:
+                    return context
+            return default_retriever(query["question"])
+        return []
 
     answers = {}
     for m in models2test:
@@ -71,7 +77,7 @@ def main():
         )
 
         system = system_structure.RAG_system(
-            REASONING_LIMIT = 2,
+            REASONING_LIMIT = 1,
             models_to_use = [chat_model, chat_model],
             retriever = retriever,
             context_filter = model_utils.ContextHandling.filter,
@@ -79,20 +85,6 @@ def main():
             system_prompt_responder = model_utils.Prompt.responder,
             system_prompt_final_responder = model_utils.Prompt.final_responder
         )
-
-        query = "when airdrop 3 took place?"
-        print(query)
-        context = keywords_index_retriever(query, "airdrop 3")
-        result, is_enough = system.responder_LLM(query, context, "", "", final = False)
-        print(result)
-
-        query = "when airdrop 4 took place?"
-        print(query)
-        context = keywords_index_retriever(query, "airdrop 4")
-        result, is_enough = system.responder_LLM(query, context, "", "", final = False)
-        print(result)
-        
-        return 0
         
         answers[m] = {}
         for test_type, test_queries in tests.items():
