@@ -1,10 +1,10 @@
-import Link from "next/link";
-import { ForumPost } from "./table/post-options";
-import { Badge } from "@/components/ui/badge";
 import { Octagram } from "@/components/forum/Octagram";
 import { getColor } from "@/components/forum/table/table-row";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { cn, formatDate } from "@/lib/utils";
+import Link from "next/link";
+import type { ForumPost } from "./table/post-options";
 
 export function TopicHeader({
   title,
@@ -30,7 +30,7 @@ export function TopicHeader({
                 label={category.name}
                 className={cn(
                   { [getColor(category.externalId || "")]: true },
-                  "size-4 fill-current"
+                  "size-4 fill-current",
                 )}
               />
               <span className="text-muted-foreground w-auto whitespace-nowrap">

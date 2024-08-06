@@ -1,5 +1,9 @@
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 BASE_PATH = os.getenv("OP_CHAT_BASE_PATH", os.path.expanduser("../../data"))
 
 DOCS_PATH = os.path.join(BASE_PATH, "001-initial-dataset-governance-docs/file.txt")
@@ -23,14 +27,14 @@ API_RATE_LIMIT = int(os.getenv("API_RATE_LIMIT", "100"))
 API_SECRET_KEY = os.getenv("API_SECRET_KEY", "your-secret-key-here")
 SUMMARIZER_MODEL = os.getenv("SUMMARIZER_MODEL", CHAT_MODEL_OPENAI)
 
-DB_STORAGE_PATH = "dbs"  # os.path.join(BASE_PATH, "dbs")
+DB_STORAGE_PATH = os.path.join(BASE_PATH, "dbs")
 POSTHOG_API_KEY = os.getenv("POSTHOG_API_KEY", "")
 
 RAW_FORUM_DB = "RawForumPost"
 FORUM_SUMMARY_DB = "ForumPost"
 
-QUESTIONS_INDEX_JSON = "questions_index.json"
-QUESTIONS_INDEX_NPY = "questions_index.npy"
+QUESTIONS_INDEX_JSON = os.path.join(BASE_PATH, "questions_index.json")
+QUESTIONS_INDEX_NPY = os.path.join(BASE_PATH, "questions_index.npy")
 
 SCOPE = "OPTIMISM GOVERNANCE/OPTIMISM COLLECTIVE/OPTIMISM L2"
 

@@ -4,7 +4,7 @@ from op_chat_brains.chat import model_utils
 import re
 
 
-class RAG_system:
+class RAGModel:
     REASONING_LIMIT: int
     models_to_use: list
     index_retriever: Callable
@@ -64,7 +64,7 @@ class RAG_system:
             ]
             return True, (user_knowledge, questions)
 
-    def Retriever(self, query: str, info_type: str, reasoning_level) -> list:
+    def retrivier(self, query: str, info_type: str, reasoning_level) -> list:
         if reasoning_level == 0:
             context = self.index_retriever(query)
             if len(context) == 0:
@@ -156,7 +156,7 @@ class RAG_system:
                 summary_of_explored_contexts, questions = result
 
                 context_list = [
-                    self.Retriever(
+                    self.retrivier(
                         q["text"], info_type=q["type"], reasoning_level=reasoning_level
                     )
                     for q in questions

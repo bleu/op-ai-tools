@@ -79,6 +79,17 @@ export function generateMessageParams(
   };
 }
 
+export function generateMessagesMemory(
+  messages: Message[],
+): { name: string; message: string }[] {
+  return messages.map((message) => {
+    return {
+      name: message.name === "Optimism GovGPT" ? "chat" : "user",
+      message: message.message,
+    };
+  });
+}
+
 export const addNewChat = (chats: ChatData[]): ChatData[] => {
   const newChat = generateChatParams("chat");
   return [newChat, ...chats];

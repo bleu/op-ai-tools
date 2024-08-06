@@ -2,8 +2,8 @@ import { Search } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-import { MobileSidebar } from "./Sidebar";
 import Link from "next/link";
+import { MobileSidebar } from "./Sidebar";
 
 export function Header() {
   return (

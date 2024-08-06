@@ -11,6 +11,6 @@ export default function ForumPage({ searchParams }: IndexPageProps) {
   const { category } = searchParams;
 
   return redirect(
-    `/forum/latest-topics?${category ? `category=${category}` : ""}`
+    `/forum/latest-topics?${category ? `category=${category}` : ""}`,
   );
 }

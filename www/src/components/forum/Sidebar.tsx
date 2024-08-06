@@ -119,14 +119,14 @@ function NavLink({
         !isCategory && className,
         isSelected
           ? "bg-[#FFDBDF] text-optimism font-semibold"
-          : "hover:bg-gray-100"
+          : "hover:bg-gray-100",
       )}
       onClick={onClick}
     >
       <Icon
         className={cn(
           isMobile ? "h-5 w-5" : "h-4 w-4",
-          isCategory && className
+          isCategory && className,
         )}
         label={label}
       />
@@ -146,7 +146,7 @@ function NavContent({ isMobile, setSheetOpen = () => {} }: NavContentProps) {
             <h2
               className={cn(
                 "mb-2 px-3 font-semibold",
-                isMobile ? "text-xl" : "text-lg"
+                isMobile ? "text-xl" : "text-lg",
               )}
             >
               {section.title}
@@ -173,7 +173,7 @@ function NavContent({ isMobile, setSheetOpen = () => {} }: NavContentProps) {
         <h2
           className={cn(
             "mb-2 px-3 font-semibold",
-            isMobile ? "text-xl" : "text-lg"
+            isMobile ? "text-xl" : "text-lg",
           )}
         >
           Have any questions?
@@ -182,7 +182,7 @@ function NavContent({ isMobile, setSheetOpen = () => {} }: NavContentProps) {
           href="/"
           target="_blank"
           className={cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-gray-100 text-gray-700 text-sm"
+            "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-gray-100 text-gray-700 text-sm",
           )}
         >
           Ask GovGPT{" "}
