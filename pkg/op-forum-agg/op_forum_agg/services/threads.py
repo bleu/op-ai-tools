@@ -76,33 +76,54 @@ class ThreadsService:
         ]
 
         # Create a lookup for raw posts and categories
-        raw_posts_lookup = {post.url: post for post in raw_posts}
+        # raw_posts_lookup = {post.url: post for post in raw_posts}
+        summary_lookup = {summary["url"]: summary for summary in parsed_summaries}
         categories_lookup = {cat.externalId: cat for cat in categories}
 
+        topics_raw_posts_first_post = {
+            raw_post.url.removesuffix("/1"): raw_post
+            for raw_post in raw_posts
+            if raw_post.url.endswith("/1")
+        }
+
+        topics_raw_posts_urls = [
+            url.removesuffix("/1") for url in topics_raw_posts_first_post.keys()
+        ]
+
+        topics_raw_posts = [
+            raw_post for raw_post in raw_posts if raw_post.url in topics_raw_posts_urls
+        ]
+
         forum_posts = []
-        for summary in parsed_summaries:
-            raw_post = raw_posts_lookup.get(summary["url"])
-            if not raw_post:
-                continue
 
-            first_post = raw_posts_lookup.get(f"{summary['url']}/1")
-            if not first_post:
-                continue
+        import pdb
 
-            category = categories_lookup.get(raw_post.rawData["category_id"])
+        pdb.set_trace()
+        for raw_post in topics_raw_posts:
+            # for summary in parsed_summaries:
+            summary = summary_lookup.get(raw_post.url)
+            # raw_post = raw_posts_lookup.get(summary["url"])
+            # if not raw_post:
+            #     continue
 
-            all_text = " ".join(
-                [
-                    summary["about"],
-                    summary["first_post"],
-                    summary["reaction"],
-                    summary["overview"],
-                    summary["tldr"],
-                    summary["classification"],
-                ]
-            )
-            read_time = estimate_reading_time(all_text)
+            # first_post = raw_posts_lookup.get(f"{summary['url']}/1")
+            # if not first_post:
+            #     continue
 
+            category = categories_lookup.get(raw_post.rawData.get("category_id", ""))
+
+            # all_text = " ".join(
+            #     [
+            #         summary["about"],
+            #         summary["first_post"],
+            #         summary["reaction"],
+            #         summary["overview"],
+            #         summary["tldr"],
+            #         summary["classification"],
+            #     ]
+            # )
+            # read_time = estimate_reading_time(all_text)
+            first_post = topics_raw_posts_first_post.get(raw_post.url)
             forum_posts.append(
                 ForumPost(
                     externalId=raw_post.externalId,
@@ -113,14 +134,14 @@ class ThreadsService:
                     or first_post.rawData.get("username", ""),
                     category=category,
                     rawForumPost=raw_post,
-                    about=summary["about"],
-                    firstPost=summary["first_post"],
-                    reaction=summary["reaction"],
-                    overview=summary["overview"],
-                    tldr=summary["tldr"],
-                    classification=summary["classification"],
-                    lastActivity=raw_post.rawData["last_posted_at"],
-                    readTime=read_time,
+                    # about=summary["about"],
+                    # firstPost=summary["first_post"],
+                    # reaction=summary["reaction"],
+                    # overview=summary["overview"],
+                    # tldr=summary["tldr"],
+                    # classification=summary["classification"],
+                    # lastActivity=raw_post.rawData["last_posted_at"],
+                    # readTime=read_time,
                 )
             )
 
