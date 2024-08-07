@@ -16,7 +16,7 @@ from op_chat_brains.config import (
     MAX_RETRIES,
     K_RETRIEVER,
 )
-from op_chat_brains.chat.utils import process_question_stream, process_question
+from op_chat_brains.chat.utils import process_question
 from flask_cors import CORS
 from posthog import Posthog
 from functools import wraps
@@ -63,15 +63,17 @@ def handle_question(func):
         data = request.json
         if data is not None:
             question = data.get("question")
+            memory = data.get("memory", [])
             rag_structure = data.get("rag_structure", DEFAULT_RAG_STRUCTURE)
         else:
             question = None
+            memory = []
             rag_structure = DEFAULT_RAG_STRUCTURE
 
         if not question:
             return jsonify({"error": "No question provided"}), 400
 
-        return func(question, rag_structure, *args, **kwargs)
+        return func(question, memory, rag_structure, *args, **kwargs)
 
     return wrapper
 
@@ -86,8 +88,8 @@ def handle_exception(e):
 @app.route("/predict", methods=["POST"])
 @limiter.limit(f"{API_RATE_LIMIT} per minute")
 @handle_question
-def predict(question, rag_structure):
-    result = process_question(question, rag_structure, logger, get_config())
+def predict(question, memory, rag_structure):
+    result = process_question(question, memory, rag_structure)
 
     user_token = request.headers.get("x-user-id")
     posthog.capture(
@@ -104,42 +106,6 @@ def predict(question, rag_structure):
     posthog.shutdown()
 
     return jsonify(result)
-
-
-@app.route("/predict_stream", methods=["POST"])
-@limiter.limit(f"{API_RATE_LIMIT} per minute")
-@handle_question
-def predict_stream(question, rag_structure):
-    def generate():
-        full_answer = ""
-        error = None
-        for chunk in process_question_stream(
-            question, rag_structure, logger, get_config()
-        ):
-            if chunk["error"]:
-                error = chunk["error"]
-                yield f"error: {error}\n"
-                break
-            chunk_answer = chunk["answer"]
-            full_answer += chunk_answer
-            yield chunk_answer
-        yield "[DONE]\n"
-
-        user_token = request.headers.get("x-user-id")
-        posthog.capture(
-            user_token,
-            "MODEL_PREDICTED_ANSWER",
-            {
-                "endpoint": "predict_stream",
-                "question": question,
-                "answer": full_answer,
-                "error": error,
-                "rag_structure": rag_structure,
-            },
-        )
-        posthog.shutdown()
-
-    return Response(stream_with_context(generate()), content_type="text/plain")
 
 
 if __name__ == "__main__":

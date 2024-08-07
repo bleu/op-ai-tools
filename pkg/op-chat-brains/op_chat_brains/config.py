@@ -1,5 +1,9 @@
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 BASE_PATH = os.getenv("OP_CHAT_BASE_PATH", os.path.expanduser("../../data"))
 
 DOCS_PATH = os.path.join(BASE_PATH, "001-initial-dataset-governance-docs/file.txt")

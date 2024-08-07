@@ -1,7 +1,8 @@
-import re, json, time
+import re
+import json
+import time
 import pandas as pd
 from typing import Any, Dict, List
-from collections import defaultdict
 
 from langchain_core.documents.base import Document
 from langchain_text_splitters import MarkdownHeaderTextSplitter
@@ -83,7 +84,7 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
     @staticmethod
     def retrieve():
         out_db = connect_db.retrieve_data(
-            f'select "rawData", url, type, external_id from "{RAW_FORUM_DB}"'
+            f'select "rawData", url, type, "externalId" from "{RAW_FORUM_DB}"'
         )
         posts, threads = {}, {}
         for line in out_db:
@@ -199,7 +200,7 @@ trust_level (0-4): {TRUST_LEVEL}
         df_posts = pd.DataFrame(posts).T
         threads = []
         category_names = connect_db.retrieve_data(
-            f'select "external_id", "name" from "ForumPostCategory"'
+            'select "externalId", "name" from "ForumPostCategory"'
         )
         category_names = {int(c[0]): c[1] for c in category_names}
         for t in df_posts["thread_id"].unique():

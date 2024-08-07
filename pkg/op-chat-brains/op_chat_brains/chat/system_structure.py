@@ -193,7 +193,7 @@ class RAG_system:
                 if verbose:
                     print(f"-------Result: {result}\n")
                     if is_enough:
-                        print(f"END!!!\n")
+                        print("END!!!\n")
 
                 reasoning_level += 1
                 history_reasoning["reasoning"][reasoning_level] = {

@@ -1,12 +1,12 @@
 import Link from "next/link";
 import type React from "react";
 import { CATEGORY_COLORS } from "../categoryColors";
-import { FILTER_OPTIONS, type ForumPost } from "./post-options";
 import { TopicHeader } from "../topic-header";
+import { FILTER_OPTIONS, type ForumPost } from "./post-options";
 
 export function getColor(categoryValue: string) {
   const categoryLabel = FILTER_OPTIONS.options.find(
-    (option) => option.value === categoryValue
+    (option) => option.value === categoryValue,
   )?.label;
 
   if (!categoryLabel) {
