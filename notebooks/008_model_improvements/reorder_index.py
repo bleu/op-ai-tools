@@ -3,21 +3,13 @@ from ragatouille import RAGPretrainedModel
 RAG = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
 RAG = RAG.as_langchain_document_compressor()
 
-import time, json, faiss, re
-import numpy as np
-import pandas as pd
+import json
 
 from op_chat_brains.documents import optimism
 
 all_contexts_df = optimism.DataframeBuilder.build_dataframes()
 
-from op_chat_brains.config import (
-    QUESTIONS_INDEX_JSON,
-    QUESTIONS_INDEX_NPY,
-    KEYWORDS_INDEX_JSON,
-    KEYWORDS_INDEX_NPY,
-    EMBEDDING_MODEL,
-)
+from op_chat_brains.config import QUESTIONS_INDEX_JSON, KEYWORDS_INDEX_JSON
 
 
 def reorder_index(index_dict):

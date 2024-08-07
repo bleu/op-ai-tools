@@ -382,6 +382,10 @@ class DataframeBuilder:
         most_recent = max(last_posted_at)
         print(f"Most recent post date: {most_recent}")
 
+        last_posted_at = [time.strptime(s[1], "%Y-%m-%dT%H:%M:%S.%fZ") for s in summaries if s[1] is not None]
+        most_recent = max(last_posted_at)
+        print(f"Most recent post date: {most_recent}")
+
         fragments_loader = FragmentsProcessingStrategy()
         fragments = fragments_loader.process_document(DOCS_PATH, headers_to_split_on=[])
 
