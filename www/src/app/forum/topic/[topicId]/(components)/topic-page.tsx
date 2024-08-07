@@ -48,6 +48,12 @@ export function TopicPage({ topic }: TopicPageProps) {
         </Section>
       )}
 
+      {topic.overview && (
+        <Section title="Post Overview">
+          <div className="whitespace-pre-line">{topic.overview}</div>
+        </Section>
+      )}
+
       {topic.reaction && (
         <Section title="Reactions">
           <div className="whitespace-pre-line">{topic.reaction}</div>
