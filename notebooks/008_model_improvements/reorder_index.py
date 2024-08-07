@@ -1,4 +1,5 @@
 from ragatouille import RAGPretrainedModel
+
 RAG = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
 RAG = RAG.as_langchain_document_compressor()
 
@@ -7,6 +8,7 @@ import numpy as np
 import pandas as pd
 
 from op_chat_brains.documents import optimism
+
 all_contexts_df = optimism.DataframeBuilder.build_dataframes()
 
 from op_chat_brains.config import (
@@ -14,8 +16,9 @@ from op_chat_brains.config import (
     QUESTIONS_INDEX_NPY,
     KEYWORDS_INDEX_JSON,
     KEYWORDS_INDEX_NPY,
-    EMBEDDING_MODEL
+    EMBEDDING_MODEL,
 )
+
 
 def reorder_index(index_dict):
     output_dict = {}
@@ -32,6 +35,7 @@ def reorder_index(index_dict):
 
     return output_dict
 
+
 def reorder_file(path):
     with open(path, "r") as f:
         index = json.load(f)
@@ -39,10 +43,11 @@ def reorder_file(path):
     with open(path, "w") as f:
         json.dump(index, f, indent=4)
 
+
 def main():
     reorder_file(QUESTIONS_INDEX_JSON)
     reorder_file(KEYWORDS_INDEX_JSON)
 
+
 if __name__ == "__main__":
     main()
-

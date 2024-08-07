@@ -20,8 +20,11 @@ from op_chat_brains.config import (
 
 NOW = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
 
+
 class FragmentsProcessingStrategy(DocumentProcessingStrategy):
-    def process_document(self, file_path: str, headers_to_split_on: List|None = None) -> List[Document]:
+    def process_document(
+        self, file_path: str, headers_to_split_on: List | None = None
+    ) -> List[Document]:
         with open(file_path, "r") as f:
             docs_read = f.read()
 
@@ -50,7 +53,7 @@ class FragmentsProcessingStrategy(DocumentProcessingStrategy):
                 ("#####", "header 5"),
                 ("######", "header 6"),
             ]
-            
+
         markdown_splitter = MarkdownHeaderTextSplitter(
             headers_to_split_on=headers_to_split_on
         )
@@ -59,8 +62,13 @@ class FragmentsProcessingStrategy(DocumentProcessingStrategy):
         for d in docs:
             f = markdown_splitter.split_text(d["content"])
             for fragment in f:
-                fragment.metadata["url"] = "https://community.optimism.io/docs/" + d["path"] + "/" + d["document_name"][:-3]
-                fragment.metadata["path"] = d["path"] 
+                fragment.metadata["url"] = (
+                    "https://community.optimism.io/docs/"
+                    + d["path"]
+                    + "/"
+                    + d["document_name"][:-3]
+                )
+                fragment.metadata["path"] = d["path"]
                 fragment.metadata["document_name"] = d["document_name"]
                 fragment.metadata["type_db_info"] = "docs_fragment"
                 fragments_docs.append(fragment)
@@ -70,10 +78,13 @@ class FragmentsProcessingStrategy(DocumentProcessingStrategy):
     def get_db_name(self) -> str:
         return "fragments_docs_db"
 
+
 class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
     @staticmethod
     def retrieve():
-        out_db = connect_db.retrieve_data(f'select "rawData", url, type, external_id from "{RAW_FORUM_DB}"')
+        out_db = connect_db.retrieve_data(
+            f'select "rawData", url, type, external_id from "{RAW_FORUM_DB}"'
+        )
         posts, threads = {}, {}
         for line in out_db:
             id = int(line[3])
@@ -82,22 +93,22 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
             data_line = line[0]
             if type_line == "post":
                 posts[id] = data_line
-                posts[id]['url'] = url_line
-                posts[id]['thread_id'] = int(url_line.split("/")[-2])
+                posts[id]["url"] = url_line
+                posts[id]["thread_id"] = int(url_line.split("/")[-2])
             elif type_line == "thread":
                 threads[id] = data_line
-                threads[id]['url'] = url_line
-        
-        #print(len(posts))
-        to_del =[]
+                threads[id]["url"] = url_line
+
+        # print(len(posts))
+        to_del = []
         for p in posts:
             try:
-                posts[p]['thread_title'] = threads[posts[p]['thread_id']]['title']
-                posts[id]['category_id'] = threads[posts[p]['thread_id']]['category_id']
+                posts[p]["thread_title"] = threads[posts[p]["thread_id"]]["title"]
+                posts[id]["category_id"] = threads[posts[p]["thread_id"]]["category_id"]
             except KeyError:
                 to_del.append(p)
         posts = {k: v for k, v in posts.items() if k not in to_del}
-        #print(len(posts))
+        # print(len(posts))
 
         return posts, threads
 
@@ -124,6 +135,7 @@ winning_option: {winning_option}
 
 ----
     """
+
     @staticmethod
     def return_snapshot_proposals(file_path: str) -> Dict[str, Any]:
         with open(file_path, "r") as file:
@@ -185,17 +197,21 @@ trust_level (0-4): {TRUST_LEVEL}
     def return_threads() -> List:
         posts, threads_info = ForumPostsProcessingStrategy.retrieve()
         df_posts = pd.DataFrame(posts).T
-        threads =[]
-        category_names = connect_db.retrieve_data(f'select "external_id", "name" from "ForumPostCategory"')
+        threads = []
+        category_names = connect_db.retrieve_data(
+            f'select "external_id", "name" from "ForumPostCategory"'
+        )
         category_names = {int(c[0]): c[1] for c in category_names}
-        for t in df_posts['thread_id'].unique():
-            posts_thread = df_posts[df_posts['thread_id'] == t].sort_values(by='created_at')
-            url = posts_thread['url'].iloc[0]
+        for t in df_posts["thread_id"].unique():
+            posts_thread = df_posts[df_posts["thread_id"] == t].sort_values(
+                by="created_at"
+            )
+            url = posts_thread["url"].iloc[0]
             url = url.split("/")[:-1]
             url = "/".join(url)
             t_i = threads_info[int(t)]
             category_name = category_names[t_i["category_id"]]
-            
+
             str_thread = ForumPostsProcessingStrategy.template_thread.format(
                 CATEGORY_NAME=category_name,
                 THREAD_TITLE=t_i["title"],
@@ -210,15 +226,19 @@ trust_level (0-4): {TRUST_LEVEL}
 
             for i, post in posts_thread.iterrows():
                 str_thread += ForumPostsProcessingStrategy.template_post.format(
-                    POST_NUMBER=post['post_number'],
-                    USERNAME=post['username'],
-                    CREATED_AT=post['created_at'],
-                    TRUST_LEVEL=post['trust_level'],
-                    IS_REPLY=f"(reply to post #{post['reply_to_post_number']})\n" if post['reply_to_post_number'] != None else "",
-                    CONTENT=post['cooked'].replace("<\\content_user_input>", "").replace("<content_user_input>", ""),
-                    MODERATOR=post['moderator'],
-                    ADMIN=post['admin'],
-                    STAFF=post['staff'],
+                    POST_NUMBER=post["post_number"],
+                    USERNAME=post["username"],
+                    CREATED_AT=post["created_at"],
+                    TRUST_LEVEL=post["trust_level"],
+                    IS_REPLY=f"(reply to post #{post['reply_to_post_number']})\n"
+                    if post["reply_to_post_number"] != None
+                    else "",
+                    CONTENT=post["cooked"]
+                    .replace("<\\content_user_input>", "")
+                    .replace("<content_user_input>", ""),
+                    MODERATOR=post["moderator"],
+                    ADMIN=post["admin"],
+                    STAFF=post["staff"],
                 )
 
             metadata = {
@@ -234,28 +254,24 @@ trust_level (0-4): {TRUST_LEVEL}
                 "category_name": category_name,
                 "url": url,
                 "num_posts": len(posts_thread),
-                "users": list(posts_thread['username'].unique()),
-                'length_str_thread': len(str_thread),
+                "users": list(posts_thread["username"].unique()),
+                "length_str_thread": len(str_thread),
                 "type_db_info": "forum_thread",
             }
             threads.append([str_thread, metadata])
 
         return threads
-    
+
     @staticmethod
     def get_threads_documents() -> List[Document]:
         threads = ForumPostsProcessingStrategy.return_threads()
-        threads_forum = [
-            Document(
-                page_content = t[0],
-                metadata = t[1]
-            ) for t in threads
-        ]
+        threads_forum = [Document(page_content=t[0], metadata=t[1]) for t in threads]
 
         return threads_forum
 
     def get_db_name(self) -> str:
         return "posts_forum_db"
+
 
 class SummaryProcessingStrategy(DocumentProcessingStrategy):
     template_summary = """
@@ -267,7 +283,9 @@ class SummaryProcessingStrategy(DocumentProcessingStrategy):
 
     @staticmethod
     def retrieve() -> List:
-        out_db = connect_db.retrieve_data(f'select url, tldr, about, overview, reaction from "{FORUM_SUMMARY_DB}"')
+        out_db = connect_db.retrieve_data(
+            f'select url, tldr, about, overview, reaction from "{FORUM_SUMMARY_DB}"'
+        )
 
         ret = []
         for o in out_db:
@@ -277,53 +295,44 @@ class SummaryProcessingStrategy(DocumentProcessingStrategy):
                 OVERVIEW=o[3],
                 REACTION=o[4],
             )
-            item = {
-                "content": str_summary,
-                "url": o[0],
-                "classification": ""
-            }
+            item = {"content": str_summary, "url": o[0], "classification": ""}
             ret.append(item)
         threads = ForumPostsProcessingStrategy.return_threads()
 
         for entry in ret:
             url = entry["url"]
             thread = next((t for t in threads if t[1]["url"] == url), None)
-            entry['metadata'] = thread[1]
-            entry['metadata']['whole_thread'] = thread[0]
-            entry['metadata']['classification'] = entry['classification']
-            entry['metadata']['type_db_info'] = 'forum_thread_summary'
+            entry["metadata"] = thread[1]
+            entry["metadata"]["whole_thread"] = thread[0]
+            entry["metadata"]["classification"] = entry["classification"]
+            entry["metadata"]["type_db_info"] = "forum_thread_summary"
 
         ret = [x for x in ret if x is not None]
-        ret = [x for x in ret if 'metadata' in x.keys()]
-        
-        return ret 
-    
+        ret = [x for x in ret if "metadata" in x.keys()]
+
+        return ret
+
     @staticmethod
-    def langchain_process(divide: str|None = None) -> Dict[str, List[Document]]:
+    def langchain_process(divide: str | None = None) -> Dict[str, List[Document]]:
         data = SummaryProcessingStrategy.retrieve()
 
         if isinstance(divide, str):
-            classes = set([entry['metadata'][divide] for entry in data])
-            docs = {c : [] for c in classes}
+            classes = set([entry["metadata"][divide] for entry in data])
+            docs = {c: [] for c in classes}
             for entry in data:
-                c = entry['metadata'][divide]
+                c = entry["metadata"][divide]
                 docs[c].append(
-                    Document(
-                        page_content = entry["content"],
-                        metadata = entry["metadata"]
-                    )
+                    Document(page_content=entry["content"], metadata=entry["metadata"])
                 )
             return docs
         else:
             docs = [
-                Document(
-                        page_content = entry["content"],
-                        metadata = entry["metadata"]
-                    )
+                Document(page_content=entry["content"], metadata=entry["metadata"])
                 for entry in data
             ]
-            
+
             return docs
+
 
 class OptimismDocumentProcessorFactory(DocumentProcessorFactory):
     def create_processor(self, doc_type: str) -> DocumentProcessingStrategy:
@@ -342,24 +351,35 @@ class OptimismDocumentProcessorFactory(DocumentProcessorFactory):
             "forum_posts": "002-governance-forum-202406014/dataset/_out.jsonl",
         }
 
+
 class DataframeBuilder:
     @staticmethod
     def build_dataframes():
         summaries = SummaryProcessingStrategy.langchain_process(divide="category_name")
-        pattern = r'[^A-Za-z0-9_]+'
-        summaries = [(s.metadata['url'], s.metadata["last_posted_at"], s, re.sub(pattern, '', k)) for k, v in summaries.items() for s in v]
+        pattern = r"[^A-Za-z0-9_]+"
+        summaries = [
+            (s.metadata["url"], s.metadata["last_posted_at"], s, re.sub(pattern, "", k))
+            for k, v in summaries.items()
+            for s in v
+        ]
 
-        last_posted_at = [time.strptime(s[1], "%Y-%m-%dT%H:%M:%S.%fZ") for s in summaries if s[1] is not None]
+        last_posted_at = [
+            time.strptime(s[1], "%Y-%m-%dT%H:%M:%S.%fZ")
+            for s in summaries
+            if s[1] is not None
+        ]
         most_recent = max(last_posted_at)
         print(f"Most recent post date: {most_recent}")
 
         fragments_loader = FragmentsProcessingStrategy()
         fragments = fragments_loader.process_document(DOCS_PATH, headers_to_split_on=[])
-        
-        data = [(f.metadata['url'], NOW, f, "fragments_docs") for f in fragments]
+
+        data = [(f.metadata["url"], NOW, f, "fragments_docs") for f in fragments]
         data.extend(summaries)
-        context_df = pd.DataFrame(data, columns=["url", "last_date", "content", "type_db_info"])
+        context_df = pd.DataFrame(
+            data, columns=["url", "last_date", "content", "type_db_info"]
+        )
 
         context_df = context_df.sort_values(by="last_date", ascending=False)
-    
+
         return context_df

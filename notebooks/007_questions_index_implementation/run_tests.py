@@ -20,7 +20,7 @@ easy_test = [
     "What is required for a non-grant proposal to move to a vote in the Optimism governance process?",
     "What is required for a proposal to move to a vote in the Optimism governance process?",
     "What is the purpose of the Code of Conduct Council?",
-    "When does Voting Cycle 22 begin and end?"
+    "When does Voting Cycle 22 begin and end?",
 ]
 
 hard_test = [
@@ -28,31 +28,28 @@ hard_test = [
     "How many project grants were approved and how many were rejected in the last three voting cycles?",
     "Can you explain the most recent Optimism governance proposal?",
     "Can you give me an overview of the OP token distribution?",
-    "What cycle is the current voting cycle?"
+    "What cycle is the current voting cycle?",
 ]
 
-tests = {
-    "old": old_test,
-    "easy": easy_test,
-    "hard": hard_test
-}
+tests = {"old": old_test, "easy": easy_test, "hard": hard_test}
 
 models2test = [
     "gpt-4o-mini",
 ]
 
+
 def main():
     list_dbs = os.listdir("dbs")
     list_dbs = [db[:-3] for db in list_dbs if db[-3:] == "_db"]
-    filter_out_dbs = ['summary_archived___old_missions']
+    filter_out_dbs = ["summary_archived___old_missions"]
     dbs = [db for db in list_dbs if db not in filter_out_dbs]
 
     index_retriever = model_utils.build_index(questions_index, embedding_model)
-    
+
     default_retriever = model_utils.build_retriever(
-        dbs, 
+        dbs,
         embedding_model,
-        k = 20,
+        k=20,
     )
 
     answers = {}
@@ -64,21 +61,21 @@ def main():
                 "max_retries": 5,
                 "max_tokens": 1024,
                 "timeout": 60,
-            }
+            },
         )
 
         system = system_structure.RAG_system(
-            REASONING_LIMIT = 1,
-            models_to_use = [chat_model, chat_model],
-            factual_retriever = default_retriever,
-            temporal_retriever = default_retriever,
-            index_retriever = index_retriever,
-            context_filter = model_utils.ContextHandling.filter,
-            system_prompt_preprocessor = model_utils.Prompt.preprocessor,
-            system_prompt_responder = model_utils.Prompt.responder,
-            system_prompt_final_responder = model_utils.Prompt.final_responder
+            REASONING_LIMIT=1,
+            models_to_use=[chat_model, chat_model],
+            factual_retriever=default_retriever,
+            temporal_retriever=default_retriever,
+            index_retriever=index_retriever,
+            context_filter=model_utils.ContextHandling.filter,
+            system_prompt_preprocessor=model_utils.Prompt.preprocessor,
+            system_prompt_responder=model_utils.Prompt.responder,
+            system_prompt_final_responder=model_utils.Prompt.final_responder,
         )
-        
+
         answers[m] = {}
         for test_type, test_queries in tests.items():
             answers[m][test_type] = {}
@@ -92,7 +89,7 @@ def main():
     json.dump(answers, open("test_results/answers.json", "w"), indent=4)
 
     json2csv(answers)
- 
+
 
 def json2csv(answers):
     for test_type, test_queries in tests.items():
@@ -100,13 +97,15 @@ def json2csv(answers):
         for m in models2test:
             for query in test_queries:
                 answer = answers[m][test_type][query]
-                out_answers.append({
-                    "model": m,
-                    "query": query,
-                    "answer": answer["answer"],
-                    "time_taken": answer["time_taken"],
-                    "reasoning_level": len(answer["reasoning"])
-                })
+                out_answers.append(
+                    {
+                        "model": m,
+                        "query": query,
+                        "answer": answer["answer"],
+                        "time_taken": answer["time_taken"],
+                        "reasoning_level": len(answer["reasoning"]),
+                    }
+                )
         pd.DataFrame(out_answers).to_csv(f"test_results/{test_type}.csv", index=False)
 
 

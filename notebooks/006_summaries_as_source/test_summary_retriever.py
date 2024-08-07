@@ -2,10 +2,12 @@ import streamlit as st
 import model_builder, time
 
 from datetime import date
+
 TODAY = date.today()
 
 with st.echo():
     from langchain_openai import OpenAIEmbeddings
+
     embedding_model = "text-embedding-ada-002"
     chat_pars = {
         "temperature": 0.0,
@@ -15,11 +17,17 @@ with st.echo():
     }
     dbs = ["summaries"]
     from langchain_community.vectorstores import FAISS
-    vectorstore = 'faiss'
+
+    vectorstore = "faiss"
     reasoning_limit = 3
 
 chat_models_openai = ["gpt-3.5-turbo-0125", "gpt-4o"]
-chat_models_anthropic = ["claude-3-sonnet-20240229", "claude-3-haiku-20240307", "claude-3-opus-20240229", "claude-3-5-sonnet-20240620"]
+chat_models_anthropic = [
+    "claude-3-sonnet-20240229",
+    "claude-3-haiku-20240307",
+    "claude-3-opus-20240229",
+    "claude-3-5-sonnet-20240620",
+]
 all_models = chat_models_openai + chat_models_anthropic
 chosen_model = st.selectbox("Select chat model", all_models, index=1)
 chat_pars["model"] = chosen_model
@@ -42,10 +50,8 @@ structure = st.selectbox("Select architecture", archs, index=0)
 with st.echo():
     match structure:
         case "simple":
-                k = 5 # number of context elements
-                retriever_pars = {
-                    "search_kwargs" : {'k': k+1}
-                }
+            k = 5  # number of context elements
+            retriever_pars = {"search_kwargs": {"k": k + 1}}
 
 prompt_template = lambda question, context: [
     (
@@ -103,13 +109,10 @@ In these cases: consider always that today's date is {TODAY}. Always be cautious
    </answer>
 
 Remember to be helpful, polite, and informative while maintaining assertiveness, objectivity, and brevity in your response.
-"""
-                    ),
-                    (
-                        "human",
-                        f"<question> {question} </question> \n\n <context> {context} </context>"
-                    )
-                ]
+""",
+    ),
+    ("human", f"<question> {question} </question> \n\n <context> {context} </context>"),
+]
 
 final_prompt_template = lambda question, context: [
     (
@@ -160,13 +163,11 @@ Follow these steps:
    </answer>
 
 Remember to be helpful, polite, and informative while maintaining assertiveness, objectivity, and brevity in your response.
-"""
-                    ),
-                    (
-                        "human",
-                        f"<question> {question} </question> \n\n <context> {context} </context>"
-                    )
-                ]
+""",
+    ),
+    ("human", f"<question> {question} </question> \n\n <context> {context} </context>"),
+]
+
 
 def test_model(model, question):
     st.write(question)
@@ -174,30 +175,39 @@ def test_model(model, question):
     response = model.predict(question)
     end = time.time()
     with st.expander("Reasoning history"):
-         st.write(response["reasoning_history"])
+        st.write(response["reasoning_history"])
     with st.expander("Final Context"):
-         context = response["final_answer"]["context"]
-         st.write([context[s][i].page_content for s in context for i in range(len(context[s]))])
+        context = response["final_answer"]["context"]
+        st.write(
+            [
+                context[s][i].page_content
+                for s in context
+                for i in range(len(context[s]))
+            ]
+        )
     st.write(response["final_answer"]["answer"])
     st.write(f"Time taken: {end-start}s")
     st.write("-----")
+
 
 if st.button("Build model"):
     with st.echo():
         model = model_builder.RAG_model(
             structure_name=f"{structure}-{llm_type}",
-            dbs_name=dbs, 
-            embeddings_name = embedding_model, 
-            chat_pars = chat_pars,
-            retriever_pars = retriever_pars,
-            prompt_template = prompt_template,
-            final_prompt_template = final_prompt_template,
-            reasoning_limit = reasoning_limit
+            dbs_name=dbs,
+            embeddings_name=embedding_model,
+            chat_pars=chat_pars,
+            retriever_pars=retriever_pars,
+            prompt_template=prompt_template,
+            final_prompt_template=final_prompt_template,
+            reasoning_limit=reasoning_limit,
         )
 
         test_model(model, "what is optimism?")
-        #test_model(model, "who is Gonna?")
-        test_model(model, "Are Governance Fund grant applications currently being processed?")
-        #test_model(model, "How can I participate in voting on Optimism governance proposals?")
+        # test_model(model, "who is Gonna?")
+        test_model(
+            model, "Are Governance Fund grant applications currently being processed?"
+        )
+        # test_model(model, "How can I participate in voting on Optimism governance proposals?")
         test_model(model, "Can you give me an overview of the OP token distribution?")
-        #test_model(model, "what about Diego's vote rationale for RF3?")
+        # test_model(model, "what about Diego's vote rationale for RF3?")

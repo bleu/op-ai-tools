@@ -4,13 +4,16 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
 from ragatouille import RAGPretrainedModel
+
 RAG = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
 RAG = RAG.as_langchain_document_compressor()
 
 import time
+
 TODAY = time.strftime("%Y-%m-%d")
-scope="Optimism Governance/Optimism Collective/Optimism L2"
-source="Optimism Governance Forum"
+scope = "Optimism Governance/Optimism Collective/Optimism L2"
+source = "Optimism Governance Forum"
+
 
 class Prompt:
     responder = f"""
@@ -156,7 +159,7 @@ Follow these steps:
 
 Remember to be helpful, polite, and informative while maintaining assertiveness, objectivity, and brevity in your response.
 """
-    
+
     preprocessor = f"""
 You are a part of a helpful chatbot assistant system that provides information about {scope}. Your task is to help responding to user queries appropriately based on the given information and guidelines. You will return <answer> tags with the response to the user or <user_knowledge> and <questions> tags so the system can retrieve more information to properly answer the query.
 
@@ -199,7 +202,8 @@ When formulating questions, adhere to these guidelines:
 
 Remember, your goal is to provide accurate and helpful information about {scope} while staying within the defined scope and gathering necessary information when required.
 """
-    
+
+
 class ContextHandling:
     summary_template = """
 <summary_from_forum_thread>
@@ -212,8 +216,14 @@ class ContextHandling:
 </summary_from_forum_thread>
 
 """
+
     @staticmethod
-    def filter(context_dict:dict, explored_contexts:list, query:str|None = None, k:int = 5) -> Tuple[str, list]:
+    def filter(
+        context_dict: dict,
+        explored_contexts: list,
+        query: str | None = None,
+        k: int = 5,
+    ) -> Tuple[str, list]:
         urls = context_dict.keys()
         context = [c for c in context_dict.values() if c not in explored_contexts]
 
@@ -231,36 +241,41 @@ class ContextHandling:
             type_db = c.metadata["type_db_info"]
             match type_db:
                 case "forum_thread_summary":
-                    out.append(ContextHandling.summary_template.format(
-                        TITLE = c.metadata["thread_title"],
-                        CREATED_AT = c.metadata["created_at"],
-                        LAST_POST_AT = c.metadata["last_posted_at"],
-                        URL = c.metadata["url"],
-                        CONTENT = c.page_content
-                    ))
+                    out.append(
+                        ContextHandling.summary_template.format(
+                            TITLE=c.metadata["thread_title"],
+                            CREATED_AT=c.metadata["created_at"],
+                            LAST_POST_AT=c.metadata["last_posted_at"],
+                            URL=c.metadata["url"],
+                            CONTENT=c.page_content,
+                        )
+                    )
                 case _:
                     pass
 
         urls = [url for url in urls if context_dict[url] in context]
         return "".join(out), urls
-    
+
     @staticmethod
-    def reordering(context:list, query:str, k:int = 5) -> list:
+    def reordering(context: list, query: str, k: int = 5) -> list:
         return RAG.compress_documents(query=query, documents=context, k=k)
 
 
-
-def load_db(dbs, model_embeddings, vectorstore = 'faiss'):
+def load_db(dbs, model_embeddings, vectorstore="faiss"):
     embeddings = OpenAIEmbeddings(model=model_embeddings)
-    if vectorstore == 'faiss':
+    if vectorstore == "faiss":
         dbs = [f"dbs/{name}_db/faiss/{model_embeddings}" for name in dbs]
-        dbs = [FAISS.load_local(db_path, embeddings, allow_dangerous_deserialization=True) for db_path in dbs]
+        dbs = [
+            FAISS.load_local(db_path, embeddings, allow_dangerous_deserialization=True)
+            for db_path in dbs
+        ]
         db = dbs[0]
         for db_ in dbs[1:]:
             db.merge_from(db_)
-    
+
     return db
+
 
 def build_retriever(dbs_name, embeddings_name, **retriever_pars):
     db = load_db(dbs_name, embeddings_name)
-    return lambda query : db.similarity_search(query, **retriever_pars)
+    return lambda query: db.similarity_search(query, **retriever_pars)

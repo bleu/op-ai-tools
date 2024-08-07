@@ -2,13 +2,12 @@ from typing import Tuple, Any, Callable, Iterable
 import re, json, faiss, re
 import numpy as np
 
-from op_chat_brains.documents.optimism import SummaryProcessingStrategy, FragmentsProcessingStrategy
-from op_chat_brains.chat import model_utils
-from op_chat_brains.config import (
-    DOCS_PATH,
-    SCOPE,
-    EMBEDDING_MODEL
+from op_chat_brains.documents.optimism import (
+    SummaryProcessingStrategy,
+    FragmentsProcessingStrategy,
 )
+from op_chat_brains.chat import model_utils
+from op_chat_brains.config import DOCS_PATH, SCOPE, EMBEDDING_MODEL
 
 from langchain_community.vectorstores import FAISS
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
@@ -85,11 +84,11 @@ Remember, your goal is to create questions that a non-specialist user would find
 """
 
 
-def generate_indexes_from_fragment(list_contexts : Iterable, llm : Any) -> dict:
+def generate_indexes_from_fragment(list_contexts: Iterable, llm: Any) -> dict:
     kw_index = {}
     q_index = {}
     for context in list_contexts:
-        type_db = context.metadata['type_db_info']
+        type_db = context.metadata["type_db_info"]
 
         if type_db == "docs_fragment":
             TYPE_GUIDELINES = "It is a post from the Optimism Governance Documentation. As the documentation is a place for official information, the content should be relevant and important. Try to encapsulate the whole content in your questions. Aim to generate at least 5 questions, depending on the complexity and richness of the fragment."
@@ -97,9 +96,7 @@ def generate_indexes_from_fragment(list_contexts : Iterable, llm : Any) -> dict:
             TYPE_GUIDELINES = "It is a summary of a forum thread from the Optimism Governance Forum. As the forum is a place for community discussion, the content may vary. If you understand that the content is unimportant or irrelevant, return <nothing>."
 
         prompt = prompt_question_generation.format(
-            CONTEXT=context.page_content,
-            SCOPE=SCOPE,
-            TYPE_GUIDELINES=TYPE_GUIDELINES
+            CONTEXT=context.page_content, SCOPE=SCOPE, TYPE_GUIDELINES=TYPE_GUIDELINES
         )
 
         out = llm.invoke(prompt).content
@@ -107,33 +104,34 @@ def generate_indexes_from_fragment(list_contexts : Iterable, llm : Any) -> dict:
         xml_tag_pattern = re.compile(r"<(\w+)(\s[^>]*)?>(.*?)</\1>", re.DOTALL)
         xml_tags = xml_tag_pattern.findall(out)
         tags = {tag[0]: tag[2] for tag in xml_tags}
-        
+
         if "questions" in tags.keys():
             questions = tags["questions"]
-            questions = [(q[2],q[1]) for q in xml_tag_pattern.findall(questions)]
+            questions = [(q[2], q[1]) for q in xml_tag_pattern.findall(questions)]
 
             for q in questions:
                 q = q[0]
                 if q not in q_index:
                     q_index[q] = []
-                q_index[q].append(context.metadata['url'])
+                q_index[q].append(context.metadata["url"])
                 print(q, q_index[q])
 
         if "keywords" in tags.keys():
             keywords = tags["keywords"]
             keywords = [k.strip().lower() for k in keywords.split(",")]
-            keywords = [re.sub(r'[^\w\s]', '', k) for k in keywords]
+            keywords = [re.sub(r"[^\w\s]", "", k) for k in keywords]
 
             for k in keywords:
                 if k not in kw_index:
                     kw_index[k] = []
-                kw_index[k].append(context.metadata['url'])
+                kw_index[k].append(context.metadata["url"])
                 print(k, kw_index[k])
-            
+
     return q_index, kw_index
 
+
 def get_data():
-    summary = SummaryProcessingStrategy.langchain_process(divide='category_name')
+    summary = SummaryProcessingStrategy.langchain_process(divide="category_name")
     summary = {f'summary_"{key}': value for key, value in summary.items()}
 
     fragments_loader = FragmentsProcessingStrategy()
@@ -144,18 +142,19 @@ def get_data():
 
     return data
 
-def main(model:str):
+
+def main(model: str):
     data = get_data()
 
     llm = model_utils.access_APIs.get_llm(model)
     embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
-    
+
     questions_index = {}
     keywords_index = {}
     for db_name, contexts in data.items():
         db = FAISS.from_documents(contexts, embeddings)
         db.save_local(f"dbs/{db_name}_db/faiss/{EMBEDDING_MODEL}")
-        
+
         q_index, kw_index = generate_indexes_from_fragment(contexts, llm)
 
         for q, urls in q_index.items():
@@ -179,6 +178,7 @@ def main(model:str):
     index_keywords = list(keywords_index.keys())
     index_keywords_embed = np.array(embeddings.embed_documents(index_keywords))
     np.save("index/keywords.npy", index_keywords_embed)
-        
+
+
 if __name__ == "__main__":
     main("gpt-4o-mini")

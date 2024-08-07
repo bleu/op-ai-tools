@@ -246,19 +246,19 @@ for i, tab in enumerate(tabs):
             "What accountability measures are in place for teams receiving grants from the Governance Fund?",
         ]
 
-
-        if st.button("Predict", key=f'{arch}_predict'):
+        if st.button("Predict", key=f"{arch}_predict"):
             answers = []
-            for question in dataset:    
+            for question in dataset:
                 start = time.time()
                 answer = rag.predict(question)
                 end = time.time()
                 st.write(f"(took {end-start:.2f} seconds)")
                 st.write(answer)
-                answers.append((question, answer['answer'], end-start, answer['context']))
-            
+                answers.append(
+                    (question, answer["answer"], end - start, answer["context"])
+                )
 
-            df_answers = pd.DataFrame(answers, columns=["Question", "Answer", "Elapsed Time", "Context"])
+            df_answers = pd.DataFrame(
+                answers, columns=["Question", "Answer", "Elapsed Time", "Context"]
+            )
             df_answers.to_csv(f"{arch}_answers.csv", index=False)
-
-                

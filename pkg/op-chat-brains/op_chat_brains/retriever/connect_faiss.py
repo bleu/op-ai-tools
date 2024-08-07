@@ -9,9 +9,7 @@ from op_chat_brains.config import DB_STORAGE_PATH, EMBEDDING_MODEL
 
 class DatabaseLoader:
     @staticmethod
-    def load_db(
-        dbs: Tuple[str, ...], vectorstore: str = "faiss"
-    ) -> FAISS:
+    def load_db(dbs: Tuple[str, ...], vectorstore: str = "faiss") -> FAISS:
         embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
         if vectorstore == "faiss":
             db_paths = [
@@ -29,4 +27,3 @@ class DatabaseLoader:
                 merged_db.merge_from(db)
             return merged_db
         raise ValueError(f"Unsupported vectorstore: {vectorstore}")
-

@@ -2,12 +2,12 @@ from typing import Tuple, Any, Callable, Iterable
 import re, json, faiss, re
 import numpy as np
 
-from op_chat_brains.documents.optimism import SummaryProcessingStrategy, FragmentsProcessingStrategy
-from op_chat_brains.chat import model_utils
-from op_chat_brains.config import (
-    DOCS_PATH,
-    SCOPE
+from op_chat_brains.documents.optimism import (
+    SummaryProcessingStrategy,
+    FragmentsProcessingStrategy,
 )
+from op_chat_brains.chat import model_utils
+from op_chat_brains.config import DOCS_PATH, SCOPE
 
 from langchain_community.vectorstores import FAISS
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
@@ -57,20 +57,19 @@ Remember, your goal is to create questions that a non-specialist user would find
 """
 
 
-def generate_question_index(list_contexts : Iterable, llm : Any) -> dict:
+def generate_question_index(list_contexts: Iterable, llm: Any) -> dict:
     index = {}
     for context in list_contexts:
         prompt = prompt_question_generation.format(
-            CONTEXT=context.page_content,
-            SCOPE=SCOPE
+            CONTEXT=context.page_content, SCOPE=SCOPE
         )
 
         questions = llm.invoke(prompt).content
-        
+
         xml_tag_pattern = re.compile(r"<(\w+)(\s[^>]*)?>(.*?)</\1>", re.DOTALL)
         xml_tags = xml_tag_pattern.findall(questions)
         tags = {tag[0]: tag[2] for tag in xml_tags}
-        
+
         if "questions" in tags.keys():
             questions = tags["questions"]
             questions = [q[2] for q in xml_tag_pattern.findall(questions)]
@@ -82,13 +81,13 @@ def generate_question_index(list_contexts : Iterable, llm : Any) -> dict:
             for q in questions:
                 if q not in index:
                     index[q] = []
-                index[q].append(context.metadata['url'])
+                index[q].append(context.metadata["url"])
 
-            
     return list_contexts, index
 
-def main(model:str):
-    summary = SummaryProcessingStrategy.langchain_process(divide='category_name')
+
+def main(model: str):
+    summary = SummaryProcessingStrategy.langchain_process(divide="category_name")
     summary = {f'summary_"{key}': value for key, value in summary.items()}
 
     fragments_loader = FragmentsProcessingStrategy()
@@ -99,7 +98,7 @@ def main(model:str):
 
     llm = model_utils.access_APIs.get_llm(model)
     embeddings = OpenAIEmbeddings(model=MODEL_EMBEDDING)
-    
+
     questions_index = {}
     for key, value in data.items():
         list_contexts, index = generate_question_index(value, llm)
@@ -125,6 +124,7 @@ def main(model:str):
 
     # export
     np.save("questions_index.npy", index_questions_embed)
-        
+
+
 if __name__ == "__main__":
     main("gpt-4o-mini")
