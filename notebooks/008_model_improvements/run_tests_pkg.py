@@ -10,17 +10,23 @@ time_related_dataset = pd.read_csv("datasets/time_related.csv")
 time_related_test = time_related_dataset.question.tolist()
 time_related_expected = time_related_dataset.expected.tolist()
 
+from_fragments_dataset = pd.read_csv("datasets/fragmented_easy.csv")
+from_fragments_test = from_fragments_dataset.question.tolist()
+from_fragments_expected = from_fragments_dataset.answer.tolist()
+
 tests = {
     "time_related": time_related_test,
+    "from_fragments": from_fragments_test,
 }
 
 expected = {
     "time_related": time_related_expected,
+    "from_fragments": from_fragments_expected,
 }
 
 models2test = [
     "gpt-4o-mini",
-    "claude-3-opus-20240229"
+    #"claude-3-opus-20240229"
 ]
 
 
@@ -36,8 +42,8 @@ def main():
     )
     
     keywords_index_retriever = model_utils.RetrieverBuilder.build_keywords_index(
-        k_max=5,
-        treshold=0.9
+        k_max=3,
+        treshold=0.95
     )
 
     def contains(must_contain):

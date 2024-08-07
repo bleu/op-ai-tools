@@ -130,19 +130,18 @@ class RAG_system:
             print(f"-------------------\nQuery: {query}\nNeeds info: {needs_info}\nPreprocess reasoning: {preprocess_reasoning}\n")
         if needs_info:
             is_enough = False
-            explored_contexts = []
+            explored_contexts_urls = []
             user_knowledge, questions, type_search = preprocess_reasoning
             result = "", questions, type_search
             reasoning_level = 0
             while not is_enough:
                 summary_of_explored_contexts, questions, type_search = result
 
-                context_list = [self.retriever(q, reasoning_level=reasoning_level) for q in questions]
-                print(type(context_list))
-                context_dict = {c.metadata['url']:c for cc in context_list for c in cc}
+                context_dict = {list(q.values())[0] : self.retriever(q, reasoning_level=reasoning_level) for q in questions}
+                #context_dict = {c.metadata['url']:c for cc in context_list for c in cc}
 
-                context, context_urls = self.context_filter(context_dict, explored_contexts, query, type_search)
-                explored_contexts.extend(context_urls)
+                context, context_urls = self.context_filter(context_dict, explored_contexts_urls, query, type_search)
+                explored_contexts_urls.extend(context_urls)
 
                 if verbose:
                     print(f"-------Reasoning level {reasoning_level}\nExplored Context URLS: {context_urls}")

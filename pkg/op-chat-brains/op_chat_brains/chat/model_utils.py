@@ -1,11 +1,3 @@
-import time
-from ragatouille import RAGPretrainedModel
-start = time.time()
-print("Loading RAG...")
-RAG = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
-RAG = RAG.as_langchain_document_compressor()
-print(f"Time to load RAG: {time.time()-start:.2f}s")
-
 from typing import Iterator, List, Dict, Any, Callable, Tuple
 import time, json, faiss, re
 import numpy as np
@@ -207,21 +199,34 @@ class ContextHandling:
 
 """
     @staticmethod
-    def filter(context_dict:dict, explored_contexts:list, query:str|None = None, type_search:str = "factual", k:int = 5) -> Tuple[str, list]:
-        urls = context_dict.keys()
-        context = [(u, c) for u, c in context_dict.items() if c not in explored_contexts]
+    def filter(question_context:dict, explored_contexts:list, query:str|None = None, type_search:str = "factual", k:int = 3) -> Tuple[str, list]:
+        contexts_to_be_explored = {}
+        for question, contexts in question_context.items():
+            new_contexts = [c for c in contexts if c.metadata['url'] not in explored_contexts]
+            contexts_to_be_explored[question] = new_contexts
 
-        if query is not None:
-            k = min(k, len(context))
-            if k > 0:
-                context = ContextHandling.reordering(context, query, k=k, type_search=type_search)
+            if query is not None:
+                k = min(k, len(new_contexts))
+                if k > 0:
+                    new_contexts = ContextHandling.reordering(new_contexts, query, k=k, type_search=type_search)
 
-        return ContextHandling.format(context, context_dict, urls)
+        c = contexts_to_be_explored.values()
+        if len(c) > 0:
+            max_c = max([len(cc) for cc in c])
+            contexts_to_be_explored = []
+            for i in range(max_c):
+                for cc in c:
+                    if i < len(cc):
+                        contexts_to_be_explored.append(cc[i])
+            contexts_to_be_explored = {c.metadata['url']: c for c in contexts_to_be_explored}
+
+        return ContextHandling.format(contexts_to_be_explored, question_context)
 
     @staticmethod
-    def format(context: list, context_dict: dict, urls: list) -> Tuple[str, list]:
+    def format(context: dict, context_dict: dict) -> Tuple[str, list]:
+        urls = list(context.keys())
         out = []
-        for c in context:
+        for c in context.values():
             type_db = c.metadata["type_db_info"]
             match type_db:
                 case "forum_thread_summary":
@@ -235,19 +240,15 @@ class ContextHandling:
                 case _:
                     pass
 
-        urls = [url for url in urls if context_dict[url] in context]
         return "".join(out), urls
     
     @staticmethod
     def reordering(context:list, query:str, k:int, type_search:str) -> list:
         if type_search == "factual" or type_search == "ocurrence":
-            context = [c[1] for c in context]
-            return RAG.compress_documents(query=query, documents=context, k=k)
+            return context[:k]
         elif type_search == "recent":
-            urls = [c[0] for c in context]
-            print(urls)
+            urls = [c.metadata['url'] for c in context]
             contexts = all_contexts_df[all_contexts_df["url"].isin(urls)].iloc[:k]
-            print(contexts)
             return contexts.content.tolist()
             
 
@@ -297,10 +298,9 @@ class RetrieverBuilder:
             contexts = all_contexts_df
             if "type_db_info" in kwargs:
                 contexts = contexts[contexts["type_db_info"].isin(kwargs["type_db_info"])]
-
             contexts = contexts[contexts["url"].isin(urls)]
-            
-            return contexts["content"].tolist()
+
+            return [contexts[contexts["url"] == u].content.tolist()[0] for u in urls]
 
         return find_similar
     

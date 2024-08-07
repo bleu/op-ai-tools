@@ -349,6 +349,10 @@ class DataframeBuilder:
         pattern = r'[^A-Za-z0-9_]+'
         summaries = [(s.metadata['url'], s.metadata["last_posted_at"], s, re.sub(pattern, '', k)) for k, v in summaries.items() for s in v]
 
+        last_posted_at = [time.strptime(s[1], "%Y-%m-%dT%H:%M:%S.%fZ") for s in summaries if s[1] is not None]
+        most_recent = max(last_posted_at)
+        print(f"Most recent post date: {most_recent}")
+
         fragments_loader = FragmentsProcessingStrategy()
         fragments = fragments_loader.process_document(DOCS_PATH, headers_to_split_on=[])
         
