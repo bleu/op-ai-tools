@@ -54,15 +54,15 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // if (startDate || endDate) {
-  //   conditions.createdAt = {};
-  //   if (startDate) {
-  //     conditions.createdAt.gte = new Date(startDate);
-  //   }
-  //   if (endDate) {
-  //     conditions.createdAt.lte = new Date(endDate);
-  //   }
-  // }
+  if (startDate || endDate) {
+    conditions.createdAt = {};
+    if (startDate) {
+      conditions.createdAt.gte = new Date(startDate);
+    }
+    if (endDate) {
+      conditions.createdAt.lte = new Date(endDate);
+    }
+  }
 
   const data = await prisma.forumPost.findMany({
     skip: start ? Number(start) : 0,
