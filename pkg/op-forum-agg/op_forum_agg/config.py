@@ -5,6 +5,9 @@ load_dotenv()
 
 BASEDIR = os.path.abspath(os.path.dirname(__name__))
 
+if os.getenv("DATABASE_URL"):
+    raise ValueError("DATABASE_URL is not set")
+
 TORTOISE_ORM = {
     "connections": {"default": os.getenv("DATABASE_URL")},
     "apps": {
