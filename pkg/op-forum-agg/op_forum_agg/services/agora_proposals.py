@@ -3,6 +3,9 @@ import httpx
 import asyncio
 from op_forum_agg.db.models import AgoraProposal
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_URL = "https://vote.optimism.io/api/v1/proposals"
 BEARER_TOKEN = os.getenv("AGORA_BEARER_TOKEN")

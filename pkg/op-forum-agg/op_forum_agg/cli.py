@@ -10,8 +10,12 @@ from op_forum_agg.services.threads import ThreadsService
 from op_forum_agg.services.snapshot import SnapshotService
 from op_forum_agg.services.sync_all import run_sync as run_full_sync
 
+from dotenv import load_dotenv
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+load_dotenv()
 
 
 async def init_db():

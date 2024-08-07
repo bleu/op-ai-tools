@@ -1,11 +1,13 @@
 import os
+
+BASEDIR = os.path.abspath(os.path.dirname(__name__))
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
-BASEDIR = os.path.abspath(os.path.dirname(__name__))
 
-if os.getenv("DATABASE_URL"):
+if not os.getenv("DATABASE_URL"):
     raise ValueError("DATABASE_URL is not set")
 
 TORTOISE_ORM = {
