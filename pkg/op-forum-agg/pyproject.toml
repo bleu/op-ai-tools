@@ -17,7 +17,7 @@ celery = "^5.4.0"
 flower = "^2.0.1"
 forum-dl = "^0.3.0"
 python-dotenv = "^1.0.1"
-tortoise-orm = {extras = ["asyncpg"], version = "^0.21.5"}
+tortoise-orm = { extras = ["asyncpg"], version = "^0.21.5" }
 psycopg = "^3.2.1"
 
 

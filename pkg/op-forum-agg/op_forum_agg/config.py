@@ -14,7 +14,7 @@ TORTOISE_ORM = {
     "connections": {"default": os.getenv("DATABASE_URL")},
     "apps": {
         "models": {
-            "models": ["op_forum_agg.db.models", "aerich.models"],
+            "models": ["op_forum_agg.db.models"],
             "default_connection": "default",
         },
     },
