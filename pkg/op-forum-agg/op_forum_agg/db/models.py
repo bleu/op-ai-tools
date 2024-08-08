@@ -64,6 +64,7 @@ class RawForumPost(Model):
     url = fields.CharField(max_length=255, unique=True)
     type = fields.CharField(max_length=255)
     rawData = fields.JSONField()
+    lastUpdatedAt = NaiveDatetimeField()
 
     forumPosts: fields.ReverseRelation["ForumPost"]
 

@@ -50,6 +50,7 @@ model RawForumPost {
   url        String      @unique
   type       String
   rawData    Json
+  lastUpdatedAt DateTime  @default(now())
   forumPosts ForumPost[] @relation
 }
 
