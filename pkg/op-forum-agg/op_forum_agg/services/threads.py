@@ -64,7 +64,7 @@ class ThreadsService:
     @staticmethod
     async def acquire_and_save():
         # Fetch all data in parallel
-        summaries, raw_posts, categories = await asyncio.gather(
+        summaries, raw_topics, categories = await asyncio.gather(
             ThreadsService.fetch_summaries(),
             RawForumPost.all(),
             ForumPostCategory.all(),
@@ -80,74 +80,51 @@ class ThreadsService:
         summary_lookup = {summary["url"]: summary for summary in parsed_summaries}
         categories_lookup = {cat.externalId: cat for cat in categories}
 
-        topics_raw_posts_first_post = {
-            raw_post.url.removesuffix("/1"): raw_post
-            for raw_post in raw_posts
-            if raw_post.url.endswith("/1")
-        }
+        forum_topics = []
+        for raw_topic in raw_topics:
+            summary = summary_lookup.get(raw_topic.url)
 
-        topics_raw_posts_urls = [
-            url.removesuffix("/1") for url in topics_raw_posts_first_post.keys()
-        ]
+            if not summary:
+                continue
 
-        topics_raw_posts = [
-            raw_post for raw_post in raw_posts if raw_post.url in topics_raw_posts_urls
-        ]
+            category = categories_lookup.get(str(raw_topic.rawData.get("category_id", "")))
 
-        forum_posts = []
+            all_text = " ".join(
+                [
+                    summary.get("about", ""),
+                    summary.get("first_post", ""),
+                    summary.get("reaction", ""),
+                    summary.get("overview", ""),
+                    summary.get("tldr", ""),
+                    summary.get("classification", ""),
+                ]
+            )
 
-        import pdb
-
-        pdb.set_trace()
-        for raw_post in topics_raw_posts:
-            # for summary in parsed_summaries:
-            summary = summary_lookup.get(raw_post.url)
-            # raw_post = raw_posts_lookup.get(summary["url"])
-            # if not raw_post:
-            #     continue
-
-            # first_post = raw_posts_lookup.get(f"{summary['url']}/1")
-            # if not first_post:
-            #     continue
-
-            category = categories_lookup.get(raw_post.rawData.get("category_id", ""))
-
-            # all_text = " ".join(
-            #     [
-            #         summary["about"],
-            #         summary["first_post"],
-            #         summary["reaction"],
-            #         summary["overview"],
-            #         summary["tldr"],
-            #         summary["classification"],
-            #     ]
-            # )
-            # read_time = estimate_reading_time(all_text)
-            first_post = topics_raw_posts_first_post.get(raw_post.url)
-            forum_posts.append(
+            read_time = estimate_reading_time(all_text)
+            created_by = raw_topic.rawData.get("details", {}).get("created_by", {})
+            forum_topics.append(
                 ForumPost(
-                    externalId=raw_post.externalId,
-                    url=raw_post.url,
-                    title=raw_post.rawData["title"],
-                    username=first_post.rawData.get("username", ""),
-                    displayUsername=first_post.rawData.get("display_username", "")
-                    or first_post.rawData.get("username", ""),
+                    externalId=raw_topic.externalId,
+                    url=raw_topic.url,
+                    title=raw_topic.rawData["title"],
+                    username=created_by.get("username", ""),
+                    displayUsername=created_by.get("name", "") or created_by.get("username", ""),
                     category=category,
-                    rawForumPost=raw_post,
-                    # about=summary["about"],
-                    # firstPost=summary["first_post"],
-                    # reaction=summary["reaction"],
-                    # overview=summary["overview"],
-                    # tldr=summary["tldr"],
-                    # classification=summary["classification"],
-                    # lastActivity=raw_post.rawData["last_posted_at"],
-                    # readTime=read_time,
+                    rawForumPost=raw_topic,
+                    firstPost=summary.get("first_post", ""),
+                    about=summary.get("about", ""),
+                    reaction=summary.get("reaction", ""),
+                    overview=summary.get("overview", ""),
+                    tldr=summary.get("tldr", ""),
+                    classification=summary.get("classification", ""),
+                    lastActivity=raw_topic.rawData["last_posted_at"],
+                    readTime=read_time,
                 )
             )
 
         # Bulk create or update forum posts
         await ForumPost.bulk_create(
-            forum_posts,
+            forum_topics,
             update_fields=[
                 "url",
                 "title",
@@ -165,7 +142,7 @@ class ThreadsService:
             on_conflict=["externalId"],
         )
 
-        print(f"Acquired and saved {len(forum_posts)} forum posts")
+        print(f"Acquired and saved {len(forum_topics)} forum topics.")
 
     @staticmethod
     async def update_relationships():
