@@ -1,14 +1,12 @@
-from op_chat_brains.chat.system_structure import RAGModel
+from op_chat_brains.chat.system_structure import RAGSystem
 from op_chat_brains.chat.model_utils import (
     ContextHandling,
-    access_APIs,
     RetrieverBuilder,
 )
 from typing import Dict, Any, List, Tuple
 from op_chat_brains.chat.prompts import Prompt
 from op_chat_brains.config import DB_STORAGE_PATH
 import os
-from op_chat_brains.structured_logger import StructuredLogger
 
 
 def transform_memory_entries(entries: List[Dict[str, str]]) -> List[Tuple[str, str]]:
@@ -80,8 +78,8 @@ def process_question(
             k=5,
         )
 
-        # Instantiate RAGModel with parameters
-        rag_model = RAGModel(
+        # Instantiate RAGSystem with parameters
+        rag_model = RAGSystem(
             REASONING_LIMIT=3,
             models_to_use=[chat_model, chat_model],
             index_retriever=index_retriever,
@@ -98,7 +96,7 @@ def process_question(
 
         # logger.log_query(question, result)
         return {"answer": result["answer"], "error": None}
-    except Exception as e:
+    except Exception:
         # logger.logger.error(f"Unexpected error during prediction: {str(e)}")
         return {
             "answer": None,

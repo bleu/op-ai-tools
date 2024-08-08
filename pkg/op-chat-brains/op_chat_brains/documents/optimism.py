@@ -21,6 +21,7 @@ from op_chat_brains.config import (
 
 NOW = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
 
+
 class FragmentsProcessingStrategy(DocumentProcessingStrategy):
     def process_document(
         self, file_path: str, headers_to_split_on: List | None = None
@@ -95,7 +96,7 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
                 posts[post["id"]] = post
                 posts[post["id"]]["url"] = f"{url_line}/{post["id"]}"
                 posts[post["id"]]["thread_id"] = int(id)
-            
+
             threads[id] = data_line
             threads[id]["url"] = url_line
 
@@ -112,7 +113,9 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
         for key in posts:
             try:
                 posts[key]["thread_title"] = threads[posts[key]["thread_id"]]["title"]
-                posts[key]["category_id"] = threads[posts[key]["thread_id"]]["category_id"]
+                posts[key]["category_id"] = threads[posts[key]["thread_id"]][
+                    "category_id"
+                ]
             except KeyError:
                 to_del.append(p)
         posts = {k: v for k, v in posts.items() if k not in to_del}

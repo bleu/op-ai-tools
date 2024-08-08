@@ -29,7 +29,7 @@ def mock_logger():
     return Mock()
 
 
-@patch("op_chat_brains.model.RAGModel.SimpleClaude")
+@patch("op_chat_brains.model.RAGSystem.SimpleClaude")
 def test_get_rag_model(mock_simple_claude):
     mock_instance = Mock()
     mock_simple_claude.return_value = mock_instance

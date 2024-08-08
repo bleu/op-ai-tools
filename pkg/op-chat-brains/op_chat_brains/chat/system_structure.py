@@ -4,7 +4,7 @@ from op_chat_brains.chat import model_utils
 import re
 
 
-class RAG_system:
+class RAGSystem:
     REASONING_LIMIT: int
     models_to_use: list
     retriever: Callable
