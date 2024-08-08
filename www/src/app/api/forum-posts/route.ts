@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
     },
     where: conditions,
     orderBy: {
-      lastActivity: "desc",
+      createdAt: "desc",
     },
   });
 
