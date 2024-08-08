@@ -19,6 +19,8 @@ forum-dl = "^0.3.0"
 python-dotenv = "^1.0.1"
 tortoise-orm = { extras = ["asyncpg"], version = "^0.21.5" }
 psycopg = "^3.2.1"
+aiohttp = "^3.10.1"
+aiofiles = "^24.1.0"
 
 
 [tool.poetry.group.dev.dependencies]
