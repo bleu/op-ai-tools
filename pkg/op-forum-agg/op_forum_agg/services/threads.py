@@ -44,10 +44,15 @@ class ThreadsService:
         )
         reaction_match = re.search(r"<reaction>\s*([\s\S]*?)<\/reaction>", summary)
         overview_match = re.search(r"<overview>\s*([\s\S]*?)<\/overview>", summary)
-        tldr_match = re.search(r"<tldr>\s*([\s\S]*?)<\/tldr>", summary)
         classification_match = re.search(
             r"<classification>\s*([\s\S]*?)<\/classification>", summary
         )
+
+        tldr_match = re.search(r"<tldr>\s*([\s\S]*?)<\/tldr>", summary)
+        tldr = tldr_match.group(1).strip() if tldr_match else ""
+        if not tldr:
+            start_index = summary.find("<tldr>\n") + len("<tldr>\n")
+            tldr = summary[start_index:].strip() or ""
 
         return {
             "url": url_match.group(1).strip() if url_match else "",
@@ -55,7 +60,7 @@ class ThreadsService:
             "first_post": first_post_match.group(1).strip() if first_post_match else "",
             "reaction": reaction_match.group(1).strip() if reaction_match else "",
             "overview": overview_match.group(1).strip() if overview_match else "",
-            "tldr": tldr_match.group(1).strip() if tldr_match else "",
+            "tldr": tldr,
             "classification": classification_match.group(1).strip()
             if classification_match
             else "",
@@ -87,7 +92,9 @@ class ThreadsService:
             if not summary:
                 continue
 
-            category = categories_lookup.get(str(raw_topic.rawData.get("category_id", "")))
+            category = categories_lookup.get(
+                str(raw_topic.rawData.get("category_id", ""))
+            )
 
             all_text = " ".join(
                 [
@@ -102,13 +109,15 @@ class ThreadsService:
 
             read_time = estimate_reading_time(all_text)
             created_by = raw_topic.rawData.get("details", {}).get("created_by", {})
+
             forum_topics.append(
                 ForumPost(
                     externalId=raw_topic.externalId,
                     url=raw_topic.url,
                     title=raw_topic.rawData["title"],
                     username=created_by.get("username", ""),
-                    displayUsername=created_by.get("name", "") or created_by.get("username", ""),
+                    displayUsername=created_by.get("name", "")
+                    or created_by.get("username", ""),
                     category=category,
                     rawForumPost=raw_topic,
                     firstPost=summary.get("first_post", ""),
