@@ -43,19 +43,19 @@ export function TopicPage({ topic }: TopicPageProps) {
       */}
 
       {topic.firstPost && (
-        <Section title="Post Summary">
+        <Section title="What's Being Discussed">
           <div className="whitespace-pre-line">{topic.firstPost}</div>
         </Section>
       )}
 
       {topic.overview && (
-        <Section title="Post Overview">
+        <Section title="Overview">
           <div className="whitespace-pre-line">{topic.overview}</div>
         </Section>
       )}
 
       {topic.reaction && (
-        <Section title="Reactions">
+        <Section title="Community">
           <div className="whitespace-pre-line">{topic.reaction}</div>
         </Section>
       )}

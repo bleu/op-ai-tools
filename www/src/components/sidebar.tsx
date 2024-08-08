@@ -53,7 +53,7 @@ export function Sidebar({
               href="#"
               className={cn(
                 buttonVariants({ variant: "ghost", size: "icon" }),
-                "h-9 w-9"
+                "h-9 w-9",
               )}
               onClick={onNewChat}
             >
@@ -76,7 +76,7 @@ export function Sidebar({
                         buttonVariants({ variant: link.variant, size: "icon" }),
                         "h-11 w-11 md:h-16 md:w-16",
                         link.variant === "grey" &&
-                          "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white"
+                          "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white",
                       )}
                     >
                       <span className="sr-only">{link.name}</span>
@@ -99,7 +99,7 @@ export function Sidebar({
                   buttonVariants({ variant: link.variant, size: "xl" }),
                   link.variant === "grey" &&
                     "dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white shrink",
-                  "justify-start gap-4"
+                  "justify-start gap-4",
                 )}
               >
                 <div className="flex flex-col max-w-28">
@@ -109,7 +109,7 @@ export function Sidebar({
                   </span>
                 </div>
               </Link>
-            )
+            ),
           )}
         </nav>
       </ScrollArea>

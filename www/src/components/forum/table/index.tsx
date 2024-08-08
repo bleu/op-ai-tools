@@ -27,7 +27,7 @@ import {
 import { SnapshotProposal } from "./table-row";
 
 import { DateRangePicker } from "@/components/ui/date-range-picker";
-import { DateRange } from "react-day-picker";
+import type { DateRange } from "react-day-picker";
 
 const FETCH_SIZE = 10;
 
@@ -117,7 +117,7 @@ function ForumInfiniteScrollTable({
   // flatten the array of arrays from the useInfiniteQuery hook
   const flatData = React.useMemo(
     () => data?.pages?.flatMap((page) => page.data) ?? [],
-    [data]
+    [data],
   );
 
   const totalDBRowCount = data?.pages?.[0]?.meta?.totalRowCount ?? 0;
@@ -138,7 +138,7 @@ function ForumInfiniteScrollTable({
         }
       }
     },
-    [fetchNextPage, isFetching, totalFetched, totalDBRowCount]
+    [fetchNextPage, isFetching, totalFetched, totalDBRowCount],
   );
 
   // a check on mount and after a fetch to see if the table is already scrolled to the bottom and immediately needs to fetch more data
@@ -164,7 +164,7 @@ function ForumInfiniteScrollTable({
 
   // scroll to top of table when sorting changes
   const handleColumnFilterChange: OnChangeFn<ColumnFiltersState> = (
-    updater
+    updater,
   ) => {
     setColumnFilters(updater);
     if (!!table.getRowModel().rows.length) {
@@ -207,7 +207,7 @@ function ForumInfiniteScrollTable({
 
       return params.toString();
     },
-    [searchParams]
+    [searchParams],
   );
 
   const onCategoryFilterChange = (value: string, setParams = true) => {
