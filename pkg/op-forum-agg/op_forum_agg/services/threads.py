@@ -121,6 +121,7 @@ class ThreadsService:
                     classification=summary["classification"],
                     lastActivity=raw_post.rawData["last_posted_at"],
                     readTime=read_time,
+                    createdAt=raw_topic.rawData["created_at"],
                 )
             )
 
@@ -140,6 +141,7 @@ class ThreadsService:
                 "classification",
                 "lastActivity",
                 "readTime",
+                "createdAt",
             ],
             on_conflict=["externalId"],
         )
