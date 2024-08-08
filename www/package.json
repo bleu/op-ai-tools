@@ -42,7 +42,7 @@
     "prop-types": "^15.8.1",
     "reablocks": "^8.4.4",
     "react": "19.0.0-rc-1434af3d22-20240618",
-    "react-day-picker": "^9.0.6",
+    "react-day-picker": "8.10.1",
     "react-dom": "19.0.0-rc-1434af3d22-20240618",
     "react-hook-form": "^7.52.1",
     "react-markdown": "^9.0.1",

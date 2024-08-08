@@ -43,7 +43,6 @@ export const SnapshotProposal = ({
           category={category}
           status={status}
         />
-
         {about && <p className="text-gray-700 mb-2 mt-4">{about}</p>}
       </div>
     </Link>
