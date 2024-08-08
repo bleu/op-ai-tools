@@ -23,6 +23,7 @@ langchain-anthropic = "^0.1.19"
 posthog = "^3.5.0"
 python-dotenv = "^1.0.1"
 psycopg = "^3.2.1"
+op-forum-agg = {path = "../op-forum-agg"}
 
 
 [tool.poetry.group.dev.dependencies]
