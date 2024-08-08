@@ -21,7 +21,6 @@ from op_chat_brains.config import (
 
 NOW = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
 
-
 class FragmentsProcessingStrategy(DocumentProcessingStrategy):
     def process_document(
         self, file_path: str, headers_to_split_on: List | None = None
@@ -92,20 +91,28 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
             type_line = line[2]
             url_line = line[1]
             data_line = line[0]
-            if type_line == "post":
-                posts[id] = data_line
-                posts[id]["url"] = url_line
-                posts[id]["thread_id"] = int(url_line.split("/")[-2])
-            elif type_line == "thread":
-                threads[id] = data_line
-                threads[id]["url"] = url_line
+            for post in data_line["post_stream"]["posts"]:
+                posts[post["id"]] = post
+                posts[post["id"]]["url"] = f"{url_line}/{post["id"]}"
+                posts[post["id"]]["thread_id"] = int(id)
+            
+            threads[id] = data_line
+            threads[id]["url"] = url_line
+
+        #     if type_line == "post":
+        #         posts[id] = data_line
+        #         posts[id]["url"] = url_line
+        #         posts[id]["thread_id"] = int(url_line.split("/")[-2])
+        #     elif type_line == "thread":
+        #         threads[id] = data_line
+        #         threads[id]["url"] = url_line
 
         # print(len(posts))
         to_del = []
-        for p in posts:
+        for key in posts:
             try:
-                posts[p]["thread_title"] = threads[posts[p]["thread_id"]]["title"]
-                posts[id]["category_id"] = threads[posts[p]["thread_id"]]["category_id"]
+                posts[key]["thread_title"] = threads[posts[key]["thread_id"]]["title"]
+                posts[key]["category_id"] = threads[posts[key]["thread_id"]]["category_id"]
             except KeyError:
                 to_del.append(p)
         posts = {k: v for k, v in posts.items() if k not in to_del}
