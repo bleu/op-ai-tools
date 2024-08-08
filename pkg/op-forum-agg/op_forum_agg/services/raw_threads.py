@@ -23,10 +23,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-FORUM_URL = "https://gov.optimism.io"
-CATEGORY_URL = f"{FORUM_URL}/c/{{category_slug}}.json"
-
-
 class Saver(ABC):
     @abstractmethod
     async def save(self, topic_id: int, topic_data: Dict[str, Any]):
@@ -194,7 +190,7 @@ class AsyncDiscourseScraperV3:
             logger.warning(f"No data found for topic ID: {topic_id}")
             return None
 
-        topic_url = f"{self.base_url}/t/{topic_data["slug"]/{topic_id}}"
+        topic_url = f"{self.base_url}/t/{topic_data["slug"]}/{topic_id}"
         topic_data["url"] = topic_url
 
         stream_ids = set(topic_data.get("post_stream", {}).get("stream", []))
