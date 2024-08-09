@@ -1,7 +1,9 @@
 from op_chat_brains.chat import model_utils, system_structure
 from op_chat_brains.config import DB_STORAGE_PATH
 
-import os, json, time
+import os
+import json
+import time
 import pandas as pd
 
 questions_index = "index/questions.json"
@@ -82,7 +84,7 @@ def main():
             },
         )
 
-        system = system_structure.RAG_system(
+        system = system_structure.RAGSystem(
             REASONING_LIMIT=3,
             models_to_use=[chat_model, chat_model],
             retriever=retriever,
