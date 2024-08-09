@@ -1,27 +1,27 @@
-from typing import Iterator, List, Dict, Any, Callable, Tuple
-import time, json, faiss, re
+from typing import List, Callable, Tuple
+import time
+import json
+import faiss
 import numpy as np
-import pandas as pd
 
 from langchain_openai import OpenAIEmbeddings
-from langchain_community.vectorstores import FAISS
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 
 from op_chat_brains.retriever import connect_faiss
 from op_chat_brains.config import (
     QUESTIONS_INDEX_JSON,
     QUESTIONS_INDEX_NPY,
-    DOCS_PATH,
     SCOPE,
     KEYWORDS_INDEX_JSON,
     KEYWORDS_INDEX_NPY,
-    EMBEDDING_MODEL
+    EMBEDDING_MODEL,
 )
 from op_chat_brains.documents import optimism
 
 TODAY = time.strftime("%Y-%m-%d")
 all_contexts_df = optimism.DataframeBuilder.build_dataframes()
+
 
 class Prompt:
     responder_start = f"""
@@ -67,7 +67,9 @@ Follow these steps:
    - Never refer to past events as if they were happening now or in the future.
 """
 
-    responder = responder_start+f"""
+    responder = (
+        responder_start
+        + """
 5. If you think more information is necessary to fully answer the query, formulate questions about that encompasses the information you think is missing. These questions are going to be used by the system to retrieve the information. The user won't see them. Include these questions within <new_questions> tags, following this format:
     <new_questions>
         <question>[Your question here]</question>
@@ -108,8 +110,11 @@ When formulating questions, adhere to these guidelines:
 
 Remember to be helpful, polite, and informative while maintaining assertiveness, objectivity, and brevity in your response.
 """
+    )
 
-    final_responder = responder_start+f"""
+    final_responder = (
+        responder_start
+        + """
 5. If you don't have enough information, start the <answer> tag with "I couldn't find all the information I wanted to provide a complete answer." And provide some context about the information you have, how it relates to the query and what you think is missing to properly answer the user's query.
 
 6. Format your entire response as follows:
@@ -133,7 +138,8 @@ Remember to be helpful, polite, and informative while maintaining assertiveness,
 
 Remember to be helpful, polite, and informative while maintaining assertiveness, objectivity, and brevity in your response.
 """
-    
+    )
+
     preprocessor = f"""
 You are a part of a helpful chatbot assistant system that provides information about {SCOPE}. Your task is to help responding to user input appropriately based on the following information and guidelines:
 
@@ -185,7 +191,8 @@ The type of search can be one of the following:
 - "ocurrence": in the case of question about a specific event or ocurrence that happened
 - "recent": in the case of questions about recent events, the current state of something or the most recent information available
 """
-    
+
+
 class ContextHandling:
     summary_template = """
 <summary_from_forum_thread>
@@ -198,17 +205,28 @@ class ContextHandling:
 </summary_from_forum_thread>
 
 """
+
     @staticmethod
-    def filter(question_context:dict, explored_contexts:list, query:str|None = None, type_search:str = "factual", k:int = 3) -> Tuple[str, list]:
+    def filter(
+        question_context: dict,
+        explored_contexts: list,
+        query: str | None = None,
+        type_search: str = "factual",
+        k: int = 3,
+    ) -> Tuple[str, list]:
         contexts_to_be_explored = {}
         for question, contexts in question_context.items():
-            new_contexts = [c for c in contexts if c.metadata['url'] not in explored_contexts]
+            new_contexts = [
+                c for c in contexts if c.metadata.get("url") not in explored_contexts
+            ]
             contexts_to_be_explored[question] = new_contexts
 
             if query is not None:
                 k = min(k, len(new_contexts))
                 if k > 0:
-                    new_contexts = ContextHandling.reordering(new_contexts, query, k=k, type_search=type_search)
+                    new_contexts = ContextHandling.reordering(
+                        new_contexts, query, k=k, type_search=type_search
+                    )
 
         c = contexts_to_be_explored.values()
         if len(c) > 0:
@@ -218,7 +236,11 @@ class ContextHandling:
                 for cc in c:
                     if i < len(cc):
                         contexts_to_be_explored.append(cc[i])
-            contexts_to_be_explored = {c.metadata['url']: c for c in contexts_to_be_explored}
+            contexts_to_be_explored = {
+                c.metadata.get("url"): c
+                for c in contexts_to_be_explored
+                if c.metadata.get("url")
+            }
 
         return ContextHandling.format(contexts_to_be_explored, question_context)
 
@@ -230,27 +252,29 @@ class ContextHandling:
             type_db = c.metadata["type_db_info"]
             match type_db:
                 case "forum_thread_summary":
-                    out.append(ContextHandling.summary_template.format(
-                        TITLE = c.metadata["thread_title"],
-                        CREATED_AT = c.metadata["created_at"],
-                        LAST_POST_AT = c.metadata["last_posted_at"],
-                        URL = c.metadata["url"],
-                        CONTENT = c.page_content
-                    ))
+                    out.append(
+                        ContextHandling.summary_template.format(
+                            TITLE=c.metadata["thread_title"],
+                            CREATED_AT=c.metadata["created_at"],
+                            LAST_POST_AT=c.metadata["last_posted_at"],
+                            URL=c.metadata["url"],
+                            CONTENT=c.page_content,
+                        )
+                    )
                 case _:
                     pass
 
         return "".join(out), urls
-    
+
     @staticmethod
-    def reordering(context:list, query:str, k:int, type_search:str) -> list:
+    def reordering(context: list, query: str, k: int, type_search: str) -> list:
         if type_search == "factual" or type_search == "ocurrence":
             return context[:k]
         elif type_search == "recent":
-            urls = [c.metadata['url'] for c in context]
+            urls = [c.metadata["url"] for c in context]
             contexts = all_contexts_df[all_contexts_df["url"].isin(urls)].iloc[:k]
             return contexts.content.tolist()
-            
+
 
 class RetrieverBuilder:
     @staticmethod
@@ -259,8 +283,8 @@ class RetrieverBuilder:
         **retriever_pars,
     ):
         db = connect_faiss.DatabaseLoader.load_db(dbs_name)
-        return lambda query : db.similarity_search(query, **retriever_pars)
-    
+        return lambda query: db.similarity_search(query, **retriever_pars)
+
     @staticmethod
     def build_index(json_file, npy_file, k_max, treshold):
         embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
@@ -268,18 +292,18 @@ class RetrieverBuilder:
         with open(json_file, "r") as f:
             index = json.load(f)
         index_keys = list(index.keys())
-        
+
         if treshold < 1 and treshold > 0:
             index_embed = np.load(npy_file)
             index_faiss = faiss.IndexFlatIP(index_embed.shape[1])
             index_faiss.add(index_embed)
 
-        def find_similar(query : str, criteria : Callable = lambda x : x, **kwargs):
+        def find_similar(query: str, criteria: Callable = lambda x: x, **kwargs):
             if treshold < 1:
                 if treshold > 0:
                     query_embed = np.array(embeddings.embed_documents([query]))
                     D, I = index_faiss.search(query_embed, k_max)
-                    
+
                     similar = [index_keys[i] for i in I[0]]
                     dists = D[0]
 
@@ -297,24 +321,30 @@ class RetrieverBuilder:
 
             contexts = all_contexts_df
             if "type_db_info" in kwargs:
-                contexts = contexts[contexts["type_db_info"].isin(kwargs["type_db_info"])]
+                contexts = contexts[
+                    contexts["type_db_info"].isin(kwargs["type_db_info"])
+                ]
             contexts = contexts[contexts["url"].isin(urls)]
 
             return [contexts[contexts["url"] == u].content.tolist()[0] for u in urls]
 
         return find_similar
-    
+
     @staticmethod
-    def build_questions_index(k_max = 2, treshold = 0.9):
-        return RetrieverBuilder.build_index(QUESTIONS_INDEX_JSON, QUESTIONS_INDEX_NPY, k_max, treshold)
-    
+    def build_questions_index(k_max=2, treshold=0.9):
+        return RetrieverBuilder.build_index(
+            QUESTIONS_INDEX_JSON, QUESTIONS_INDEX_NPY, k_max, treshold
+        )
+
     @staticmethod
-    def build_keywords_index(k_max = 5, treshold = 0.95):
-        return RetrieverBuilder.build_index(KEYWORDS_INDEX_JSON, KEYWORDS_INDEX_NPY, k_max, treshold)
-    
+    def build_keywords_index(k_max=5, treshold=0.95):
+        return RetrieverBuilder.build_index(
+            KEYWORDS_INDEX_JSON, KEYWORDS_INDEX_NPY, k_max, treshold
+        )
+
 
 class access_APIs:
-    def get_llm(model:str = "gpt-4o-mini", **kwargs):
+    def get_llm(model: str = "gpt-4o-mini", **kwargs):
         if "gpt" in model:
             return ChatOpenAI(model=model, **kwargs)
         elif "claude" in model:

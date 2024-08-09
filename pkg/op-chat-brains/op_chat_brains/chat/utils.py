@@ -1,12 +1,9 @@
-from op_chat_brains.chat.system_structure import RAGSystem
-from op_chat_brains.chat.model_utils import (
-    ContextHandling,
-    RetrieverBuilder,
-)
-from typing import Dict, Any, List, Tuple
-from op_chat_brains.chat.prompts import Prompt
-from op_chat_brains.config import DB_STORAGE_PATH
 import os
+from op_chat_brains.chat import model_utils
+from op_chat_brains.chat.system_structure import RAGSystem
+from typing import Dict, Any, List, Tuple
+
+from op_chat_brains.config import DB_STORAGE_PATH
 
 
 def transform_memory_entries(entries: List[Dict[str, str]]) -> List[Tuple[str, str]]:
@@ -51,7 +48,6 @@ def process_question(
             is caught and logged, with a user-friendly error message returned in the dictionary.
     """
 
-    embedding_model = "text-embedding-ada-002"
     chat_model = (
         "gpt-4o-mini",
         {
@@ -68,27 +64,48 @@ def process_question(
         filter_out_dbs = ["summary_archived___old_missions"]
         dbs = [db for db in list_dbs if db not in filter_out_dbs]
 
-        index_retriever = RetrieverBuilder.build_index(
-            embedding_model, k_max=2, treshold=0.9
+        questions_index_retriever = model_utils.RetrieverBuilder.build_questions_index(
+            k_max=2, treshold=0.9
         )
 
-        default_retriever = RetrieverBuilder.build_faiss_retriever(
+        keywords_index_retriever = model_utils.RetrieverBuilder.build_keywords_index(
+            k_max=3, treshold=0.95
+        )
+
+        def contains(must_contain):
+            return lambda similar: [s for s in similar if must_contain in s]
+
+        default_retriever = model_utils.RetrieverBuilder.build_faiss_retriever(
             dbs,
-            embedding_model,
             k=5,
         )
 
-        # Instantiate RAGSystem with parameters
+        def retriever(query: dict, reasoning_level: int) -> list:
+            if reasoning_level < 2 and "keyword" in query:
+                if "instance" in query:
+                    context = keywords_index_retriever(
+                        query["keyword"], criteria=contains(query["instance"])
+                    )
+                else:
+                    context = keywords_index_retriever(query["keyword"])
+                return context
+
+            if "question" in query:
+                if reasoning_level < 2:
+                    context = questions_index_retriever(query["question"])
+                    if len(context) > 0:
+                        return context
+                return default_retriever(query["question"])
+            return []
+
         rag_model = RAGSystem(
             REASONING_LIMIT=3,
             models_to_use=[chat_model, chat_model],
-            index_retriever=index_retriever,
-            factual_retriever=default_retriever,
-            temporal_retriever=default_retriever,
-            context_filter=ContextHandling.filter,
-            system_prompt_preprocessor=Prompt.preprocessor,
-            system_prompt_responder=Prompt.responder,
-            system_prompt_final_responder=Prompt.final_responder,
+            retriever=retriever,
+            context_filter=model_utils.ContextHandling.filter,
+            system_prompt_preprocessor=model_utils.Prompt.preprocessor,
+            system_prompt_responder=model_utils.Prompt.responder,
+            system_prompt_final_responder=model_utils.Prompt.final_responder,
         )
 
         formatted_memory = transform_memory_entries(memory)
@@ -97,6 +114,7 @@ def process_question(
         # logger.log_query(question, result)
         return {"answer": result["answer"], "error": None}
     except Exception:
+        raise
         # logger.logger.error(f"Unexpected error during prediction: {str(e)}")
         return {
             "answer": None,
