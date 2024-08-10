@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 import datetime as dt
 from typing import Dict, List, Tuple, Any
 import json
@@ -41,16 +41,22 @@ class TopicRepository:
         }
 
     async def save_topic(self, topic_id: int, topic_data: Dict[str, Any]):
-        raw_post, created = await RawForumPost.update_or_create(
-            externalId=str(topic_id),
-            url=topic_data.get("url", ""),
-            defaults={
-                "type": "topic",
-                "rawData": topic_data,
-                "lastUpdatedAt": dt.datetime.utcnow(),
-            },
+        raw_post = [
+            RawForumPost(
+                externalId=str(topic_id),
+                url=topic_data.get("url", ""),
+                type="topic",
+                rawData=topic_data,
+                lastUpdatedAt=dt.datetime.now(dt.UTC),
+                needsSummarize=True
+            )
+        ]
+        await RawForumPost.bulk_create(
+            raw_post,
+            update_fields=["url", "type", "rawData", "lastUpdatedAt", "needsSummarize"],
+            on_conflict=["externalId"],
         )
-        return created
+        return raw_post
 
     async def bulk_save_topics(self, topics: List[Tuple[int, Dict[str, Any]]]):
         raw_posts = [
@@ -60,30 +66,34 @@ class TopicRepository:
                 type="topic",
                 rawData=topic_data,
                 lastUpdatedAt=dt.datetime.now(dt.UTC),
+                needsSummarize=True
             )
             for topic_id, topic_data in topics
         ]
         await RawForumPost.bulk_create(
             raw_posts,
-            update_fields=["url", "type", "rawData", "lastUpdatedAt"],
+            update_fields=["url", "type", "rawData", "lastUpdatedAt", "needsSummarize"],
             on_conflict=["externalId"],
         )
 
 
 class TopicUpdateChecker:
-    def __init__(self, repository: TopicRepository, update_interval: timedelta):
+    def __init__(self, repository: TopicRepository):
         self.repository = repository
-        self.update_interval = update_interval
         self.existing_topics = {}
 
     async def initialize(self):
         self.existing_topics = await self.repository.get_existing_topics()
 
-    async def should_update_topic(self, topic_id: int) -> bool:
+    async def should_update_topic(self, topic_id: int, topic_data: Dict[str, Any]) -> bool:
         if str(topic_id) not in self.existing_topics:
             return True
-        lastUpdatedAt = self.existing_topics[str(topic_id)]
-        return dt.datetime.utcnow() - lastUpdatedAt > self.update_interval
+        
+        lastInternalUpdatedAt = self.existing_topics[str(topic_id)]
+
+        lastExternalPostedAt = datetime.strptime(topic_data["last_posted_at"], '%Y-%m-%dT%H:%M:%S.%fZ')
+                
+        return lastInternalUpdatedAt < lastExternalPostedAt
 
 
 class DatabaseSaver(Saver):
@@ -255,13 +265,14 @@ class AsyncDiscourseScraperV3:
         return topic_ids
 
     async def process_topic(self, session: aiohttp.ClientSession, topic_id: int):
+        topic = await self.fetch_topic_and_posts(session, topic_id)
+
         if self.update_checker and not await self.update_checker.should_update_topic(
-            topic_id
+            topic_id=topic_id, topic_data=topic
         ):
             logger.info(f"Skipping topic {topic_id} as it's up to date")
             return
 
-        topic = await self.fetch_topic_and_posts(session, topic_id)
         if topic:
             await self.saver.save(topic_id, topic)
         else:
@@ -315,7 +326,7 @@ class RawThreadsService:
     async def acquire_and_save_all():
         repository = TopicRepository()
         db_saver = DatabaseSaver(repository)
-        update_checker = TopicUpdateChecker(repository, timedelta(days=1))
+        update_checker = TopicUpdateChecker(repository)
         scraper = AsyncDiscourseScraperV3("gov.optimism.io", db_saver, update_checker)
         await scraper.scrape_and_save()
 

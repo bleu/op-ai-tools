@@ -65,6 +65,7 @@ class RawForumPost(Model):
     type = fields.CharField(max_length=255)
     rawData = fields.JSONField()
     lastUpdatedAt = NaiveDatetimeField()
+    needsSummarize = fields.BooleanField(default=True)
 
     forumPosts: fields.ReverseRelation["ForumPost"]
 

@@ -8,11 +8,12 @@ from op_chat_brains.config import FORUM_PATH, SNAPSHOT_PATH
 from op_chat_brains.documents.optimism import ForumPostsProcessingStrategy
 from op_chat_brains.exceptions import OpChatBrainsException
 from op_chat_brains.summarizer.utils import Prompt
+from op_chat_brains.summarizer.mock import get_mock_summary
 
 threads = ForumPostsProcessingStrategy.get_threads_documents()
 
-
 def get_thread_from_url(url: str) -> Document:
+    # improve this function to perform a sql query with where clause
     thread = next((t for t in threads if t.metadata["url"] == url), None)
     if not thread:
         raise OpChatBrainsException(f"Thread not found for URL: {url}")
@@ -23,7 +24,10 @@ def load_snapshot_proposals() -> Dict[str, Any]:
     return ForumPostsProcessingStrategy.return_snapshot_proposals(SNAPSHOT_PATH)
 
 
-def summarize_thread(url: str, model_name: str) -> str:
+def summarize_thread(url: str, model_name: str, use_mock_data: bool = False) -> str:
+    if use_mock_data:
+        return get_mock_summary()
+
     thread = get_thread_from_url(url)
     snapshot_proposals = load_snapshot_proposals()
 
