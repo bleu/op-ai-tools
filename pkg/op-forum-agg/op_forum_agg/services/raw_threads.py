@@ -180,17 +180,46 @@ class AsyncDiscourseScraperV3:
             logger.error(f"Request failed: {e}")
             return None
 
+    async def fetch_topic_data(
+        self, session: aiohttp.ClientSession, topic_id: int
+    ) -> Optional[Dict[str, Any]]:
+        logger.info(f"Fetching topic data for topic ID: {topic_id}")
+        return await self.retry_request(session, f"/t/{topic_id}.json")
+
+    async def fetch_missing_posts(
+        self,
+        session: aiohttp.ClientSession,
+        topic_id: int,
+        missing_ids: Set[int],
+        topic_url: str,
+    ) -> List[Dict[str, Any]]:
+        logger.info(f"Fetching {len(missing_ids)} missing posts for topic ID: {topic_id}")
+        post_data = await self.retry_request(
+            session,
+            f"/t/{topic_id}/posts.json",
+            params={"post_ids[]": list(missing_ids)},
+        )
+
+        if not post_data:
+            return []
+
+        returned_posts = post_data.get("post_stream", {}).get("posts", [])
+        return [
+            {**post, "url": f"{topic_url}/{post['id']}"}
+            for post in returned_posts
+            if post["id"] in missing_ids
+        ]
+
     async def fetch_topic_and_posts(
         self, session: aiohttp.ClientSession, topic_id: int
     ) -> Optional[Dict[str, Any]]:
-        logger.info(f"Fetching topic and posts for topic ID: {topic_id}")
-        topic_data = await self.retry_request(session, f"/t/{topic_id}.json")
+        topic_data = await self.fetch_topic_data(session, topic_id)
 
         if not topic_data:
             logger.warning(f"No data found for topic ID: {topic_id}")
             return None
 
-        topic_url = f"{self.base_url}/t/{topic_data["slug"]}/{topic_id}"
+        topic_url = f"{self.base_url}/t/{topic_data['slug']}/{topic_id}"
         topic_data["url"] = topic_url
 
         stream_ids = set(topic_data.get("post_stream", {}).get("stream", []))
@@ -200,26 +229,9 @@ class AsyncDiscourseScraperV3:
         missing_ids = stream_ids - post_ids
 
         if missing_ids:
-            logger.info(
-                f"Fetching {len(missing_ids)} missing posts for topic ID: {topic_id}"
-            )
-            post_data = await self.retry_request(
-                session,
-                f"/t/{topic_id}/posts.json",
-                params={"post_ids[]": list(missing_ids)},
-            )
-
-            if post_data:
-                returned_posts = post_data.get("post_stream", {}).get("posts", [])
-                added_posts = [
-                    {**post, "url": f"{topic_url}/{post['id']}"}
-                    for post in returned_posts
-                    if post["id"] in missing_ids
-                ]
-                topic_data["post_stream"]["posts"].extend(added_posts)
-                logger.info(
-                    f"Added {len(added_posts)} missing posts to topic ID: {topic_id}"
-                )
+            added_posts = await self.fetch_missing_posts(session, topic_id, missing_ids, topic_url)
+            topic_data["post_stream"]["posts"].extend(added_posts)
+            logger.info(f"Added {len(added_posts)} missing posts to topic ID: {topic_id}")
 
         return topic_data
 

@@ -7,39 +7,34 @@ from typing import Any, Optional, Type, Union
 
 
 def to_naive(value: datetime.datetime) -> datetime.datetime:
+    """Convert a datetime to naive UTC."""
     if value.tzinfo is None:
         return value
 
-    value = value.astimezone(datetime.timezone.utc)
-
-    return value.replace(tzinfo=None)
+    return value.astimezone(datetime.timezone.utc).replace(tzinfo=None)
 
 
 class NaiveDatetimeField(fields.DatetimeField):
+    """A DatetimeField that stores datetimes in naive UTC format."""
+
     skip_to_python_if_native = True
 
     class _db_postgres:  # noqa
         SQL_TYPE = "TIMESTAMP"
 
     def to_python_value(self, value: Any) -> Optional[datetime.datetime]:
+        """Convert database value to Python datetime."""
         value = super().to_python_value(value)
-
-        if value is None:
-            return value
-
-        return to_naive(value)
+        return to_naive(value) if value is not None else None
 
     def to_db_value(
         self,
         value: Optional[datetime.datetime],
         instance: "Union[Type[Model], Model]",
     ) -> Optional[datetime.datetime]:
+        """Convert Python datetime to database value."""
         value = super().to_db_value(value, instance)
-
-        if value is None:
-            return value
-
-        return to_naive(value)
+        return to_naive(value) if value is not None else None
 
 
 class ForumPostCategory(Model):

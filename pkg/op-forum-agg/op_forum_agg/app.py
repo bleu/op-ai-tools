@@ -5,6 +5,7 @@ from op_forum_agg.extensions import register_extensions
 
 
 def create_app():
+    """Create and configure the main Flask application."""
     app = Flask(__name__)
     app.config.from_mapping(**config)
     app.url_map.strict_slashes = False
@@ -15,7 +16,7 @@ def create_app():
 
 
 def create_worker_app():
-    """Minimal App without routes for celery worker."""
+    """Create a minimal Flask application for Celery worker without routes."""
     app = Flask(__name__)
     app.config.from_mapping(**config)
 

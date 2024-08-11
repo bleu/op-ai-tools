@@ -8,17 +8,28 @@ SNAPSHOT_HUB_URL = "https://hub.snapshot.org/graphql"
 SPACE_IDS = ["citizenshouse.eth", "opcollective.eth"]
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 class SnapshotService:
     @staticmethod
     async def get_query_data(query: str, skip: int) -> List[Dict]:
         query_with_skip = query.replace("skip: 0", f"skip: {skip}")
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                SNAPSHOT_HUB_URL, json={"query": query_with_skip}
-            )
-        response.raise_for_status()
-        result = response.json()
-        return result["data"]["proposals"]
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    SNAPSHOT_HUB_URL, json={"query": query_with_skip}
+                )
+            response.raise_for_status()
+            result = response.json()
+            return result["data"]["proposals"]
+        except httpx.HTTPStatusError as e:
+            logger.error(f"HTTP error occurred: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"An error occurred while fetching query data: {e}")
+            raise
 
     @staticmethod
     async def get_paginated_data(
@@ -32,26 +43,28 @@ class SnapshotService:
         max_skip = 100_000_000
 
         while True:
-            print(
+            logger.info(
                 f"Fetching data with skip {skip}, page size {page_size}, pages per group {pages_per_group}, max pages {max_pages}"
             )
             tasks = []
             for i in range(pages_per_group):
-                current_skip = skip + page_size * i
-                if current_skip >= max_skip:
-                    current_skip = max_skip
-                items = await SnapshotService.get_query_data(query, current_skip)
-                tasks.append(items)
+                current_skip = min(skip + page_size * i, max_skip)
+                tasks.append(SnapshotService.get_query_data(query, current_skip))
 
-            for items in tasks:
-                data.extend(items)
-                if len(items) < page_size:
-                    break
+            try:
+                results = await asyncio.gather(*tasks)
+                for items in results:
+                    data.extend(items)
+                    if len(items) < page_size:
+                        break
+            except Exception as e:
+                logger.error(f"Error fetching paginated data: {e}")
+                break
 
-            print(f"Total items: {len(data)}")
+            logger.info(f"Total items: {len(data)}")
             skip += page_size * pages_per_group
-            print(f"Skip: {skip}, max skip: {max_skip}, tasks: {len(tasks)}")
-            if len(tasks) == 0 or len(tasks[-1]) < page_size:
+            logger.debug(f"Skip: {skip}, max skip: {max_skip}, tasks: {len(tasks)}")
+            if len(tasks) == 0 or len(results[-1]) < page_size:
                 break
 
         return data
@@ -84,79 +97,83 @@ class SnapshotService:
             }}
         """
 
-        proposals = await SnapshotService.get_query_data(query, 0)
+        try:
+            proposals = await SnapshotService.get_query_data(query, 0)
 
-        snapshot_proposals = []
-        for proposal in proposals:
-            proposal_data = {
-                "externalId": proposal["id"],
-                "spaceId": proposal["space"]["id"],
-                "spaceName": proposal["space"]["name"],
-                "title": proposal["title"],
-                "author": proposal["author"],
-                "choices": proposal["choices"],
-                "state": proposal["state"],
-                "votes": proposal["votes"],
-                "end": proposal["end"],
-                "start": proposal["start"],
-                "type": proposal["type"],
-                "body": proposal["body"],
-                "discussion": proposal["discussion"],
-                "quorum": proposal["quorum"],
-                "quorumType": proposal["quorumType"],
-                "snapshot": proposal["snapshot"],
-                "scores": proposal["scores"],
-            }
+            snapshot_proposals = []
+            for proposal in proposals:
+                proposal_data = {
+                    "externalId": proposal["id"],
+                    "spaceId": proposal["space"]["id"],
+                    "spaceName": proposal["space"]["name"],
+                    "title": proposal["title"],
+                    "author": proposal["author"],
+                    "choices": proposal["choices"],
+                    "state": proposal["state"],
+                    "votes": proposal["votes"],
+                    "end": proposal["end"],
+                    "start": proposal["start"],
+                    "type": proposal["type"],
+                    "body": proposal["body"],
+                    "discussion": proposal["discussion"],
+                    "quorum": proposal["quorum"],
+                    "quorumType": proposal["quorumType"],
+                    "snapshot": proposal["snapshot"],
+                    "scores": proposal["scores"],
+                }
 
-            if proposal["state"] == "closed":
-                winner = proposal["scores"].index(max(proposal["scores"]))
-                proposal_data["winningOption"] = proposal["choices"][winner]
+                if proposal["state"] == "closed":
+                    winner = proposal["scores"].index(max(proposal["scores"]))
+                    proposal_data["winningOption"] = proposal["choices"][winner]
 
-            snapshot_proposals.append(SnapshotProposal(**proposal_data))
+                snapshot_proposals.append(SnapshotProposal(**proposal_data))
 
-        await SnapshotProposal.bulk_create(
-            snapshot_proposals,
-            update_fields=[
-                field
-                for field in SnapshotProposal._meta.fields
-                if field != "id" and field != "forumPost"
-            ],
-            on_conflict=["externalId"],
-        )
+            await SnapshotProposal.bulk_create(
+                snapshot_proposals,
+                update_fields=[
+                    field
+                    for field in SnapshotProposal._meta.fields
+                    if field != "id" and field != "forumPost"
+                ],
+                on_conflict=["externalId"],
+            )
 
-        print(f"Acquired and saved {len(snapshot_proposals)} snapshot proposals")
+            logger.info(f"Acquired and saved {len(snapshot_proposals)} snapshot proposals")
+        except Exception as e:
+            logger.error(f"Error acquiring and saving snapshot proposals: {e}")
 
     @staticmethod
     async def update_relationships():
-        snapshot_proposals = await SnapshotProposal.filter(
-            discussion__isnull=False
-        ).all()
-        forum_post_updates = []
-
-        for proposal in snapshot_proposals:
-            forum_post_updates.append(
+        try:
+            snapshot_proposals = await SnapshotProposal.filter(
+                discussion__isnull=False
+            ).all()
+            forum_post_updates = [
                 {
                     "url": proposal.discussion,
                     "snapshotProposal": proposal,
                 }
+                for proposal in snapshot_proposals
+            ]
+
+            forum_posts_to_update = []
+            if forum_post_updates:
+                forum_posts = await ForumPost.filter(
+                    url__in=[u["url"] for u in forum_post_updates]
+                ).all()
+
+                for forum_post in forum_posts:
+                    update = next(
+                        (u for u in forum_post_updates if u["url"] == forum_post.url), None
+                    )
+                    if update:
+                        forum_post.snapshotProposal = update["snapshotProposal"]
+                        forum_posts_to_update.append(forum_post)
+
+            await asyncio.gather(
+                *[forum_post.save() for forum_post in forum_posts_to_update]
             )
 
-        forum_posts_to_update = []
-        if forum_post_updates:
-            forum_posts = await ForumPost.filter(
-                url__in=[u["url"] for u in forum_post_updates]
-            ).all()
-
-            for forum_post in forum_posts:
-                update = next(
-                    (u for u in forum_post_updates if u["url"] == forum_post.url), None
-                )
-                if update:
-                    forum_post.snapshotProposal = update["snapshotProposal"]
-                    forum_posts_to_update.append(forum_post)
-
-        await asyncio.gather(
-            *[forum_post.save() for forum_post in forum_posts_to_update]
-        )
-
-        print(f"Updated {len(forum_post_updates)} forum posts with snapshot proposals")
+            logger.info(f"Updated {len(forum_posts_to_update)} forum posts with snapshot proposals")
+        except Exception as e:
+            logger.error(f"Error updating relationships: {e}")

@@ -87,17 +87,24 @@ def main():
 
     logger.debug(f"CLI called with arguments: {sys.argv}")
 
-    if len(sys.argv) > 1:
-        command = sys.argv[1]
-        if command in SYNC_COMMANDS:
-            logger.info(f"Executing command: {command}")
-            run_sync(SYNC_COMMANDS[command])
-        else:
-            logger.error(f"Unknown command: {command}")
-            print(f"Unknown command: {command}")
-    else:
+    if len(sys.argv) <= 1:
         logger.warning("No command specified")
         print(f"Please specify a command: {', '.join(SYNC_COMMANDS.keys())}")
+        return
+
+    command = sys.argv[1]
+    if command not in SYNC_COMMANDS:
+        logger.error(f"Unknown command: {command}")
+        print(f"Unknown command: {command}")
+        print(f"Available commands: {', '.join(SYNC_COMMANDS.keys())}")
+        return
+
+    logger.info(f"Executing command: {command}")
+    try:
+        run_sync(SYNC_COMMANDS[command])
+    except Exception as e:
+        logger.exception(f"Error executing command {command}: {str(e)}")
+        print(f"Error executing command {command}: {str(e)}")
 
 
 if __name__ == "__main__":
