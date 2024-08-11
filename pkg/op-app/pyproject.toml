@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "app"
+version = "0.1.0"
+description = ""
+authors = ["José Ribeiro <me@joseribeiro.dev>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+op-core = { path = "../op-core" }
+op-chat-brains = { path = "../op-chat-brains" }
+flask = "^3.0.3"
+flask-cors = "^4.0.1"
+flask-limiter = "^3.8.0"
+cchardet = "2.2.0a2"
+redis = "^5.0.7"
+celery = "^5.4.0"
+python-dotenv = "^1.0.1"
+op-data = { path = "../op-data" }
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.5.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

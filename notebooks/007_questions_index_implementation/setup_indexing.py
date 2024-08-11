@@ -1,32 +1,32 @@
-from typing import Tuple, Any, Callable, Iterable
-import re, json, faiss, re
+from typing import Any, Iterable
+import json
+import re
 import numpy as np
 
-from op_chat_brains.documents.optimism import (
+from op_brains.documents.optimism import (
     SummaryProcessingStrategy,
     FragmentsProcessingStrategy,
 )
-from op_chat_brains.chat import model_utils
-from op_chat_brains.config import DOCS_PATH, SCOPE
+from op_brains.chat import model_utils
+from op_brains.config import DOCS_PATH, SCOPE
 
 from langchain_community.vectorstores import FAISS
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_anthropic import ChatAnthropic
+from langchain_openai import OpenAIEmbeddings
 
 MODEL_EMBEDDING = "text-embedding-ada-002"
 
 
-prompt_question_generation = f"""
-You are tasked with generating general questions that a non-specialist user might ask about a given fragment of text. The fragment is related to {{SCOPE}}. Your goal is to create questions that are relevant, interesting, and could realistically be asked by someone unfamiliar with the content.
+prompt_question_generation = """
+You are tasked with generating general questions that a non-specialist user might ask about a given fragment of text. The fragment is related to {SCOPE}. Your goal is to create questions that are relevant, interesting, and could realistically be asked by someone unfamiliar with the content.
 
 Here is the fragment you will be working with:
 
 <fragment>
-{{CONTEXT}}
+{CONTEXT}
 </fragment>
 
 When generating questions, follow these criteria:
-1. Questions should be relevant to the {{SCOPE}}.
+1. Questions should be relevant to the {SCOPE}.
 2. Avoid questions that are too silly or unrelated to the main topic.
 3. Ensure that the questions can be well-answered using the information provided in the fragment.
 4. Avoid repetitive or overly specific questions.

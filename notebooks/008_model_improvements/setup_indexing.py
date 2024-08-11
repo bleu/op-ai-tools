@@ -1,28 +1,29 @@
-from typing import Tuple, Any, Callable, Iterable
-import re, json, faiss, re
+from typing import Any, Iterable
+import json
+import re
 import numpy as np
 
-from op_chat_brains.documents.optimism import (
+from op_brains.documents.optimism import (
     SummaryProcessingStrategy,
     FragmentsProcessingStrategy,
 )
-from op_chat_brains.chat import model_utils
-from op_chat_brains.config import DOCS_PATH, SCOPE, EMBEDDING_MODEL
-
+import op_artifacts
+from op_brains.chat import model_utils
+from op_brains.config import DOCS_PATH, SCOPE, EMBEDDING_MODEL
+import importlib.resources
 from langchain_community.vectorstores import FAISS
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_anthropic import ChatAnthropic
+from langchain_openai import OpenAIEmbeddings
 
-prompt_question_generation = f"""
-You are tasked with generating keywords and FAQ to help users to find information about {{SCOPE}}. Your goal is to create keywords that are useful and questions that are relevant, interesting, and could realistically be asked by someone unfamiliar with the content.
+prompt_question_generation = """
+You are tasked with generating keywords and FAQ to help users to find information about {SCOPE}. Your goal is to create keywords that are useful and questions that are relevant, interesting, and could realistically be asked by someone unfamiliar with the content.
 
 Here is the fragment you will be working with:
 
 <fragment>
-{{CONTEXT}}
+{CONTEXT}
 </fragment>
 
-{{TYPE_GUIDELINES}}
+{TYPE_GUIDELINES}
 
 First, write some bullet points presenting the structure and content of the post. Try to mention the whole structure. They should be presented as:
 <bullet_points>
@@ -40,7 +41,7 @@ Use the following format:
 </keywords>
 
 Finally, generate questions, follow these criteria:
-1. Questions should be relevant to the {{SCOPE}}.
+1. Questions should be relevant to the {SCOPE}.
 2. Avoid questions that are too silly or unrelated to the main topic.
 3. Ensure that the questions can be well-answered using the information provided in the fragment.
 4. Avoid repetitive or overly specific questions.
@@ -167,17 +168,22 @@ def main(model: str):
                 keywords_index[k] = []
             keywords_index[k].extend(urls)
 
-    with open("index/questions.json", "w") as f:
+    op_artifacts_pkg = importlib.resources.files(op_artifacts)
+    with open(op_artifacts_pkg.joinpath("index_questions.json"), "w") as f:
         json.dump(questions_index, f, indent=4)
     index_questions = list(questions_index.keys())
     index_questions_embed = np.array(embeddings.embed_documents(index_questions))
-    np.save("index/questions.npy", index_questions_embed)
+    np.savez_compressed(
+        op_artifacts_pkg.joinpath("index_questions.npz"), index_questions_embed
+    )
 
-    with open("index/keywords.json", "w") as f:
+    with open(op_artifacts_pkg.joinpath("index_keywords.json"), "w") as f:
         json.dump(keywords_index, f, indent=4)
     index_keywords = list(keywords_index.keys())
     index_keywords_embed = np.array(embeddings.embed_documents(index_keywords))
-    np.save("index/keywords.npy", index_keywords_embed)
+    np.savez_compressed(
+        op_artifacts_pkg.joinpath("index_keywords.npz"), index_keywords_embed
+    )
 
 
 if __name__ == "__main__":

@@ -5,11 +5,11 @@ RAG = RAG.as_langchain_document_compressor()
 
 import json
 
-from op_chat_brains.documents import optimism
+from op_brains.documents import optimism
 
 all_contexts_df = optimism.DataframeBuilder.build_dataframes()
 
-from op_chat_brains.config import QUESTIONS_INDEX_JSON, KEYWORDS_INDEX_JSON
+from op_brains.config import QUESTIONS_INDEX_JSON, KEYWORDS_INDEX_JSON
 
 
 def reorder_index(index_dict):

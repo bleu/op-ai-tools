@@ -1,5 +1,5 @@
-from op_chat_brains.chat import model_utils, system_structure
-from op_chat_brains.config import DB_STORAGE_PATH
+from op_brains.chat import model_utils, system_structure
+from op_brains.config import DB_STORAGE_PATH
 
 import os
 import json

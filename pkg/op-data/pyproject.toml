@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "op-data"
+version = "0.1.0"
+description = ""
+authors = ["José Ribeiro <me@joseribeiro.dev>"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+aiohttp = "^3.10.3"
+tortoise-orm = { extras = ["asyncpg"], version = "^0.21.5" }
+psycopg = "^3.2.1"
+aiofiles = "^24.1.0"
+importlib-resources = "^6.4.0"
+op-artifacts = {path = "../op-artifacts"}
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.5.7"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+sync = "op_data.cli:main"

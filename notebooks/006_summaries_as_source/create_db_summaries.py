@@ -1,5 +1,6 @@
+import importlib.resources
 import streamlit as st
-from op_chat_brains.documents.optimism import SummaryProcessingStrategy
+from op_brains.documents.optimism import SummaryProcessingStrategy
 
 with st.echo():
     # libraries for embedding model and vectorstore
@@ -13,7 +14,9 @@ with st.echo():
 
 with st.echo():
     # paths to the data
-    summary_path = "../../data/summaries/all_thread_summaries.txt"
+    summary_path = importlib.resources.open_text(
+        "op_artifacts", "all_thread_summaries.txt"
+    ).name
     forum_path = "../../data/002-governance-forum-202406014/dataset/_out.jsonl"
 
 
