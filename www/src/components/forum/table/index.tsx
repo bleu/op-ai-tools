@@ -26,7 +26,18 @@ import {
 } from "./post-options";
 import { SnapshotProposal } from "./table-row";
 
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import type { DateRange } from "react-day-picker";
+
 const FETCH_SIZE = 10;
+
+function toLocaleDateString(date: Date | undefined) {
+  if (!date) {
+    return undefined;
+  }
+
+  return date.toLocaleDateString("en-US");
+}
 
 async function getPosts({
   pageParam,
@@ -62,13 +73,17 @@ function ForumInfiniteScrollTable({
 }: {
   title: string;
   category?: string;
-  startDate?: string;
-  endDate?: string;
+  startDate?: Date;
+  endDate?: Date;
 }) {
   const tableContainerRef = React.useRef<HTMLDivElement>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const [dates, setDates] = React.useState<DateRange | undefined>({
+    from: startDate || undefined,
+    to: endDate || undefined,
+  });
 
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([
     {
@@ -79,20 +94,20 @@ function ForumInfiniteScrollTable({
 
   const { data, fetchNextPage, isFetching, isLoading } =
     useInfiniteQuery<ForumPostApiResponse>({
-      queryKey: ["forumPosts", columnFilters], // refetch when filters changes
+      queryKey: ["forumPosts", columnFilters, dates], // refetch when filters changes
       queryFn: getPosts as any,
       initialPageParam: {
         page: 0,
         category: columnFilters.find((f) => f.id === "category")?.value,
-        startDate: startDate,
-        endDate: endDate,
+        startDate: toLocaleDateString(dates?.from),
+        endDate: toLocaleDateString(dates?.to),
       },
       getNextPageParam: (_lastGroup, groups) => {
         return {
           page: groups.length,
           category: columnFilters.find((f) => f.id === "category")?.value,
-          startDate: startDate,
-          endDate: endDate,
+          startDate: toLocaleDateString(dates?.from),
+          endDate: toLocaleDateString(dates?.to),
         };
       },
       refetchOnWindowFocus: false,
@@ -180,9 +195,15 @@ function ForumInfiniteScrollTable({
 
   // https://nextjs.org/docs/app/api-reference/functions/use-search-params#updating-searchparams
   const createQueryString = useCallback(
-    (name: string, value: string) => {
+    (paramsObject: { [s: string]: unknown } | ArrayLike<unknown>) => {
       const params = new URLSearchParams(searchParams.toString());
-      params.set(name, value);
+      Object.entries(paramsObject).forEach(([name, value]) => {
+        if (value) {
+          params.set(name, String(value));
+        } else {
+          params.delete(name);
+        }
+      });
 
       return params.toString();
     },
@@ -191,7 +212,12 @@ function ForumInfiniteScrollTable({
 
   const onCategoryFilterChange = (value: string, setParams = true) => {
     if (setParams) {
-      router.push(pathname + "?" + createQueryString("category", value));
+      const query = {
+        category: value,
+        startDate: toLocaleDateString(dates?.from),
+        endDate: toLocaleDateString(dates?.to),
+      };
+      router.push(pathname + "?" + createQueryString(query));
     }
     setColumnFilters([
       {
@@ -205,7 +231,15 @@ function ForumInfiniteScrollTable({
     if (category) {
       onCategoryFilterChange(category, false);
     }
-  }, [category]);
+
+    const query = {
+      category: category,
+      startDate: toLocaleDateString(dates?.from),
+      endDate: toLocaleDateString(dates?.to),
+    };
+
+    router.push(pathname + "?" + createQueryString(query));
+  }, [category, dates]);
 
   if (isLoading) {
     return <>Loading...</>;
@@ -227,7 +261,11 @@ function ForumInfiniteScrollTable({
             }
             onChange={onCategoryFilterChange}
           />
-          {/* <FilterDates /> */}
+          <DateRangePicker
+            className="bg-muted"
+            dateRange={dates}
+            setDateRange={setDates}
+          />
         </div>
       </div>
       {/* Even though we're still using sematic table tags, we must use CSS grid and flexbox for dynamic row heights */}
@@ -299,13 +337,16 @@ export function InfiniteTable({
   startDate?: string;
   endDate?: string;
 }) {
+  const from = startDate ? new Date(startDate) : undefined;
+  const to = endDate ? new Date(endDate) : undefined;
+
   return (
     <QueryClientProvider client={queryClient}>
       <ForumInfiniteScrollTable
         title={title}
         category={category}
-        startDate={startDate}
-        endDate={endDate}
+        startDate={from}
+        endDate={to}
       />
     </QueryClientProvider>
   );

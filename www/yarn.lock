@@ -6063,7 +6063,7 @@ __metadata:
     prop-types: "npm:^15.8.1"
     reablocks: "npm:^8.4.4"
     react: "npm:19.0.0-rc-1434af3d22-20240618"
-    react-day-picker: "npm:^9.0.6"
+    react-day-picker: "npm:8.10.1"
     react-dom: "npm:19.0.0-rc-1434af3d22-20240618"
     react-hook-form: "npm:^7.52.1"
     react-markdown: "npm:^9.0.1"
@@ -6562,14 +6562,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-day-picker@npm:^9.0.6":
-  version: 9.0.6
-  resolution: "react-day-picker@npm:9.0.6"
-  dependencies:
-    date-fns: "npm:^3.6.0"
+"react-day-picker@npm:8.10.1":
+  version: 8.10.1
+  resolution: "react-day-picker@npm:8.10.1"
   peerDependencies:
-    react: ">=16.8.0"
-  checksum: 10c0/b56ddaea9f5ca9a87f41a43c3acd1f01a324560b58b419877821350b20f14fab3f434a67a11634a69b4a21018aa06133423308383e1326fd36719d39ebb124b6
+    date-fns: ^2.28.0 || ^3.0.0
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: 10c0/a0ff28c4b61b3882e6a825b19e5679e2fdf3256cf1be8eb0a0c028949815c1ae5a6561474c2c19d231c010c8e0e0b654d3a322610881e0655abca05a2e03d9df
   languageName: node
   linkType: hard
 

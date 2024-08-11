@@ -1,11 +1,12 @@
-import re, json
+import re
+import json
 import pandas as pd
 from typing import Dict, List, Any
 
 from langchain_core.documents.base import Document
 from langchain_text_splitters import MarkdownHeaderTextSplitter
 
-from op_chat_brains.documents import (
+from op_brains.documents import (
     DocumentProcessingStrategy,
     DocumentProcessorFactory,
 )

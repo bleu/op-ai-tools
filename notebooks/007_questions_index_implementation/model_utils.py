@@ -1,5 +1,14 @@
+from op_brains.documents.optimism import (
+    SummaryProcessingStrategy,
+    FragmentsProcessingStrategy,
+)
+
+import importlib.resources
 from typing import Tuple
-import time, json, faiss, re
+import time
+import json
+import faiss
+import re
 import numpy as np
 import pandas as pd
 
@@ -277,12 +286,10 @@ def build_retriever(dbs_name, embeddings_name, **retriever_pars):
     return lambda query: db.similarity_search(query, **retriever_pars)
 
 
-from op_chat_brains.documents.optimism import (
-    SummaryProcessingStrategy,
-    FragmentsProcessingStrategy,
-)
+SUMMARY_PATH = importlib.resources.open_text(
+    "op_artifacts", "all_thread_summaries.txt"
+).name
 
-SUMMARY_PATH = "../../data/summaries/all_thread_summaries.txt"
 FORUM_PATH = "../../data/002-governance-forum-202406014/dataset/_out.jsonl"
 DOCS_PATH = "../../data/001-initial-dataset-governance-docs/file.txt"
 
