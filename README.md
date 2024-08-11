@@ -39,7 +39,7 @@ Reporting Tool: Tracks user engagement and evaluates the model's effectiveness.
 2. Set up the Python environment:
 
    ```bash
-   cd pkg/op-chat-brains
+   cd pkg/op-brains
    poetry install
    ```
 
@@ -64,7 +64,7 @@ python scripts/op-9-create-optimism-forum-dataset/main.py
 Process the collected data:
 
 ```bash
-cd pkg/op-chat-brains && python op_chat_brains/setup.py
+cd pkg/op-brains && python op_brains/setup.py
 ```
 
 #### Running the API
@@ -72,7 +72,7 @@ cd pkg/op-chat-brains && python op_chat_brains/setup.py
 Start the Flask API:
 
 ```bash
-cd pkg/op-chat-brains && python op_chat_brains/api.py
+cd pkg/op-brains && python op_brains/api.py
 ```
 
 #### Running the Web Application

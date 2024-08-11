@@ -3,6 +3,8 @@ name = "op-artifacts"
 version = "0.1.0"
 description = ""
 authors = ["José Ribeiro <me@joseribeiro.dev>"]
+packages = [{ include = "op_artifacts" }]
+include = ["op_artifacts/dbs/**/*.faiss", "op_artifacts/dbs/**/*.pkl"]
 
 [tool.poetry.dependencies]
 python = "^3.12"

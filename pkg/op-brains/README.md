@@ -1,6 +1,6 @@
-# op_chat_brains
+# op_brains
 
-op_chat_brains is an advanced question-answering system that utilizes Retrieval-Augmented Generation (RAG) techniques to provide intelligent responses tailored to specific domains. Designed for flexibility, it can be adapted for various use cases, such as Optimism Collective/Optimism L2.
+op_brains is an advanced question-answering system that utilizes Retrieval-Augmented Generation (RAG) techniques to provide intelligent responses tailored to specific domains. Designed for flexibility, it can be adapted for various use cases, such as Optimism Collective/Optimism L2.
 
 ## Features
 
@@ -14,7 +14,7 @@ op_chat_brains is an advanced question-answering system that utilizes Retrieval-
 ## Project Structure
 
 ```
-op_chat_brains/
+op_brains/
 ├── api.py
 ├── cli.py
 ├── config.py
@@ -36,7 +36,7 @@ op_chat_brains/
 
    ```bash
    git clone https://github.com/bleu/op-ai-tools.git
-   cd pkg/op-chat-brains
+   cd pkg/op-brains
    ```
 
 2. Install dependencies:
@@ -52,7 +52,7 @@ op_chat_brains/
 Run the setup script to prepare the document databases:
 
 ```bash
-python -m op_chat_brains.setup
+python -m op_brains.setup
 ```
 
 ### API
@@ -60,7 +60,7 @@ python -m op_chat_brains.setup
 Start the Flask API:
 
 ```bash
-python -m op_chat_brains.api
+python -m op_brains.api
 ```
 
 The API will be available at `http://localhost:3123` by default.
@@ -70,7 +70,7 @@ The API will be available at `http://localhost:3123` by default.
 Use the CLI for quick testing:
 
 ```bash
-python -m op_chat_brains.cli "Your question here"
+python -m op_brains.cli "Your question here"
 ```
 
 ## Development

@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "op-chat-brains"
+name = "op-brains"
 version = "0.1.0"
 description = ""
 authors = ["José Ribeiro <jose@bleu.studio>"]
@@ -23,13 +23,14 @@ langchain-anthropic = "^0.1.19"
 posthog = "^3.5.0"
 python-dotenv = "^1.0.1"
 psycopg = "^3.2.1"
-op-artifacts = {path = "../op-artifacts"}
+op-artifacts = { path = "../op-artifacts", develop = true }
 
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.5.0"
 pytest = "^8.2.2"
 pytest-mock = "^3.14.0"
+pyright = "^1.1.375"
 
 [build-system]
 requires = ["poetry-core"]

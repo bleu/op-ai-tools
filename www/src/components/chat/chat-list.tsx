@@ -51,7 +51,10 @@ export function ChatList({
       messagesContainerRef.current.scrollHeight;
   }, []);
 
-  const deduplicateLineBreaks = (message: string) => {
+  const deduplicateLineBreaks = (message: string | string[]) => {
+    if (Array.isArray(message)) {
+      return message.map((m) => m?.replace(/\n{3,}/g, "\n\n"));
+    }
     return message ? message?.replace(/\n{3,}/g, "\n\n") : message;
   };
 

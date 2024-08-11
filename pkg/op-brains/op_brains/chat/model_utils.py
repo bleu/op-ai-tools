@@ -294,10 +294,11 @@ class RetrieverBuilder:
         index_keys = list(index.keys())
 
         if treshold < 1 and treshold > 0:
-            if not npz_file.endswith(".npz"):
+            if not npz_file.suffix == ".npz":
                 raise ValueError("npz_file must be a .npz file")
-
-            index_embed = next(x for x in np.load(npz_file).items())
+            with npz_file.open("rb") as f:
+                index_embed = next(x for x in np.load(f).items())
+            index_embed = index_embed[1]
             index_faiss = faiss.IndexFlatIP(index_embed.shape[1])
             index_faiss.add(index_embed)
 

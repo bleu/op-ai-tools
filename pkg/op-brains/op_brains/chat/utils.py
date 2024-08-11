@@ -23,7 +23,6 @@ def transform_memory_entries(entries: List[Dict[str, str]]) -> List[Tuple[str, s
 def process_question(
     question: str,
     memory: List[Dict[str, str]],
-    rag_structure,
     # logger: StructuredLogger,
     # config: Dict[str, Any],
 ) -> Dict[str, Any]:

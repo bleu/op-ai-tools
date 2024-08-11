@@ -1,0 +1,5 @@
+export NEXT_PUBLIC_API_MOCKING=false
+export NEXT_PUBLIC_POSTHOG_KEY=""
+export NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+export NEXT_PUBLIC_CHAT_API_URL=http://localhost:3123/predict
+export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/op-ai-tools

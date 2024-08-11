@@ -1,0 +1,4 @@
+export SECRET=your_secret_key
+export DATABASE_URL=postgres://postgres:postgres@localhost:5432/op-ai-tools
+export CELERY_BROKER_URL=redis://localhost
+export CELERY_RESULT_BACKEND=redis://localhost

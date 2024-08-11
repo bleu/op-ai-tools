@@ -111,7 +111,7 @@ class TopicsService:
                 ForumPost(
                     externalId=raw_topic.externalId,
                     url=raw_topic.url,
-                    title=raw_topic.rawData["title"],
+                    title=raw_topic.rawData.get("title"),
                     username=created_by.get("username", ""),
                     displayUsername=created_by.get("name", "")
                     or created_by.get("username", ""),
@@ -123,9 +123,9 @@ class TopicsService:
                     overview=summary.get("overview", ""),
                     tldr=summary.get("tldr", ""),
                     classification=summary.get("classification", ""),
-                    lastActivity=raw_topic.rawData["last_posted_at"],
+                    lastActivity=raw_topic.rawData.get("last_posted_at"),
                     readTime=read_time,
-                    createdAt=raw_topic.rawData["created_at"],
+                    createdAt=raw_topic.rawData.get("created_at"),
                 )
             )
 
