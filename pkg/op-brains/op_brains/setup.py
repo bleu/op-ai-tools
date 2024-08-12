@@ -1,6 +1,12 @@
+from ragatouille import RAGPretrainedModel
+RAG = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
+reranker_ragatouille = RAG.as_langchain_document_compressor()
+
+from op_brains.documents import optimism
+all_contexts_df = optimism.DataframeBuilder.build_dataframes()
+
 from typing import Any, Iterable
-import json
-import re
+import json, re, time
 import numpy as np
 
 from op_brains.documents.optimism import (
@@ -13,6 +19,13 @@ from op_brains.config import DOCS_PATH, SCOPE, EMBEDDING_MODEL
 import importlib.resources
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
+
+from op_brains.documents import optimism
+all_contexts_df = optimism.DataframeBuilder.build_dataframes()
+from langchain_voyageai import VoyageAIRerank
+reranker_voyager = VoyageAIRerank(model="rerank-1")
+
+from time import sleep
 
 prompt_question_generation = """
 You are tasked with generating keywords and FAQ to help users to find information about {SCOPE}. Your goal is to create keywords that are useful and questions that are relevant, interesting, and could realistically be asked by someone unfamiliar with the content.
@@ -144,6 +157,33 @@ def get_data():
     return data
 
 
+def reorder_index(index_dict):
+    output_dict = {}
+    for key, urls in index_dict.items():
+        print(key)
+        print(urls)
+        contexts = all_contexts_df[all_contexts_df["url"].isin(urls)].content.tolist()
+        k = len(contexts)
+        if k > 1:
+            try:
+                contexts = reranker_voyager.compress_documents(query=key, documents=contexts)
+            except:
+                contexts = reranker_ragatouille.compress_documents(query=key, documents=contexts, k=k)
+            urls = [context.metadata["url"] for context in contexts]
+            print(urls)
+        output_dict[key] = urls
+
+    return output_dict
+
+
+def reorder_file(path):
+    with open(path, "r") as f:
+        index = json.load(f)
+    index = reorder_index(index)
+    with open(path, "w") as f:
+        json.dump(index, f, indent=4)
+
+
 def main(model: str):
     data = get_data()
 
@@ -184,6 +224,9 @@ def main(model: str):
     np.savez_compressed(
         op_artifacts_pkg.joinpath("index_keywords.npz"), index_keywords_embed
     )
+
+    reorder_file(op_artifacts_pkg.joinpath("index_questions.json"))
+    reorder_file(op_artifacts_pkg.joinpath("index_keywords.json"))
 
 
 if __name__ == "__main__":
