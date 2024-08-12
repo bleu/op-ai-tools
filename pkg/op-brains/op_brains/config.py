@@ -37,5 +37,3 @@ KEYWORDS_INDEX_JSON = importlib.resources.files(op_artifacts) / "index_keywords.
 KEYWORDS_INDEX_NPZ = importlib.resources.files(op_artifacts) / "index_keywords.npz"
 
 SCOPE = "OPTIMISM GOVERNANCE/OPTIMISM COLLECTIVE/OPTIMISM L2"
-
-os.makedirs(BASE_PATH, exist_ok=True)
