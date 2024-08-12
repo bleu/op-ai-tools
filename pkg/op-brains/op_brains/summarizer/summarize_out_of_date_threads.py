@@ -89,7 +89,6 @@ async def main():
         logger.logger.info("No threads to summarize. Exiting.")
         return
 
-    # Upserting summaries into the database (if you uncomment the lines below)
     logger.logger.info(f"Upserting {len(summaries)} summaries into the database...")
     result = await upsert_summaries(summaries)
 
@@ -100,4 +99,4 @@ async def main():
     logger.logger.info("Summarization and upsert complete.")
 
 if __name__ == "__main__":
-    run_sync(main)  # Correctly calling the main function in an async context
+    run_sync(main)
