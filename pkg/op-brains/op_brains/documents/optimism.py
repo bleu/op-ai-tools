@@ -85,10 +85,14 @@ class FragmentsProcessingStrategy():
 
 class ForumPostsProcessingStrategy():
     @staticmethod
-    def retrieve():
-        out_db = connect_db.retrieve_data(
-            f'select "rawData", url, type, "externalId" from "{RAW_FORUM_DB}"'
-        )
+    def retrieve(only_not_summarized: bool = False):
+        if only_not_summarized:
+            query = f'select "rawData", url, type, "externalId" from "{RAW_FORUM_DB}" where "needsSummarize"=True'
+        else:
+            query = f'select "rawData", url, type, "externalId" from "{RAW_FORUM_DB}"'
+
+        out_db = connect_db.retrieve_data(query)
+
         posts, threads = {}, {}
         for line in out_db:
             id = int(line[3])
@@ -208,8 +212,12 @@ trust_level (0-4): {TRUST_LEVEL}
     """
 
     @staticmethod
-    def return_threads() -> List:
-        posts, threads_info = ForumPostsProcessingStrategy.retrieve()
+    def return_threads(only_not_summarized: bool = False) -> List:
+        posts, threads_info = ForumPostsProcessingStrategy.retrieve(only_not_summarized=only_not_summarized)
+
+        if not threads_info:
+            return []
+
         df_posts = pd.DataFrame(posts).T
         threads = []
         category_names = connect_db.retrieve_data(
@@ -283,6 +291,15 @@ trust_level (0-4): {TRUST_LEVEL}
 
         return threads_forum
 
+    @staticmethod
+    def get_threads_documents_not_summarized() -> List[Document]:
+        threads = ForumPostsProcessingStrategy.return_threads(only_not_summarized=True)
+        threads_forum = [Document(page_content=t[0], metadata=t[1]) for t in threads]
+
+        return threads_forum
+
+    def get_db_name(self) -> str:
+        return "posts_forum_db"
 
 class SummaryProcessingStrategy():
     name_source = "summary"
