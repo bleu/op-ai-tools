@@ -28,7 +28,7 @@ POSTHOG_API_KEY = os.getenv("POSTHOG_API_KEY", "")
 
 RAW_FORUM_DB = "RawForumPost"
 FORUM_SUMMARY_DB = "ForumPost"
-
+USE_SUMMARY_MOCK_DATA = os.getenv("USE_SUMMARY_MOCK_DATA", "False") == "True"
 
 QUESTIONS_INDEX_JSON = importlib.resources.files(op_artifacts) / "index_questions.json"
 QUESTIONS_INDEX_NPZ = importlib.resources.files(op_artifacts) / "index_questions.npz"
