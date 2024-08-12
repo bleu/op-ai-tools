@@ -213,7 +213,9 @@ trust_level (0-4): {TRUST_LEVEL}
 
     @staticmethod
     def return_threads(only_not_summarized: bool = False) -> List:
-        posts, threads_info = ForumPostsProcessingStrategy.retrieve(only_not_summarized=only_not_summarized)
+        posts, threads_info = ForumPostsProcessingStrategy.retrieve(
+            only_not_summarized=only_not_summarized
+        )
 
         if not threads_info:
             return []
