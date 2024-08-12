@@ -11,10 +11,15 @@ from flask_cors import CORS
 from posthog import Posthog
 from functools import wraps
 import os
+from honeybadger.contrib import FlaskHoneybadger
 
 app = Flask(__name__)
 CORS(app)
 app.config["SECRET_KEY"] = os.getenv("FLASK_API_SECRET_KEY")
+app.config["HONEYBADGER_ENVIRONMENT"] = os.getenv("ENV")
+app.config["HONEYBADGER_API_KEY"] = os.getenv("HONEYBADGER_API_KEY")
+
+FlaskHoneybadger(app, report_exceptions=True)
 
 posthog = Posthog(POSTHOG_API_KEY, host="https://us.i.posthog.com", sync_mode=True)
 
@@ -71,9 +76,14 @@ def predict(question, memory):
             "error": result.get("error"),
         },
     )
-    posthog.shutdown()
 
     return jsonify(result)
+
+
+@app.after_request
+def after_request(response):
+    posthog.flush()
+    return response
 
 
 if __name__ == "__main__":

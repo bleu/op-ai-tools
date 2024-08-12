@@ -54,8 +54,11 @@ export function useChatState(
 
         setLoadingMessageId(null);
 
-        updatedMessages[updatedMessages.length - 1].message =
-          response["answer"];
+        updatedMessages[updatedMessages.length - 1].message = Array.isArray(
+          response["answer"],
+        )
+          ? response["answer"].join("\n")
+          : response["answer"];
         setCurrentMessages([...updatedMessages]);
         onUpdateMessages([...updatedMessages]);
 
