@@ -16,7 +16,7 @@ cchardet = "2.2.0a2"
 redis = "^5.0.7"
 celery = "^5.4.0"
 python-dotenv = "^1.0.1"
-op-artifacts = { path = "../op-artifacts" }
+op-artifacts = { path = "../op-artifacts", develop = true }
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.5.5"
