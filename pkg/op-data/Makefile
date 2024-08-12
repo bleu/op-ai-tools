@@ -9,7 +9,7 @@ seed_categories:
 seed_topics:
 	@poetry install
 	@poetry run sync raw_topics
-	@poetry run sync topics
+	# @poetry run sync topics
 
 seed_snapshot:
 	@poetry install

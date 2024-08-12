@@ -45,18 +45,19 @@ model ForumPostCategory {
 }
 
 model RawForumPost {
-  id         Int         @id @default(autoincrement())
-  externalId String      @unique
-  url        String      @unique
-  type       String
-  rawData    Json
-  lastUpdatedAt DateTime  @default(now())
-  forumPosts ForumPost[] @relation
+  id             Int         @id @default(autoincrement())
+  externalId     String      @unique
+  url            String      @unique
+  type           String
+  rawData        Json
+  lastUpdatedAt  DateTime    @default(now())
+  forumPosts     ForumPost[] @relation
+  needsSummarize Boolean     @default(true)
 }
 
 model SnapshotProposal {
-  id            Int       @id @default(autoincrement())
-  externalId    String    @unique
+  id            Int        @id @default(autoincrement())
+  externalId    String     @unique
   spaceId       String
   spaceName     String
   title         String
@@ -75,33 +76,40 @@ model SnapshotProposal {
   scores        Json
   winningOption String?
   forumPost     ForumPost?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
-
 model AgoraProposal {
-  id                     Int       @id @default(autoincrement())
-  externalId             String    @unique
-  proposer               String
-  snapshotBlockNumber    Int
-  createdTime            DateTime
-  startTime              DateTime
-  endTime                DateTime
-  cancelledTime          DateTime?
-  executedTime           DateTime?
-  markdownTitle          String
-  description            String
-  quorum                 String
-  approvalThreshold      String?
-  proposalData           Json
-  unformattedProposalData String?
-  proposalResults        Json
-  proposalType           String
-  status                 String
-  createdTransactionHash String?
+  id                       Int       @id @default(autoincrement())
+  externalId               String    @unique
+  proposer                 String
+  snapshotBlockNumber      Int
+  createdTime              DateTime
+  startTime                DateTime
+  endTime                  DateTime
+  cancelledTime            DateTime?
+  executedTime             DateTime?
+  markdownTitle            String
+  description              String
+  quorum                   String
+  approvalThreshold        String?
+  proposalData             Json
+  unformattedProposalData  String?
+  proposalResults          Json
+  proposalType             String
+  status                   String
+  createdTransactionHash   String?
   cancelledTransactionHash String?
-  executedTransactionHash String?
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @updatedAt
+  executedTransactionHash  String?
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+}
+
+model RawTopicSummary {
+  id        Int      @id @default(autoincrement())
+  url       String   @unique
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -60,6 +60,7 @@ class RawForumPost(Model):
     type = fields.CharField(max_length=255)
     rawData = fields.JSONField()
     lastUpdatedAt = NaiveDatetimeField()
+    needsSummarize = fields.BooleanField(default=True)
 
     forumPosts: fields.ReverseRelation["ForumPost"]
 
@@ -167,15 +168,13 @@ class AgoraProposal(Model):
         table = "AgoraProposal"
 
 
-class ThreadSummary(Model):
+class RawTopicSummary(Model):
     id = fields.IntField(pk=True)
     url = fields.CharField(max_length=255, unique=True)
-    about = fields.TextField(null=True)
-    first_post = fields.TextField(null=True)
-    reaction = fields.TextField(null=True)
-    overview = fields.TextField(null=True)
-    tldr = fields.TextField(null=True)
-    classification = fields.CharField(max_length=255, null=True)
+    data = fields.JSONField()
+    lastGeneratedAt = NaiveDatetimeField(auto_now=True)
+    createdAt = NaiveDatetimeField(auto_now_add=True)
+    updatedAt = NaiveDatetimeField(auto_now=True)
 
     class Meta:
-        table = "ThreadSummary"
+        table = "RawTopicSummary"
