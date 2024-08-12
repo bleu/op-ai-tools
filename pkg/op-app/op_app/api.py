@@ -49,7 +49,6 @@ def handle_question(func):
 
 @app.errorhandler(Exception)
 def handle_exception(e):
-    raise e
     if isinstance(e, UnsupportedVectorstoreError):
         return jsonify({"error": str(e)}), 400
     return jsonify({"error": "An unexpected error occurred during prediction"}), 500
@@ -62,17 +61,17 @@ def predict(question, memory):
     result = process_question(question, memory)
 
     user_token = request.headers.get("x-user-id")
-    # posthog.capture(
-    #     user_token,
-    #     "MODEL_PREDICTED_ANSWER",
-    #     {
-    #         "endpoint": "predict",
-    #         "question": question,
-    #         "answer": result.get("answer"),
-    #         "error": result.get("error"),
-    #     },
-    # )
-    # posthog.shutdown()
+    posthog.capture(
+        user_token,
+        "MODEL_PREDICTED_ANSWER",
+        {
+            "endpoint": "predict",
+            "question": question,
+            "answer": result.get("answer"),
+            "error": result.get("error"),
+        },
+    )
+    posthog.shutdown()
 
     return jsonify(result)
 
