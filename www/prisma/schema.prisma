@@ -107,9 +107,10 @@ model AgoraProposal {
 }
 
 model RawTopicSummary {
-  id        Int      @id @default(autoincrement())
-  url       String   @unique
-  data      Json
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              Int      @id @default(autoincrement())
+  url             String   @unique
+  data            Json
+  lastGeneratedAt DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
