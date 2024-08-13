@@ -1,5 +1,5 @@
 from typing import List, Dict
-from op_data.db.models import ForumPostCategory
+from op_data.db.models import TopicCategory
 from op_data.utils.base_scraper import BaseScraper
 
 FORUM_URL = "https://gov.optimism.io"
@@ -31,9 +31,9 @@ class CategoryScraper(BaseScraper):
     @staticmethod
     async def acquire_and_save():
         categories = await CategoryScraper(FORUM_URL).fetch_categories()
-        category_objects = [ForumPostCategory(**category) for category in categories]
+        category_objects = [TopicCategory(**category) for category in categories]
 
-        await ForumPostCategory.bulk_create(
+        await TopicCategory.bulk_create(
             category_objects,
             update_fields=[
                 "name",

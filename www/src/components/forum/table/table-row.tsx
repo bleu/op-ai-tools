@@ -2,11 +2,11 @@ import Link from "next/link";
 import type React from "react";
 import { CATEGORY_COLORS } from "../categoryColors";
 import { TopicHeader } from "../topic-header";
-import { FILTER_OPTIONS, type ForumPost } from "./post-options";
+import { FILTER_OPTIONS, type Topic } from "./post-options";
 
 export function getColor(categoryValue: string) {
   const categoryLabel = FILTER_OPTIONS.options.find(
-    (option) => option.value === categoryValue,
+    (option) => option.value === categoryValue
   )?.label;
 
   if (!categoryLabel) {
@@ -28,7 +28,7 @@ export const SnapshotProposal = ({
   readTime,
   category,
   status,
-}: ForumPost) => {
+}: Topic) => {
   return (
     <Link href={`/forum/topic/${id}`}>
       <div className="p-1 md:p-4 max-w-7xl mx-auto rounded-md hover:bg-gray-100">

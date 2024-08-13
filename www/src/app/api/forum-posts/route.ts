@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 const parseCategory = (
   categoryExternalId: string,
-  filterableCategories: number[],
+  filterableCategories: number[]
 ) => {
   if (categoryExternalId === "all") {
     return undefined;
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
   // Build the query conditions
   const conditions: any = {};
 
-  const filterableCategories = await prisma.forumPostCategory
+  const filterableCategories = await prisma.topicCategory
     .findMany({
       where: {
         filterable: true,
@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const data = await prisma.forumPost.findMany({
+  const data = await prisma.topic.findMany({
     skip: start ? Number(start) : 0,
     take: pageSize ? Number(pageSize) : 10,
     include: {
@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  const totalRowCount = await prisma.forumPost.count({
+  const totalRowCount = await prisma.topic.count({
     where: conditions,
   });
 

@@ -5,7 +5,7 @@ import logging
 import datetime as dt
 from typing import Any, Dict, List, Tuple
 
-from op_data.db.models import RawForumPost
+from op_data.db.models import RawTopic
 
 import asyncio
 import json
@@ -22,45 +22,42 @@ logger = logging.getLogger(__name__)
 
 class TopicRepository:
     async def get_existing_topics(self) -> Dict[str, dt.datetime]:
-        existing_topics = await RawForumPost.all().values("externalId", "lastUpdatedAt")
+        existing_topics = await RawTopic.all().values("externalId", "lastUpdatedAt")
         return {
             topic["externalId"]: topic["lastUpdatedAt"] for topic in existing_topics
         }
 
     async def save_topic(self, topic_id: int, topic_data: Dict[str, Any]):
         raw_post = [
-            RawForumPost(
+            RawTopic(
                 externalId=str(topic_id),
                 url=topic_data.get("url", ""),
                 type="topic",
                 rawData=topic_data,
                 lastUpdatedAt=dt.datetime.now(dt.UTC),
-                needsSummarize=True
             )
         ]
-        await RawForumPost.bulk_create(
+        await RawTopic.bulk_create(
             raw_post,
-            update_fields=["url", "type", "rawData", "lastUpdatedAt", "needsSummarize"],
+            update_fields=["url", "type", "rawData", "lastUpdatedAt"],
             on_conflict=["externalId"],
         )
         return raw_post
 
     async def bulk_save_topics(self, topics: List[Tuple[int, Dict[str, Any]]]):
-        raw_posts = [
-            RawForumPost(
+        raw_topics = [
+            RawTopic(
                 externalId=str(topic_id),
                 url=topic_data.get("url", ""),
                 type="topic",
                 rawData=topic_data,
                 lastUpdatedAt=dt.datetime.now(dt.UTC),
-                needsSummarize=True
-
             )
             for topic_id, topic_data in topics
         ]
-        await RawForumPost.bulk_create(
-            raw_posts,
-            update_fields=["url", "type", "rawData", "lastUpdatedAt", "needsSummarize"],
+        await RawTopic.bulk_create(
+            raw_topics,
+            update_fields=["url", "type", "rawData", "lastUpdatedAt"],
             on_conflict=["externalId"],
         )
 

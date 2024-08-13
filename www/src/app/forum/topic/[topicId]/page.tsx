@@ -5,7 +5,7 @@ import { TopicPage } from "./(components)/topic-page";
 import { useUserAccessedTopicPosthogTracker } from "./(components)/useUserAccessedTopicPosthogTracker";
 
 export type TopicPageProps = {
-  topic: Prisma.ForumPostGetPayload<{
+  topic: Prisma.TopicGetPayload<{
     include: {
       category: true;
     };
@@ -15,7 +15,7 @@ export type TopicPageProps = {
 export default async function Page({ params }: { params: any }) {
   const { topicId } = params;
 
-  const topic = (await prisma.forumPost.findUnique({
+  const topic = (await prisma.topic.findUnique({
     where: {
       id: Number(topicId),
     },
