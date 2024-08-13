@@ -84,7 +84,7 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
     @staticmethod
     def retrieve(only_not_summarized: bool = False):
         if only_not_summarized:
-            query = f'select "rawData", url, type, "externalId" from "{RAW_FORUM_DB}" where "needsSummarize"=True'
+            query = f'SELECT "rawData", url, type, "externalId" FROM "{RAW_FORUM_DB}" WHERE "lastSummarizedAt" < "lastUpdatedAt" OR "lastSummarizedAt" IS NULL;'
         else:
             query = f'select "rawData", url, type, "externalId" from "{RAW_FORUM_DB}"'
 
@@ -220,7 +220,7 @@ trust_level (0-4): {TRUST_LEVEL}
         df_posts = pd.DataFrame(posts).T
         threads = []
         category_names = connect_db.retrieve_data(
-            'select "externalId", "name" from "ForumPostCategory"'
+            'select "externalId", "name" from "TopicCategory"'
         )
         category_names = {int(c[0]): c[1] for c in category_names}
         for t in df_posts["thread_id"].unique():
