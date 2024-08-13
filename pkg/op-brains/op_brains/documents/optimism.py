@@ -13,6 +13,7 @@ from op_brains.config import (
     RAW_FORUM_DB,
     FORUM_SUMMARY_DB,
     DOCS_PATH,
+    SNAPSHOT_DB
 )
 
 NOW = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
@@ -159,30 +160,44 @@ winning_option: {winning_option}
     """
 
     @staticmethod
-    def return_snapshot_proposals(file_path: str) -> Dict[str, Any]:
-        with open(file_path, "r") as file:
-            proposals = {}
-            for line in file:
-                data_line = json.loads(line)
-                discussion = data_line["discussion"]
-                proposals[discussion] = data_line
-                proposals[discussion]["str"] = (
-                    ForumPostsProcessingStrategy.template_snapshot_proposal.format(
-                        title=data_line["title"],
-                        space_id=data_line["space_id"],
-                        space_name=data_line["space_name"],
-                        snapshot=data_line["snapshot"],
-                        state=data_line["state"],
-                        type=data_line["type"],
-                        body=data_line["body"],
-                        start=data_line["start"],
-                        end=data_line["end"],
-                        votes=data_line["votes"],
-                        choices=data_line["choices"],
-                        scores=data_line["scores"],
-                        winning_option=data_line["winning_option"],
-                    )
-                )
+    def return_snapshot_proposals() -> Dict[str, Any]:
+        out_db = connect_db.retrieve_data(
+            f'select "discussion", "title", "spaceId", "spaceName", "snapshot", "state", "type", "body", "start", "end", "votes", "choices", "scores", "winningOption" from "{SNAPSHOT_DB}"'
+        )
+        proposals = {}
+        for line in out_db:
+            discussion = line[0]
+            proposals[discussion] = {
+                "title": line[1],
+                "space_id": line[2],
+                "space_name": line[3],
+                "snapshot": line[4],
+                "state": line[5],
+                "type": line[6],
+                "body": line[7],
+                "start": line[8],
+                "end": line[9],
+                "votes": line[10],
+                "choices": line[11],
+                "scores": line[12],
+                "winning_option": line[13],
+            }
+            proposals[discussion]["str"] = ForumPostsProcessingStrategy.template_snapshot_proposal.format(
+                title=line[1],
+                space_id=line[2],
+                space_name=line[3],
+                snapshot=line[4],
+                state=line[5],
+                type=line[6],
+                body=line[7],
+                start=line[8],
+                end=line[9],
+                votes=line[10],
+                choices=line[11],
+                scores=line[12],
+                winning_option=line[13],
+            )
+
         return proposals
 
     template_thread = """
