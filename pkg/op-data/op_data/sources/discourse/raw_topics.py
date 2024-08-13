@@ -1,6 +1,3 @@
-from datetime import timedelta
-
-
 import logging
 import datetime as dt
 from typing import Any, Dict, List, Tuple
@@ -76,7 +73,7 @@ class TopicUpdateChecker:
 
         lastInternalUpdatedAt = self.existing_topics[str(topic_id)]
 
-        lastExternalPostedAt = datetime.strptime(topic_data["last_posted_at"], '%Y-%m-%dT%H:%M:%S.%fZ')
+        lastExternalPostedAt = dt.datetime.strptime(topic_data["last_posted_at"], '%Y-%m-%dT%H:%M:%S.%fZ')
 
         return lastInternalUpdatedAt < lastExternalPostedAt
 
