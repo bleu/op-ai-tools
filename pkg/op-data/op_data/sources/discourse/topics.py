@@ -1,10 +1,10 @@
 import re
 from typing import List, Dict
 import asyncio
-from op_data.db.models import Topic, TopicCategory, RawTopic
+from op_data.db.models import Topic, TopicCategory, RawTopic, RawTopicSummary
 import op_artifacts
 import importlib.resources
-
+from tortoise.functions import Max
 
 def estimate_reading_time(text: str, WPM: int = 200) -> str:
     total_words = len(re.findall(r"\w+", text))
@@ -19,40 +19,46 @@ def estimate_reading_time(text: str, WPM: int = 200) -> str:
 class TopicsService:
     @staticmethod
     async def fetch_summaries() -> List[str]:
-        with importlib.resources.open_text(
-            op_artifacts, "all_thread_summaries.txt"
-        ) as file:
-            data = file.read()
-
-        return [
-            post.strip()
-            for post in data.split(
-                "--------------------------------------------------------------------------------"
-            )
-            if post.strip()
-        ]
+        latest_summaries = await RawTopicSummary.annotate(
+            latest_created=Max('createdAt')
+        ).group_by('url').order_by('-latest_created')
+        
+        return await RawTopicSummary.filter(
+            id__in=[s.id for s in latest_summaries]
+        ).order_by('-createdAt')
 
     @staticmethod
-    async def parse_summary(summary: str) -> Dict:
-        url_match = re.search(r"URL:\s*(.*)", summary)
-        about_match = re.search(r"<about>\s*([\s\S]*?)<\/about>", summary)
+    def parse_summary(summary: RawTopicSummary) -> Dict:
+        if summary.error:
+            return {
+                "url": summary.url,
+                "about": "",
+                "first_post": "",
+                "reaction": "",
+                "overview": "",
+                "tldr": "",
+                "classification": "",
+            }
+
+        summary_data = summary.data.get("summary", {})
+
+        about_match = re.search(r"<about>\s*([\s\S]*?)<\/about>", summary_data)
         first_post_match = re.search(
-            r"<first_post>\s*([\s\S]*?)<\/first_post>", summary
+            r"<first_post>\s*([\s\S]*?)<\/first_post>", summary_data
         )
-        reaction_match = re.search(r"<reaction>\s*([\s\S]*?)<\/reaction>", summary)
-        overview_match = re.search(r"<overview>\s*([\s\S]*?)<\/overview>", summary)
-        classification_match = re.search(
-            r"<classification>\s*([\s\S]*?)<\/classification>", summary
+        reaction_match = re.search(r"<reaction>\s*([\s\S]*?)<\/reaction>", summary_data)
+        overview_match = re.search(r"<overview>\s*([\s\S]*?)<\/overview>", summary_data)
+        classification_match = re.search(            r"<classification>\s*([\s\S]*?)<\/classification>", summary_data
         )
 
-        tldr_match = re.search(r"<tldr>\s*([\s\S]*?)<\/tldr>", summary)
+        tldr_match = re.search(r"<tldr>\s*([\s\S]*?)<\/tldr>", summary_data)
         tldr = tldr_match.group(1).strip() if tldr_match else ""
         if not tldr:
-            start_index = summary.find("<tldr>\n") + len("<tldr>\n")
-            tldr = summary[start_index:].strip() or ""
+            start_index = summary_data.find("<tldr>\n") + len("<tldr>\n")
+            tldr = summary_data[start_index:].strip() or ""
 
         return {
-            "url": url_match.group(1).strip() if url_match else "",
+            "url": summary.url,
             "about": about_match.group(1).strip() if about_match else "",
             "first_post": first_post_match.group(1).strip() if first_post_match else "",
             "reaction": reaction_match.group(1).strip() if reaction_match else "",
@@ -74,7 +80,7 @@ class TopicsService:
 
         # Parse summaries
         parsed_summaries = [
-            await TopicsService.parse_summary(summary) for summary in summaries
+            TopicsService.parse_summary(summary) for summary in summaries
         ]
 
         # Create a lookup for raw posts and categories
