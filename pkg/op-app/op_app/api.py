@@ -12,6 +12,7 @@ from posthog import Posthog
 from functools import wraps
 import os
 from honeybadger.contrib import FlaskHoneybadger
+from .scheduler import configure_scheduler
 
 app = Flask(__name__)
 CORS(app)
@@ -85,6 +86,8 @@ def after_request(response):
     posthog.flush()
     return response
 
+
+scheduler = configure_scheduler()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3123, debug=True)
