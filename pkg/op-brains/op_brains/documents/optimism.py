@@ -8,8 +8,7 @@ from langchain_core.documents.base import Document
 from langchain_text_splitters import MarkdownHeaderTextSplitter
 
 from op_brains.documents import (
-    DocumentProcessingStrategy,
-    DocumentProcessorFactory,
+    DocumentProcessingStrategy
 )
 from op_brains.retriever import connect_db
 
@@ -23,8 +22,9 @@ NOW = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
 
 
 class FragmentsProcessingStrategy(DocumentProcessingStrategy):
-    def process_document(
-        self, file_path: str, headers_to_split_on: List | None = None
+    @staticmethod
+    def langchain_process(
+        file_path: str, headers_to_split_on: List | None = None
     ) -> List[Document]:
         with open(file_path, "r") as f:
             docs_read = f.read()
@@ -76,8 +76,12 @@ class FragmentsProcessingStrategy(DocumentProcessingStrategy):
 
         return fragments_docs
 
-    def get_db_name(self) -> str:
-        return "fragments_docs_db"
+    @staticmethod
+    def dataframe_process(**kwargs) -> pd.DataFrame:
+        fragments = FragmentsProcessingStrategy.langchain_process(**kwargs)
+        data = [(f.metadata["url"], NOW, f, "fragments_docs") for f in fragments]
+
+        return pd.DataFrame(data, columns=["url", "last_date", "content", "type_db_info"])
 
 
 class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
@@ -117,7 +121,7 @@ class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
                     "category_id"
                 ]
             except KeyError:
-                to_del.append(p)
+                to_del.append(posts[key]["thread_id"])
         posts = {k: v for k, v in posts.items() if k not in to_del}
         # print(len(posts))
 
@@ -280,9 +284,6 @@ trust_level (0-4): {TRUST_LEVEL}
 
         return threads_forum
 
-    def get_db_name(self) -> str:
-        return "posts_forum_db"
-
 
 class SummaryProcessingStrategy(DocumentProcessingStrategy):
     template_summary = """
@@ -344,29 +345,9 @@ class SummaryProcessingStrategy(DocumentProcessingStrategy):
 
             return docs
 
-
-class OptimismDocumentProcessorFactory(DocumentProcessorFactory):
-    def create_processor(self, doc_type: str) -> DocumentProcessingStrategy:
-        if doc_type == "fragments":
-            return FragmentsProcessingStrategy()
-        elif doc_type == "forum_posts":
-            return ForumPostsProcessingStrategy()
-        elif doc_type == "summaries":
-            return SummaryProcessingStrategy()
-        else:
-            raise ValueError(f"Unsupported document type: {doc_type}")
-
-    def get_document_types(self) -> Dict[str, str]:
-        return {
-            "fragments": "001-initial-dataset-governance-docs/file.txt",
-            "forum_posts": "002-governance-forum-202406014/dataset/_out.jsonl",
-        }
-
-
-class DataframeBuilder:
     @staticmethod
-    def build_dataframes():
-        summaries = SummaryProcessingStrategy.langchain_process(divide="category_name")
+    def dataframe_process(**kwargs) -> pd.DataFrame:
+        summaries = SummaryProcessingStrategy.langchain_process(**kwargs)
         pattern = r"[^A-Za-z0-9_]+"
         summaries = [
             (s.metadata["url"], s.metadata["last_posted_at"], s, re.sub(pattern, "", k))
@@ -374,31 +355,58 @@ class DataframeBuilder:
             for s in v
         ]
 
-        last_posted_at = [
-            time.strptime(s[1], "%Y-%m-%dT%H:%M:%S.%fZ")
-            for s in summaries
-            if s[1] is not None
-        ]
-        most_recent = max(last_posted_at)
-        print(f"Most recent post date: {most_recent}")
-
-        last_posted_at = [
-            time.strptime(s[1], "%Y-%m-%dT%H:%M:%S.%fZ")
-            for s in summaries
-            if s[1] is not None
-        ]
-        most_recent = max(last_posted_at)
-        print(f"Most recent post date: {most_recent}")
-
-        fragments_loader = FragmentsProcessingStrategy()
-        fragments = fragments_loader.process_document(DOCS_PATH, headers_to_split_on=[])
-
-        data = [(f.metadata["url"], NOW, f, "fragments_docs") for f in fragments]
-        data.extend(summaries)
-        context_df = pd.DataFrame(
-            data, columns=["url", "last_date", "content", "type_db_info"]
+        return pd.DataFrame(
+            summaries, columns=["url", "last_date", "content", "type_db_info"]
         )
 
-        context_df = context_df.sort_values(by="last_date", ascending=False)
 
+class DataExporter:
+    sources = [ # this list contains lists that are ordered by priority level. each inner list contains some sources that have the same priority level (entries will be ordered by last_date)
+        [{ 
+            "name": "documentation",
+            "class": FragmentsProcessingStrategy,
+            "pars": {"file_path": DOCS_PATH, "headers_to_split_on": []},
+        }],
+        [{
+            "name": "summary",
+            "class": SummaryProcessingStrategy,
+            "pars": {"divide": "category_name"}
+        }]
+    ]
+
+    @staticmethod
+    def get_dataframe():
+        context_df = []
+        for priority_class in DataExporter.sources:
+            dfs_class = []
+            for source in priority_class:
+                df_source = source["class"].dataframe_process(**source["pars"])
+
+                if not df_source.columns.tolist() == ["url", "last_date", "content", "type_db_info"]:
+                    raise ValueError(f"DataFrame columns are not as expected: {df_source.columns.tolist()}")
+                
+                dfs_class.append(df_source)
+            
+            dfs_class = pd.concat(dfs_class)
+            dfs_class = dfs_class.sort_values(by="last_date", ascending=False)
+            context_df.append(dfs_class)
+        
+        context_df = pd.concat(context_df)
         return context_df
+
+
+    @staticmethod
+    def get_langchain_documents():
+        out = {}
+        for source in [x for xs in DataExporter.sources for x in xs]:
+            documents = source["class"].langchain_process(**source["pars"])
+            if isinstance(documents, dict):
+                documents = {f"{source['name']}_{key}": value for key, value in documents.items()}
+            elif isinstance(documents, list):
+                documents = {source["name"]: documents}
+            else:
+                raise ValueError(f"Unexpected type of documents: {type(documents)}")
+            
+            out.update(documents)
+            
+        return out

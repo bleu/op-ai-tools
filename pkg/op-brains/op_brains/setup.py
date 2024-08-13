@@ -3,29 +3,21 @@ RAG = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
 reranker_ragatouille = RAG.as_langchain_document_compressor()
 
 from op_brains.documents import optimism
-all_contexts_df = optimism.DataframeBuilder.build_dataframes()
+all_contexts_df = optimism.DataExporter.get_dataframe()
 
 from typing import Any, Iterable
-import json, re, time
+import json, re
 import numpy as np
 
-from op_brains.documents.optimism import (
-    SummaryProcessingStrategy,
-    FragmentsProcessingStrategy,
-)
+from op_brains.documents import optimism
 import op_artifacts
 from op_brains.chat import model_utils
-from op_brains.config import DOCS_PATH, SCOPE, EMBEDDING_MODEL
+from op_brains.config import SCOPE, EMBEDDING_MODEL
 import importlib.resources
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
-
-from op_brains.documents import optimism
-all_contexts_df = optimism.DataframeBuilder.build_dataframes()
 from langchain_voyageai import VoyageAIRerank
 reranker_voyager = VoyageAIRerank(model="rerank-1")
-
-from time import sleep
 
 prompt_question_generation = """
 You are tasked with generating keywords and FAQ to help users to find information about {SCOPE}. Your goal is to create keywords that are useful and questions that are relevant, interesting, and could realistically be asked by someone unfamiliar with the content.
@@ -144,19 +136,6 @@ def generate_indexes_from_fragment(list_contexts: Iterable, llm: Any) -> dict:
     return q_index, kw_index
 
 
-def get_data():
-    summary = SummaryProcessingStrategy.langchain_process(divide="category_name")
-    summary = {f'summary_"{key}': value for key, value in summary.items()}
-
-    fragments_loader = FragmentsProcessingStrategy()
-    fragments = fragments_loader.process_document(DOCS_PATH, headers_to_split_on=[])
-
-    data = {"documentation": fragments}
-    data.update(summary)
-
-    return data
-
-
 def reorder_index(index_dict):
     output_dict = {}
     for key, urls in index_dict.items():
@@ -185,7 +164,7 @@ def reorder_file(path):
 
 
 def main(model: str):
-    data = get_data()
+    data = optimism.DataExporter.get_langchain_documents()
 
     llm = model_utils.access_APIs.get_llm(model)
     embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)

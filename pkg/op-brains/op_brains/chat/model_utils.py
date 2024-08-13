@@ -20,7 +20,7 @@ from op_brains.config import (
 from op_brains.documents import optimism
 
 TODAY = time.strftime("%Y-%m-%d")
-all_contexts_df = optimism.DataframeBuilder.build_dataframes()
+all_contexts_df = optimism.DataExporter.get_dataframe()
 
 
 class Prompt:
