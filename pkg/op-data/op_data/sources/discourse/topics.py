@@ -1,7 +1,7 @@
 import re
 from typing import List, Dict
 import asyncio
-from op_data.db.models import ForumPost, ForumPostCategory, RawForumPost
+from op_data.db.models import Topic, TopicCategory, RawTopic
 import op_artifacts
 import importlib.resources
 
@@ -68,8 +68,8 @@ class TopicsService:
         # Fetch all data in parallel
         summaries, raw_topics, categories = await asyncio.gather(
             TopicsService.fetch_summaries(),
-            RawForumPost.all(),
-            ForumPostCategory.all(),
+            RawTopic.all(),
+            TopicCategory.all(),
         )
 
         # Parse summaries
@@ -108,7 +108,7 @@ class TopicsService:
             created_by = raw_topic.rawData.get("details", {}).get("created_by", {})
 
             forum_topics.append(
-                ForumPost(
+                Topic(
                     externalId=raw_topic.externalId,
                     url=raw_topic.url,
                     title=raw_topic.rawData.get("title"),
@@ -116,7 +116,7 @@ class TopicsService:
                     displayUsername=created_by.get("name", "")
                     or created_by.get("username", ""),
                     category=category,
-                    rawForumPost=raw_topic,
+                    rawTopic=raw_topic,
                     firstPost=summary.get("first_post", ""),
                     about=summary.get("about", ""),
                     reaction=summary.get("reaction", ""),
@@ -129,8 +129,8 @@ class TopicsService:
                 )
             )
 
-        # Bulk create or update forum posts
-        await ForumPost.bulk_create(
+        # Bulk create or update topics
+        await Topic.bulk_create(
             forum_topics,
             update_fields=[
                 "url",

@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { cn, formatDate } from "@/lib/utils";
 import Link from "next/link";
-import type { ForumPost } from "./table/post-options";
+import type { Topic } from "./table/post-options";
 
 export function TopicHeader({
   title,
@@ -15,7 +15,7 @@ export function TopicHeader({
   readTime,
   category,
   status,
-}: ForumPost) {
+}: Topic) {
   return (
     <div className="flex flex-col md:flex-row justify-between items-start">
       <div className="flex flex-col justify-start flex-grow md:w-2/3 mr-7">
@@ -30,7 +30,7 @@ export function TopicHeader({
                 label={category.name}
                 className={cn(
                   { [getColor(category.externalId || "")]: true },
-                  "size-4 fill-current",
+                  "size-4 fill-current"
                 )}
               />
               <span className="text-muted-foreground w-auto whitespace-nowrap">

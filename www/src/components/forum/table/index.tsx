@@ -21,8 +21,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { FilterSelect } from "./filter-select";
 import {
   FILTER_OPTIONS,
-  type ForumPost,
-  type ForumPostApiResponse,
+  type Topic,
+  type TopicApiResponse,
 } from "./post-options";
 import { SnapshotProposal } from "./table-row";
 
@@ -93,8 +93,8 @@ function ForumInfiniteScrollTable({
   ]);
 
   const { data, fetchNextPage, isFetching, isLoading } =
-    useInfiniteQuery<ForumPostApiResponse>({
-      queryKey: ["forumPosts", columnFilters, dates], // refetch when filters changes
+    useInfiniteQuery<TopicApiResponse>({
+      queryKey: ["topics", columnFilters, dates], // refetch when filters changes
       queryFn: getPosts as any,
       initialPageParam: {
         page: 0,
@@ -117,7 +117,7 @@ function ForumInfiniteScrollTable({
   // flatten the array of arrays from the useInfiniteQuery hook
   const flatData = React.useMemo(
     () => data?.pages?.flatMap((page) => page.data) ?? [],
-    [data],
+    [data]
   );
 
   const totalDBRowCount = data?.pages?.[0]?.meta?.totalRowCount ?? 0;
@@ -138,7 +138,7 @@ function ForumInfiniteScrollTable({
         }
       }
     },
-    [fetchNextPage, isFetching, totalFetched, totalDBRowCount],
+    [fetchNextPage, isFetching, totalFetched, totalDBRowCount]
   );
 
   // a check on mount and after a fetch to see if the table is already scrolled to the bottom and immediately needs to fetch more data
@@ -164,7 +164,7 @@ function ForumInfiniteScrollTable({
 
   // scroll to top of table when sorting changes
   const handleColumnFilterChange: OnChangeFn<ColumnFiltersState> = (
-    updater,
+    updater
   ) => {
     setColumnFilters(updater);
     if (!!table.getRowModel().rows.length) {
@@ -207,7 +207,7 @@ function ForumInfiniteScrollTable({
 
       return params.toString();
     },
-    [searchParams],
+    [searchParams]
   );
 
   const onCategoryFilterChange = (value: string, setParams = true) => {
@@ -277,7 +277,7 @@ function ForumInfiniteScrollTable({
           }}
         >
           {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-            const row = rows[virtualRow.index] as Row<ForumPost>;
+            const row = rows[virtualRow.index] as Row<Topic>;
             return (
               <tr
                 data-index={virtualRow.index} // needed for dynamic row height measurement
