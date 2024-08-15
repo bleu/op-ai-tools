@@ -7,9 +7,6 @@ from typing import Any, Dict, List
 from langchain_core.documents.base import Document
 from langchain_text_splitters import MarkdownHeaderTextSplitter
 
-from op_brains.documents import (
-    DocumentProcessingStrategy
-)
 from op_brains.retriever import connect_db
 
 from op_brains.config import (
@@ -21,10 +18,12 @@ from op_brains.config import (
 NOW = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
 
 
-class FragmentsProcessingStrategy(DocumentProcessingStrategy):
+class FragmentsProcessingStrategy():
+    name_source = "documentation"
+
     @staticmethod
     def langchain_process(
-        file_path: str, headers_to_split_on: List | None = None
+        file_path: str = DOCS_PATH, headers_to_split_on: List | None = []
     ) -> List[Document]:
         with open(file_path, "r") as f:
             docs_read = f.read()
@@ -84,7 +83,7 @@ class FragmentsProcessingStrategy(DocumentProcessingStrategy):
         return pd.DataFrame(data, columns=["url", "last_date", "content", "type_db_info"])
 
 
-class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
+class ForumPostsProcessingStrategy():
     @staticmethod
     def retrieve():
         out_db = connect_db.retrieve_data(
@@ -285,7 +284,9 @@ trust_level (0-4): {TRUST_LEVEL}
         return threads_forum
 
 
-class SummaryProcessingStrategy(DocumentProcessingStrategy):
+class SummaryProcessingStrategy():
+    name_source = "summary"
+
     template_summary = """
     <tldr>{TLDR}</tldr>
     <about>{ABOUT}</about>
@@ -325,7 +326,7 @@ class SummaryProcessingStrategy(DocumentProcessingStrategy):
         return ret
 
     @staticmethod
-    def langchain_process(divide: str | None = None) -> Dict[str, List[Document]]:
+    def langchain_process(divide: str | None = "category_name") -> Dict[str, List[Document]]:
         data = SummaryProcessingStrategy.retrieve()
 
         if isinstance(divide, str):
@@ -358,55 +359,3 @@ class SummaryProcessingStrategy(DocumentProcessingStrategy):
         return pd.DataFrame(
             summaries, columns=["url", "last_date", "content", "type_db_info"]
         )
-
-
-class DataExporter:
-    sources = [ # this list contains lists that are ordered by priority level. each inner list contains some sources that have the same priority level (entries will be ordered by last_date)
-        [{ 
-            "name": "documentation",
-            "class": FragmentsProcessingStrategy,
-            "pars": {"file_path": DOCS_PATH, "headers_to_split_on": []},
-        }],
-        [{
-            "name": "summary",
-            "class": SummaryProcessingStrategy,
-            "pars": {"divide": "category_name"}
-        }]
-    ]
-
-    @staticmethod
-    def get_dataframe():
-        context_df = []
-        for priority_class in DataExporter.sources:
-            dfs_class = []
-            for source in priority_class:
-                df_source = source["class"].dataframe_process(**source["pars"])
-
-                if not df_source.columns.tolist() == ["url", "last_date", "content", "type_db_info"]:
-                    raise ValueError(f"DataFrame columns are not as expected: {df_source.columns.tolist()}")
-                
-                dfs_class.append(df_source)
-            
-            dfs_class = pd.concat(dfs_class)
-            dfs_class = dfs_class.sort_values(by="last_date", ascending=False)
-            context_df.append(dfs_class)
-        
-        context_df = pd.concat(context_df)
-        return context_df
-
-
-    @staticmethod
-    def get_langchain_documents():
-        out = {}
-        for source in [x for xs in DataExporter.sources for x in xs]:
-            documents = source["class"].langchain_process(**source["pars"])
-            if isinstance(documents, dict):
-                documents = {f"{source['name']}_{key}": value for key, value in documents.items()}
-            elif isinstance(documents, list):
-                documents = {source["name"]: documents}
-            else:
-                raise ValueError(f"Unexpected type of documents: {type(documents)}")
-            
-            out.update(documents)
-            
-        return out

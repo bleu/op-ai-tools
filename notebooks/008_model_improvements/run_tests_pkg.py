@@ -1,4 +1,5 @@
 from op_brains.chat.utils import process_question
+from op_brains.config import CHAT_MODEL
 
 import os, json, time
 import pandas as pd
@@ -22,12 +23,11 @@ expected = {
 }
 
 models2test = [
-    "gpt-4o-mini",
-    # "claude-3-opus-20240229"
+    CHAT_MODEL
 ]
 
 
-def main():
+def batch_test():
     answers = {}
     for m in models2test:
         chat_model = (
@@ -45,9 +45,7 @@ def main():
             answers[m][test_type] = {}
             for query in test_queries:
                 start = time.time()
-                print(f"Query: {query}")
-                out = process_question(query, [])
-                print(f"Answer: {out['answer']}")
+                out = process_question(query, [], verbose=True)
                 print("----------")
                 end = time.time()
                 out["time_taken"] = end - start
@@ -78,6 +76,18 @@ def json2csv(answers):
                 )
         pd.DataFrame(out_answers).to_csv(f"test_results/{test_type}.csv", index=False)
 
+def single_test(query, desired_word):
+    ok = 0
+    for i in range(10):
+        out = process_question(query, [], verbose=True)
+        if desired_word in out["answer"]:
+            ok += 1
+
+    print(ok)
+    
 
 if __name__ == "__main__":
-    main()
+    #batch_test()
+    single_test("who is the grants council lead?", "Gonna")
+    
+

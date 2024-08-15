@@ -106,7 +106,6 @@ class RAGSystem:
             if "answer" in tags.keys():
                 return tags["answer"], True
             else:
-                print(tags)
                 knowledge_summary = ""
                 new_questions = ""
                 type_search = ""
@@ -120,9 +119,8 @@ class RAGSystem:
                     if len(questions) > 0:
                         questions = [{"question": q} for q in questions]
 
-                    type_search = [q[2] for q in queries_tags if q[0] == "type_search"][
-                        0
-                    ]
+                    type_search = [q[2] for q in queries_tags if q[0] == "type_search"][0]
+                    new_questions = questions
 
                 return [knowledge_summary, new_questions, type_search], False
         else:
@@ -139,7 +137,10 @@ class RAGSystem:
             xml_tags = xml_tag_pattern.findall(output_LLM)
             tags = {tag[0]: tag[2] for tag in xml_tags}
 
-            return tags["answer"], True
+            try:
+                return tags["answer"], True
+            except:
+                return "", True
 
     def predict(self, query: str, memory: list = [], verbose: bool = False) -> str:
         needs_info, preprocess_reasoning = self.query_preprocessing_LLM(
@@ -163,6 +164,10 @@ class RAGSystem:
             reasoning_level = 0
             while not is_enough:
                 summary_of_explored_contexts, questions, type_search = result
+                try:
+                    questions = [{"query": query}] + questions
+                except:
+                    pass
 
                 context_dict = {
                     list(q.values())[0]: self.retriever(
@@ -179,7 +184,7 @@ class RAGSystem:
 
                 if verbose:
                     print(
-                        f"-------Reasoning level {reasoning_level}\nExplored Context URLS: {context_urls}"
+                        f"-------Reasoning level {reasoning_level}\nExploring Context URLS: {context_urls}"
                     )
 
                 result, is_enough = self.responder_LLM(

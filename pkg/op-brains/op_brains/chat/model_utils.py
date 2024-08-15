@@ -17,10 +17,10 @@ from op_brains.config import (
     KEYWORDS_INDEX_NPZ,
     EMBEDDING_MODEL,
 )
-from op_brains.documents import optimism
+from op_brains.documents import DataExporter
 
 TODAY = time.strftime("%Y-%m-%d")
-all_contexts_df = optimism.DataExporter.get_dataframe()
+all_contexts_df = DataExporter.get_dataframe()
 
 
 class Prompt:
@@ -53,11 +53,11 @@ Follow these steps:
 
 1. Analyze the user's question, the provided context and your previous knowledge. Keep in mind the user's knowledge.
 
-2. Summarize the information you have that is relevant to the user's query. Take it from the context and from your previous knowledge. Include this summary inside <knowledge_summary></knowledge_summary> tags. Cite the source URL using the format [1] within the text and list the url references at the end. Every claim should be supported by a reference. References must come from the provided context or your previous knowledge. Never cite urls that were not provided.
+2. Summarize the information you have that is relevant to the user's query. Do not mention what's lacking and you don't know. Take it from the context and from your previous knowledge. Include this summary inside <knowledge_summary></knowledge_summary> tags. Cite the source URL using the format [1] within the text and list the url references at the end. Every phrase should be supported by a reference. References must come from the provided context or your previous knowledge. Never cite urls that were not provided. 
 
 3. Check if you have enough information to answer the user's query. 
 
-4. If you have enough information to the question, provide an answer inside <answer></answer> tags. Your answer should:
+4. Only if you have enough information to answer the query properly, provide an answer inside <answer></answer> tags. Your answer should:
    - Directly address the user's question. Never write "according to the context", "based on the provided context" or similar phrases.
    - Cite the source URL using the format [1] within the text.
    - List the url references at the end of the answer.
@@ -65,12 +65,13 @@ Follow these steps:
    - Be polite, informative, assertive, objective, and brief.
    - Avoid jargon and explain any technical terms.
    - Never refer to past events as if they were happening now or in the future.
+   - Keep in mind the <query>. Don't answer an user question if you don't know the answer to this question.
 """
 
     responder = (
         responder_start
         + """
-5. If you think more information is necessary to fully answer the query, formulate questions about that encompasses the information you think is missing. These questions are going to be used by the system to retrieve the information. The user won't see them. Include these questions within <new_questions> tags, following this format:
+5. If you don't have enough information to answer the query in the provided context, formulate questions about that encompasses the information that is missing. These questions are going to be used by the system to retrieve a context that can provide this information. The user won't see these questions. Include these questions within <new_questions> tags, following this format:
     <new_questions>
         <question>[Your question here]</question>
         <question>[Your question here]</question>
@@ -212,25 +213,28 @@ class ContextHandling:
         explored_contexts: list,
         query: str | None = None,
         type_search: str = "factual",
-        k: int = 3,
+        k: int = 10,
     ) -> Tuple[str, list]:
         contexts_to_be_explored = {}
         for question, contexts in question_context.items():
-            new_contexts = [
-                c for c in contexts if c.metadata.get("url") not in explored_contexts
-            ]
-            contexts_to_be_explored[question] = new_contexts
+            new_contexts = contexts
+            #new_contexts = [c for c in contexts if c.metadata.get("url") not in explored_contexts]
 
             if query is not None:
-                k = min(k, len(new_contexts))
-                if k > 0:
+                k_i = min(k, len(new_contexts))
+                if k_i > 0:
                     new_contexts = ContextHandling.reordering(
-                        new_contexts, query, k=k, type_search=type_search
+                        new_contexts, query, k=k_i, type_search=type_search
                     )
+                    
+            contexts_to_be_explored[question] = new_contexts
 
-        c = contexts_to_be_explored.values()
+        c = list(contexts_to_be_explored.values())[:k]
         if len(c) > 0:
-            max_c = max([len(cc) for cc in c])
+            try:
+                max_c = max([len(cc) for cc in c])
+            except:
+                max_c = 0
             contexts_to_be_explored = []
             for i in range(max_c):
                 for cc in c:
