@@ -17,7 +17,7 @@ export const CATEGORY_BY_SLUG: { [key: string]: string } =
       ...acc,
       [option.slug]: option.value,
     }),
-    {}
+    {},
   );
 
 export const categoryBySlug = (slug: string): string =>

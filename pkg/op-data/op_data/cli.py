@@ -70,9 +70,11 @@ async def sync_agora():
     await AgoraProposalService.acquire_and_save()
     await AgoraProposalService.update_relationships()
 
+
 async def sync_summaries():
     await RawTopicSummaryService.acquire_and_save()
     await RawTopicSummaryService.update_relationships()
+
 
 SYNC_COMMANDS: Dict[str, Callable] = {
     "categories": sync_categories,

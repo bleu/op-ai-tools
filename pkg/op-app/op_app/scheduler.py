@@ -16,48 +16,48 @@ def configure_scheduler():
     scheduler.add_job(
         run_sync,
         trigger=CronTrigger(hour=0, minute=0),
-        args=[SYNC_COMMANDS['categories']],
-        id='sync_categories'
+        args=[SYNC_COMMANDS["categories"]],
+        id="sync_categories",
     )
 
-     # Run 'raw_topics' every day at 00:20
+    # Run 'raw_topics' every day at 00:20
     scheduler.add_job(
         run_sync,
         trigger=CronTrigger(hour=0, minute=20),
-        args=[SYNC_COMMANDS['raw_topics']],
-        id='sync_raw_topics'
+        args=[SYNC_COMMANDS["raw_topics"]],
+        id="sync_raw_topics",
     )
 
-     # Run 'sync_summaries' every day at 01:20
+    # Run 'sync_summaries' every day at 01:20
     scheduler.add_job(
         run_sync,
         trigger=CronTrigger(hour=1, minute=20),
-        args=[SYNC_COMMANDS['summaries']],
-        id='sync_summaries'
+        args=[SYNC_COMMANDS["summaries"]],
+        id="sync_summaries",
     )
 
     # Run 'sync_topics' every day at 02:00
     scheduler.add_job(
         run_sync,
         trigger=CronTrigger(hour=2, minute=10),
-        args=[SYNC_COMMANDS['topics']],
-        id='sync_topics'
+        args=[SYNC_COMMANDS["topics"]],
+        id="sync_topics",
     )
 
     # Run 'sync_snapshot' every day at 02:30
     scheduler.add_job(
         run_sync,
         trigger=CronTrigger(hour=2, minute=30),
-        args=[SYNC_COMMANDS['snapshot']],
-        id='sync_snapshot'
+        args=[SYNC_COMMANDS["snapshot"]],
+        id="sync_snapshot",
     )
 
     # Run 'sync_agora' every day at 02:30
     scheduler.add_job(
         run_sync,
         trigger=CronTrigger(hour=0, minute=40),
-        args=[SYNC_COMMANDS['agora']],
-        id='sync_agora'
+        args=[SYNC_COMMANDS["agora"]],
+        id="sync_agora",
     )
 
     scheduler.start()

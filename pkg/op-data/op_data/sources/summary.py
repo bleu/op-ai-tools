@@ -10,6 +10,7 @@ from op_brains.exceptions import OpChatBrainsException
 
 from op_data.db.models import RawTopic, RawTopicSummary
 
+
 class RawTopicSummaryService:
     @staticmethod
     def get_topics_urls_to_summarize(out_of_date: bool = True) -> List[str]:
@@ -23,7 +24,9 @@ class RawTopicSummaryService:
     @staticmethod
     async def summarize_single_topic(url: str, model_name: str) -> Dict[str, str]:
         try:
-            summary = summarize_thread(url, model_name, use_mock_data=USE_SUMMARY_MOCK_DATA)
+            summary = summarize_thread(
+                url, model_name, use_mock_data=USE_SUMMARY_MOCK_DATA
+            )
             return {"url": url, "data": {"summary": summary}, "error": False}
         except OpChatBrainsException as e:
             return {"url": url, "data": {"error": str(e)}, "error": True}
@@ -37,8 +40,7 @@ class RawTopicSummaryService:
             return summaries
 
         tasks = [
-            cls.summarize_single_topic(url, SUMMARIZER_MODEL)
-            for url in topics_urls
+            cls.summarize_single_topic(url, SUMMARIZER_MODEL) for url in topics_urls
         ]
 
         for future in asyncio.as_completed(tasks):
@@ -79,7 +81,7 @@ class RawTopicSummaryService:
 
         await asyncio.gather(
             cls.bulk_save_summaries(summaries),
-            cls.update_raw_topics_as_summarized(summaries_urls)
+            cls.update_raw_topics_as_summarized(summaries_urls),
         )
 
     @staticmethod
