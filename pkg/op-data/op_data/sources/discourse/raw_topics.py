@@ -67,13 +67,17 @@ class TopicUpdateChecker:
     async def initialize(self):
         self.existing_topics = await self.repository.get_existing_topics()
 
-    async def should_update_topic(self, topic_id: int, topic_data: Dict[str, Any]) -> bool:
+    async def should_update_topic(
+        self, topic_id: int, topic_data: Dict[str, Any]
+    ) -> bool:
         if str(topic_id) not in self.existing_topics:
             return True
 
         lastInternalUpdatedAt = self.existing_topics[str(topic_id)]
 
-        lastExternalPostedAt = dt.datetime.strptime(topic_data["last_posted_at"], '%Y-%m-%dT%H:%M:%S.%fZ')
+        lastExternalPostedAt = dt.datetime.strptime(
+            topic_data["last_posted_at"], "%Y-%m-%dT%H:%M:%S.%fZ"
+        )
 
         return lastInternalUpdatedAt < lastExternalPostedAt
 
