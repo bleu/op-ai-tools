@@ -37,7 +37,7 @@ class NaiveDatetimeField(fields.DatetimeField):
         return to_naive(value) if value is not None else None
 
 
-class ForumPostCategory(Model):
+class TopicCategory(Model):
     id = fields.IntField(pk=True)
     externalId = fields.CharField(max_length=255, unique=True)
     name = fields.CharField(max_length=255, null=True)
@@ -47,27 +47,28 @@ class ForumPostCategory(Model):
     topicUrl = fields.CharField(max_length=255, null=True)
     filterable = fields.BooleanField(default=False)
 
-    forumPosts: fields.ReverseRelation["ForumPost"]
+    topics: fields.ReverseRelation["Topic"]
 
     class Meta:
-        table = "ForumPostCategory"
+        table = "TopicCategory"
 
 
-class RawForumPost(Model):
+class RawTopic(Model):
     id = fields.IntField(pk=True)
     externalId = fields.CharField(max_length=255, unique=True)
     url = fields.CharField(max_length=255, unique=True)
     type = fields.CharField(max_length=255)
     rawData = fields.JSONField()
     lastUpdatedAt = NaiveDatetimeField()
+    lastSummarizedAt = NaiveDatetimeField()
 
-    forumPosts: fields.ReverseRelation["ForumPost"]
+    topics: fields.ReverseRelation["Topic"]
 
     class Meta:
-        table = "RawForumPost"
+        table = "RawTopic"
 
 
-class ForumPost(Model):
+class Topic(Model):
     id = fields.IntField(pk=True)
     externalId = fields.CharField(max_length=255, unique=True)
     url = fields.CharField(max_length=255, unique=True)
@@ -75,17 +76,17 @@ class ForumPost(Model):
     username = fields.CharField(max_length=255)
     displayUsername = fields.CharField(max_length=255)
     category = OneToOneFieldInstance(
-        "models.ForumPostCategory",
-        related_name="forumPosts",
+        "models.TopicCategory",
+        related_name="topics",
         null=True,
         source_field="categoryId",
         to_field="id",
     )
-    rawForumPost = OneToOneFieldInstance(
-        "models.RawForumPost",
-        related_name="forumPosts",
+    rawTopic = OneToOneFieldInstance(
+        "models.RawTopic",
+        related_name="topics",
         null=True,
-        source_field="rawForumPostId",
+        source_field="rawTopicId",
         to_field="id",
     )
     about = fields.TextField(null=True)
@@ -100,14 +101,14 @@ class ForumPost(Model):
     updatedAt = NaiveDatetimeField(auto_now=True)
     snapshotProposal = fields.OneToOneField(
         "models.SnapshotProposal",
-        related_name="forumPost",
+        related_name="topic",
         null=True,
         source_field="snapshotProposalId",
         to_field="id",
     )
 
     class Meta:
-        table = "ForumPost"
+        table = "Topic"
 
 
 class SnapshotProposal(Model):
@@ -132,7 +133,7 @@ class SnapshotProposal(Model):
     winningOption = fields.CharField(max_length=255, null=True)
     createdAt = NaiveDatetimeField(auto_now_add=True)
     updatedAt = NaiveDatetimeField(auto_now=True)
-    forumPost: fields.ReverseRelation["ForumPost"]
+    topic: fields.ReverseRelation["Topic"]
 
     class Meta:
         table = "SnapshotProposal"
@@ -167,15 +168,13 @@ class AgoraProposal(Model):
         table = "AgoraProposal"
 
 
-class ThreadSummary(Model):
+class RawTopicSummary(Model):
     id = fields.IntField(pk=True)
     url = fields.CharField(max_length=255, unique=True)
-    about = fields.TextField(null=True)
-    first_post = fields.TextField(null=True)
-    reaction = fields.TextField(null=True)
-    overview = fields.TextField(null=True)
-    tldr = fields.TextField(null=True)
-    classification = fields.CharField(max_length=255, null=True)
+    data = fields.JSONField()
+    error = fields.BooleanField(default=False)
+    createdAt = NaiveDatetimeField(auto_now_add=True)
+    updatedAt = NaiveDatetimeField(auto_now=True)
 
     class Meta:
-        table = "ThreadSummary"
+        table = "RawTopicSummary"

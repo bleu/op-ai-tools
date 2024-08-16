@@ -1,5 +1,4 @@
 import re
-import json
 import time
 import pandas as pd
 from typing import Any, Dict, List
@@ -82,10 +81,14 @@ class FragmentsProcessingStrategy(DocumentProcessingStrategy):
 
 class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
     @staticmethod
-    def retrieve():
-        out_db = connect_db.retrieve_data(
-            f'select "rawData", url, type, "externalId" from "{RAW_FORUM_DB}"'
-        )
+    def retrieve(only_not_summarized: bool = False):
+        if only_not_summarized:
+            query = f'SELECT "rawData", url, type, "externalId" FROM "{RAW_FORUM_DB}" WHERE "lastSummarizedAt" < "lastUpdatedAt" OR "lastSummarizedAt" IS NULL;'
+        else:
+            query = f'select "rawData", url, type, "externalId" from "{RAW_FORUM_DB}"'
+
+        out_db = connect_db.retrieve_data(query)
+
         posts, threads = {}, {}
         for line in out_db:
             id = int(line[3])
@@ -221,12 +224,18 @@ trust_level (0-4): {TRUST_LEVEL}
     """
 
     @staticmethod
-    def return_threads() -> List:
-        posts, threads_info = ForumPostsProcessingStrategy.retrieve()
+    def return_threads(only_not_summarized: bool = False) -> List:
+        posts, threads_info = ForumPostsProcessingStrategy.retrieve(
+            only_not_summarized=only_not_summarized
+        )
+
+        if not threads_info:
+            return []
+
         df_posts = pd.DataFrame(posts).T
         threads = []
         category_names = connect_db.retrieve_data(
-            'select "externalId", "name" from "ForumPostCategory"'
+            'select "externalId", "name" from "TopicCategory"'
         )
         category_names = {int(c[0]): c[1] for c in category_names}
         for t in df_posts["thread_id"].unique():
@@ -295,6 +304,16 @@ trust_level (0-4): {TRUST_LEVEL}
         threads_forum = [Document(page_content=t[0], metadata=t[1]) for t in threads]
 
         return threads_forum
+
+    @staticmethod
+    def get_threads_documents_not_summarized() -> List[Document]:
+        threads = ForumPostsProcessingStrategy.return_threads(only_not_summarized=True)
+        threads_forum = [Document(page_content=t[0], metadata=t[1]) for t in threads]
+
+        return threads_forum
+
+    def get_db_name(self) -> str:
+        return "posts_forum_db"
 
 
 class SummaryProcessingStrategy(DocumentProcessingStrategy):

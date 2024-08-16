@@ -6,6 +6,7 @@ from langchain_core.documents.base import Document
 from op_brains.documents.optimism import ForumPostsProcessingStrategy
 from op_brains.exceptions import OpChatBrainsException
 from op_brains.summarizer.utils import Prompt, SummaryStructured
+from op_brains.summarizer.sample import get_sample_summary
 
 threads = ForumPostsProcessingStrategy.get_threads_documents()
 
@@ -21,7 +22,10 @@ def load_snapshot_proposals() -> Dict[str, Any]:
     return ForumPostsProcessingStrategy.return_snapshot_proposals()
 
 
-def summarize_thread(url: str, model_name: str) -> str:
+def summarize_thread(url: str, model_name: str, use_mock_data: bool = False) -> str:
+    if use_mock_data:
+        return get_sample_summary()
+
     thread = get_thread_from_url(url)
     snapshot_proposals = load_snapshot_proposals()
 

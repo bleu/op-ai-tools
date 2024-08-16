@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "RawTopicSummary" ALTER COLUMN "lastGeneratedAt" SET DEFAULT CURRENT_TIMESTAMP;

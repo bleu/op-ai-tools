@@ -1,9 +1,10 @@
 import re
 from typing import List, Dict
 import asyncio
-from op_data.db.models import ForumPost, ForumPostCategory, RawForumPost
+from op_data.db.models import Topic, TopicCategory, RawTopic, RawTopicSummary
 import op_artifacts
 import importlib.resources
+from tortoise.functions import Max
 
 
 def estimate_reading_time(text: str, WPM: int = 200) -> str:
@@ -19,40 +20,49 @@ def estimate_reading_time(text: str, WPM: int = 200) -> str:
 class TopicsService:
     @staticmethod
     async def fetch_summaries() -> List[str]:
-        with importlib.resources.open_text(
-            op_artifacts, "all_thread_summaries.txt"
-        ) as file:
-            data = file.read()
+        latest_summaries = (
+            await RawTopicSummary.annotate(latest_created=Max("createdAt"))
+            .group_by("url")
+            .order_by("-latest_created")
+        )
 
-        return [
-            post.strip()
-            for post in data.split(
-                "--------------------------------------------------------------------------------"
-            )
-            if post.strip()
-        ]
+        return await RawTopicSummary.filter(
+            id__in=[s.id for s in latest_summaries]
+        ).order_by("-createdAt")
 
     @staticmethod
-    async def parse_summary(summary: str) -> Dict:
-        url_match = re.search(r"URL:\s*(.*)", summary)
-        about_match = re.search(r"<about>\s*([\s\S]*?)<\/about>", summary)
+    def parse_summary(summary: RawTopicSummary) -> Dict:
+        if summary.error:
+            return {
+                "url": summary.url,
+                "about": "",
+                "first_post": "",
+                "reaction": "",
+                "overview": "",
+                "tldr": "",
+                "classification": "",
+            }
+
+        summary_data = summary.data.get("summary", {})
+
+        about_match = re.search(r"<about>\s*([\s\S]*?)<\/about>", summary_data)
         first_post_match = re.search(
-            r"<first_post>\s*([\s\S]*?)<\/first_post>", summary
+            r"<first_post>\s*([\s\S]*?)<\/first_post>", summary_data
         )
-        reaction_match = re.search(r"<reaction>\s*([\s\S]*?)<\/reaction>", summary)
-        overview_match = re.search(r"<overview>\s*([\s\S]*?)<\/overview>", summary)
+        reaction_match = re.search(r"<reaction>\s*([\s\S]*?)<\/reaction>", summary_data)
+        overview_match = re.search(r"<overview>\s*([\s\S]*?)<\/overview>", summary_data)
         classification_match = re.search(
-            r"<classification>\s*([\s\S]*?)<\/classification>", summary
+            r"<classification>\s*([\s\S]*?)<\/classification>", summary_data
         )
 
-        tldr_match = re.search(r"<tldr>\s*([\s\S]*?)<\/tldr>", summary)
+        tldr_match = re.search(r"<tldr>\s*([\s\S]*?)<\/tldr>", summary_data)
         tldr = tldr_match.group(1).strip() if tldr_match else ""
         if not tldr:
-            start_index = summary.find("<tldr>\n") + len("<tldr>\n")
-            tldr = summary[start_index:].strip() or ""
+            start_index = summary_data.find("<tldr>\n") + len("<tldr>\n")
+            tldr = summary_data[start_index:].strip() or ""
 
         return {
-            "url": url_match.group(1).strip() if url_match else "",
+            "url": summary.url,
             "about": about_match.group(1).strip() if about_match else "",
             "first_post": first_post_match.group(1).strip() if first_post_match else "",
             "reaction": reaction_match.group(1).strip() if reaction_match else "",
@@ -68,13 +78,13 @@ class TopicsService:
         # Fetch all data in parallel
         summaries, raw_topics, categories = await asyncio.gather(
             TopicsService.fetch_summaries(),
-            RawForumPost.all(),
-            ForumPostCategory.all(),
+            RawTopic.all(),
+            TopicCategory.all(),
         )
 
         # Parse summaries
         parsed_summaries = [
-            await TopicsService.parse_summary(summary) for summary in summaries
+            TopicsService.parse_summary(summary) for summary in summaries
         ]
 
         # Create a lookup for raw posts and categories
@@ -108,7 +118,7 @@ class TopicsService:
             created_by = raw_topic.rawData.get("details", {}).get("created_by", {})
 
             forum_topics.append(
-                ForumPost(
+                Topic(
                     externalId=raw_topic.externalId,
                     url=raw_topic.url,
                     title=raw_topic.rawData.get("title"),
@@ -116,7 +126,7 @@ class TopicsService:
                     displayUsername=created_by.get("name", "")
                     or created_by.get("username", ""),
                     category=category,
-                    rawForumPost=raw_topic,
+                    rawTopic=raw_topic,
                     firstPost=summary.get("first_post", ""),
                     about=summary.get("about", ""),
                     reaction=summary.get("reaction", ""),
@@ -129,8 +139,8 @@ class TopicsService:
                 )
             )
 
-        # Bulk create or update forum posts
-        await ForumPost.bulk_create(
+        # Bulk create or update topics
+        await Topic.bulk_create(
             forum_topics,
             update_fields=[
                 "url",
