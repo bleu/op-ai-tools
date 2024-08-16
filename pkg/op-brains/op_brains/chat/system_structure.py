@@ -74,13 +74,15 @@ class RAGSystem:
                 SUMMARY_OF_EXPLORED_CONTEXTS=summary_of_explored_contexts
             )
 
-            print(output_LLM)
+            if output_LLM is None:
+                return ("", [], ""), False
 
+            knowledge_summary = output_LLM["knowledge_summary"]
             if not output_LLM["answer"] is None:
+                output_LLM["answer"]["url_supporting"].extend([k["url_supporting"].strip() for k in knowledge_summary])
+                output_LLM["answer"]["url_supporting"] = list(set(output_LLM["answer"]["url_supporting"]))
                 return output_LLM["answer"], True
             else:
-                knowledge_summary = output_LLM["search"]["knowledge_summary"]
-                
                 new_questions = output_LLM["search"]["questions"]
                 new_questions = [{"question": q} for q in new_questions]
 
@@ -155,6 +157,6 @@ class RAGSystem:
                 }
             answer = result
         else:
-            answer = preprocess_reasoning
+            answer = {"answer": preprocess_reasoning, "url_supporting": []}
         history_reasoning["answer"] = answer
         return history_reasoning

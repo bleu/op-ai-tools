@@ -55,7 +55,7 @@ When adding keywords, adhere to these guidelines:
         
     class JustifiedClaim(BaseModel):
         claim: str = Field("The information you have.")
-        url_supporting: str = Field("The URL source of the information you have. Never cite URLS that were not exactly provided.")
+        url_supporting: str = Field(description="The URL source of the information you have. Never cite URLS that were not exactly provided.")
 
     class Answer(BaseModel):
         answer: str = Field("""Provide an answer. Some guidelines to follow:
@@ -86,11 +86,11 @@ The user now provided the following query:
 """ 
     
         class Preprocessor(BaseModel):
-            related_to_scope: bool = Field(f"""Determine if this input is within the scope of {SCOPE}.
-                                    
-Most of the time, the user will ask a question related to {SCOPE}. If you are not 100% sure, don't discard the question. Some terms as "Cycle", "Airdrop", "Citizens' House", "Token House", "Grant", "Proposal", "Retro Funding" are related to {SCOPE}. If a person/user is referred to, it is likely to be a member of the Optimism Collective.""")
+            related_to_scope: bool = Field(default=False, description=f"""Return False if you are 100% sure that the user's query is not related to the scope of {SCOPE}. Keep in mind that, most of the time, the user will ask a question related to the scope. 
+                                           
+            Some terms as "Cycle", "Airdrop", "Citizens' House", "Token House", "Grant", "Proposal", "Retro Funding", "OP", "NERD", "Law of Chains"... are related to the scope. If a person/user is referred to, it is likely to be a member of the Optimism Collectiv Community.""")
             
-            needs_info: bool = Field(f"""If related_to_scope is False, needs_info should be False. Else, determine if you need more information to properly answer the user (take a look at the <conversation_history> if you're not sure).""")
+            needs_info: bool = Field(default=False, description=f"""If related_to_scope is False, needs_info should be False. Else, return True if the user is not asking you to provide any information or if all the infor you need is in the <conversation_history>. Never make up information. If you don't have enough information to answer the user's query, needs_info should be True.""")
 
             answer: str = Field(default=None, description=f"""Only if needs_info is False, that is, if you have enough information to answer the user's query, provide an answer to the user's query. Don't make up information. If related_to_scope is False, answer should be 'I'm sorry, but I can only answer questions about {SCOPE}. Is there anything specific about {SCOPE} you'd like to know?'""")
 
@@ -139,7 +139,12 @@ Today's date is {TODAY}. Be aware of information that might be outdated.
                 search: Prompt.NewSearch = Field(default=None, description="""If you didn't write an answer, provide a new search that encompasses the information that is missing. The system will perform a search. This is going to be used by the system to retrieve a context that can provide this information. The user won't see this.""")
                 
         llm = llm.with_structured_output(Responder)
-        return llm.invoke(responder_header.format(**kwargs)).dict()
+        try:
+            out = llm.invoke(responder_header.format(**kwargs))
+        except:
+            return None
+        print(out)
+        return out.dict()
 
 class ContextHandling:
     summary_template = """
