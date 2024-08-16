@@ -87,7 +87,7 @@ def single_test(query, desired_word):
     
 
 if __name__ == "__main__":
-    #batch_test()
-    single_test("who is the grants council lead?", "Gonna")
+    batch_test()
+    #single_test("who is the grants council lead?", "Gonna")
     
 

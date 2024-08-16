@@ -1,4 +1,4 @@
-from typing import List, Callable, Tuple
+from typing import List, Callable, Tuple, Dict, Any, Union, Optional
 import time
 import json
 import faiss
@@ -7,6 +7,7 @@ import numpy as np
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
+from langchain_core.pydantic_v1 import BaseModel, Field
 
 from op_brains.retriever import connect_faiss
 from op_brains.config import (
@@ -24,7 +25,84 @@ all_contexts_df = DataExporter.get_dataframe()
 
 
 class Prompt:
-    responder_start = f"""
+    class NewSearch(BaseModel):
+        user_knowledge: str = Field(f"""Analyze the conversation history to determine what the user seems to know well about {SCOPE}. If you can't assume any knowledge, return just an empty string.""")
+
+        questions: List[str] = Field(f"""Formulate questions about that encompasses the information that is missing. These questions are going to be used by the system to retrieve a context that can provide this information. The user won't see these questions.
+                                     
+When formulating questions, adhere to these guidelines:
+    - Try to divide the lack of information into the smallest possible parts
+    - Make questions concise and not redundant
+    - Focus on gathering information directly related to answering the user's query
+    - Avoid unnecessary questions
+    - Do not ask questions that you already know the answer to.
+    - Search for the definition of terms linked to the user's input in the context of {SCOPE}.
+    """)
+        
+        keywords: List[str] = Field(f"""List some keywords that are relevant to the user's query. These keywords are going to be used by the system to retrieve a context that can provide this information. The user won't see these keywords. 
+                                    
+When adding keywords, adhere to these guidelines:
+    - Add the name of the main concepts or topics that the questions are about. Every question is about {SCOPE}, so don't need to add the words from {SCOPE} as a keyword. The keywords should be just specific terms.
+    - If the text mentions an occurrence or instance of something (very commonly adding a number at the end), sinalize it by using "#" followed by the number of the occurrence. For example, if the question mentions "Airdrop 3", use "Airdrop #3" as a keyword.
+    - If the text mentions an occurrence or instance of something, use only the specific term. For example, if the question mentions "Season 6", don't use "Season" as a keyword, use only "Season #3".
+    - If the question is about the general term, and doesn't mention any specific instance, use only the general term. For example, if the question is about "Cycle", use only "Voting Cycle" as a keyword.""")
+        
+        type_search: str = Field(f"""Classify the search as one of the following types:
+                                 
+- "factual": the default case, will search the definition of terms and concepts.
+- "ocurrence": in the case of question about a specific event or ocurrence that happened.
+- "recent": in the case of questions about recent events, the current state of something or the most recent information available.""")
+        
+    class JustifiedClaim(BaseModel):
+        claim: str = Field("The information you have.")
+        url_supporting: str = Field("The URL source of the information you have. Never cite URLS that were not exactly provided.")
+
+    class Answer(BaseModel):
+        answer: str = Field("""Provide an answer. Some guidelines to follow:
+- Directly address the user's question. Never write "according to the context", "based on the provided context" or similar phrases.
+- Be polite, informative, assertive, objective, and brief.
+- Avoid jargon and explain any technical terms.
+- Never refer to past events as if they were happening now or in the future.
+- Keep in mind the <query>. Don't answer an user question if you don't know the answer to this question. What you know is listed in the knowledge_summary.
+- Never make up information.""")
+        url_supporting: List[str] = Field(default=[], description="""The URL sources of the information you have. Never cite URLS that were not exactly provided.""")
+
+    @staticmethod
+    def preprocessor(llm: ChatOpenAI | ChatAnthropic, **kwargs):
+        preprocessor_header = f"""
+You are a part of a helpful chatbot assistant system that provides information about {SCOPE}.
+
+The context of the conversation is as follows: 
+
+<conversation_history>
+{{CONVERSATION_HISTORY}}
+</conversation_history>
+
+The user now provided the following query:
+
+<user_input>
+{{QUERY}}
+</user_input>
+""" 
+    
+        class Preprocessor(BaseModel):
+            related_to_scope: bool = Field(f"""Determine if this input is within the scope of {SCOPE}.
+                                    
+Most of the time, the user will ask a question related to {SCOPE}. If you are not 100% sure, don't discard the question. Some terms as "Cycle", "Airdrop", "Citizens' House", "Token House", "Grant", "Proposal", "Retro Funding" are related to {SCOPE}. If a person/user is referred to, it is likely to be a member of the Optimism Collective.""")
+            
+            needs_info: bool = Field(f"""If related_to_scope is False, needs_info should be False. Else, determine if you need more information to properly answer the user (take a look at the <conversation_history> if you're not sure).""")
+
+            answer: str = Field(default=None, description=f"""Only if needs_info is False, that is, if you have enough information to answer the user's query, provide an answer to the user's query. Don't make up information. If related_to_scope is False, answer should be 'I'm sorry, but I can only answer questions about {SCOPE}. Is there anything specific about {SCOPE} you'd like to know?'""")
+
+            expansion: Prompt.NewSearch = Field(default=None, description=f"""Only if needs_info is True, that is, if you don't have enough information to answer the user's query, provide a new search that encompasses the information that is missing. The system will perform a search. This is going to be used by the system to retrieve a context that can provide this information. The user won't see this.""")
+            
+        llm = llm.with_structured_output(Preprocessor)
+        return llm.invoke(preprocessor_header.format(**kwargs)).dict()
+
+
+    @staticmethod
+    def responder(llm: ChatOpenAI | ChatAnthropic, final: bool = False, **kwargs):
+        responder_header = f"""
 You are a helpful assistant that provides information about {SCOPE}. Your goal is to give polite, informative, assertive, objective, and brief answers. Avoid jargon and explain any technical terms, as the user may not be a specialist.
 
 An user inserted the following query:
@@ -48,151 +126,20 @@ From past interactions, you have the following knowledge:
 </your_previous_knowledge>
 
 Today's date is {TODAY}. Be aware of information that might be outdated.
-
-Follow these steps:
-
-1. Analyze the user's question, the provided context and your previous knowledge. Keep in mind the user's knowledge.
-
-2. Summarize the information you have that is relevant to the user's query. Do not mention what's lacking and you don't know. Take it from the context and from your previous knowledge. Include this summary inside <knowledge_summary></knowledge_summary> tags. Cite the source URL using the format [1] within the text and list the url references at the end. Every phrase should be supported by a reference. References must come from the provided context or your previous knowledge. Never cite urls that were not provided. 
-
-3. Check if you have enough information to answer the user's query. 
-
-4. Only if you have enough information to answer the query properly, provide an answer inside <answer></answer> tags. Your answer should:
-   - Directly address the user's question. Never write "according to the context", "based on the provided context" or similar phrases.
-   - Cite the source URL using the format [1] within the text.
-   - List the url references at the end of the answer.
-   - Write the complete URL of the source, not just the domain.
-   - Be polite, informative, assertive, objective, and brief.
-   - Avoid jargon and explain any technical terms.
-   - Never refer to past events as if they were happening now or in the future.
-   - Keep in mind the <query>. Don't answer an user question if you don't know the answer to this question.
 """
 
-    responder = (
-        responder_start
-        + """
-5. If you don't have enough information to answer the query in the provided context, formulate questions about that encompasses the information that is missing. These questions are going to be used by the system to retrieve a context that can provide this information. The user won't see these questions. Include these questions within <new_questions> tags, following this format:
-    <new_questions>
-        <question>[Your question here]</question>
-        <question>[Your question here]</question>
-        ...
-        <type_search>[type_search]</type_search>
-    </new_questions>
-When formulating questions, adhere to these guidelines:
-    - Try to divide the lack of information into the smallest possible parts
-    - Make questions concise and not redundant
-    - Focus on gathering information directly related to answering the user's query
-    - Avoid unnecessary questions
-    - Do not ask questions that you already know the answer to (considering the context and your previous knowledge)
-    - Classify the search as one of the following types:
-        - "factual": the default case, will search the definition of terms and concepts
-        - "ocurrence": in the case of question about a specific event or ocurrence that happened
-        - "recent": in the case of questions about recent events, the current state of something or the most recent information available
+        class Responder(BaseModel):
+            knowledge_summary: List[Prompt.JustifiedClaim] = Field(f"""Summarize the information you have that is relevant to the user's query. Do not mention what's lacking and you don't know. Take it from the context and from your previous knowledge. Every claim should be supported by a reference. References must come from the provided context or your previous knowledge. Never cite URLS that were not provided.""") 
+            
+            if final:
+                answer: Prompt.Answer = Field("""If you don't have enough information to answer the query properly, start with "I couldn't find all the information I wanted to provide a complete answer." And provide some context about the information you have, how it relates to the query and what you think is missing to properly answer the user's query.""")
+            else:
+                answer: Prompt.Answer = Field(default=None, description="""Only if you have enough information to answer the query properly, provide an answer.""")
 
-6. Format your entire response as follows:
-   <knowledge_summary>
-   [Your summary here, with in-text citations]
-
-   References:
-   [1] url
-   [2] url
-   ...
-   </knowledge_summary>
-   [Either the <new_questions> section if there's insufficient information, or:]
-
-   <answer>
-   [Your answer here, with in-text citations]
-
-   References:
-   [1] url
-   [2] url
-   ...
-   </answer>
-
-Remember to be helpful, polite, and informative while maintaining assertiveness, objectivity, and brevity in your response.
-"""
-    )
-
-    final_responder = (
-        responder_start
-        + """
-5. If you don't have enough information, start the <answer> tag with "I couldn't find all the information I wanted to provide a complete answer." And provide some context about the information you have, how it relates to the query and what you think is missing to properly answer the user's query.
-
-6. Format your entire response as follows:
-   <knowledge_summary>
-   [Your summary here, with in-text citations]
-
-   References:
-   [1] url
-   [2] url
-   ...
-   </knowledge_summary>
-
-   <answer>
-   [Your answer here, with in-text citations]
-
-   References:
-   [1] url
-   [2] url
-   ...
-   </answer>
-
-Remember to be helpful, polite, and informative while maintaining assertiveness, objectivity, and brevity in your response.
-"""
-    )
-
-    preprocessor = f"""
-You are a part of a helpful chatbot assistant system that provides information about {SCOPE}. Your task is to help responding to user input appropriately based on the following information and guidelines:
-
-<user_input>
-{{QUERY}}
-</user_input>
-
-<conversation_history>
-{{conversation_history}}
-</conversation_history>
-
-First, determine if this input is within the scope of {SCOPE} and if you have enough information to answer it based on the conversation history.
-
-If you are absolutely sure that the input has no relation with {SCOPE}, its forum or its documentation, respond with the following message within <answer> tags: "I'm sorry, but I can only answer questions about {SCOPE}. Is there anything specific about {SCOPE} you'd like to know?".
-
-Most of the time, the user will ask a question related to {SCOPE}. If you are not 100% sure, don't discard the question. Some terms as "Cycle", "Airdrop", "Citizens' House", "Token House", "Grant", "Proposal", "Retro Funding" are related to {SCOPE}. If a person is referred to, it is likely to be a member of the Optimism Collective.
-
-If the input is a simple interaction or you have all the necessary information in the conversation history to answer it, provide your response within <answer> tags. Don't make up information.
-
-If you need additional information to answer the input accurately, do not use <answer> tags. Instead, follow these steps:
-
-1. Analyze the conversation history to determine what the user seems to know well about {SCOPE}. Include this information within <user_knowledge> tags. If you can't assume any knowledge, return just <user_knowledge></user_knowledge>.
-
-2. Formulate queries to allow gathering the necessary information to answer the user's input. These are going to be used by the system to retrieve the information. The user won't see them. The queries have two distinct parts: questions and keywords. You will also specify the type of search to be performed. Use the following format:
-
-<queries>
-    <question>[Your question here]</question>
-    <question>[Your question here]</question>
-    ...
-    <keywords>[keyword 1], [keyword 2], ...</keywords>
-    <type_search>[type_search]</type_search>
-</queries>
-
-When formulating questions, adhere to these guidelines:
-- Try to divide the user's input into the smallest possible parts
-- Search for the definition of terms linked to the user's input 
-- If you are not sure, ask if the user's input is related to {SCOPE}
-- Make questions concise and not redundant
-- Focus on gathering information directly related to answering the user's input
-- Avoid unnecessary questions
-After formulating the questions, generate keywords that represent the points you have identified. 
-- Add the name of the main concepts or topics that the questions are about. Every question is about {SCOPE}, so don't need to add it as a keyword. The keywords should be just specific terms.
-- If the text mentions an occurrence or instance of something (very commonly adding a number at the end), sinalize it by using "#" followed by the number of the occurrence. For example, if the question mentions "Airdrop 3", use "Airdrop #3" as a keyword.
-- If the text mentions an occurrence or instance of something, use only the specific term. For example, if the question mentions "Season 6", don't use "Season" as a keyword, use only "Season #3".
-- If the question is about the general term, and doesn't mention any specific instance, use only the general term. For example, if the question is about "Cycle", use only " Voting Cycle" as a keyword.
-
-The type of search can be one of the following:
-- "factual": the default case, will search the definition of terms and concepts
-- "ocurrence": in the case of question about a specific event or ocurrence that happened
-- "recent": in the case of questions about recent events, the current state of something or the most recent information available
-"""
-
+                search: Prompt.NewSearch = Field(default=None, description="""If you didn't write an answer, provide a new search that encompasses the information that is missing. The system will perform a search. This is going to be used by the system to retrieve a context that can provide this information. The user won't see this.""")
+                
+        llm = llm.with_structured_output(Responder)
+        return llm.invoke(responder_header.format(**kwargs)).dict()
 
 class ContextHandling:
     summary_template = """
@@ -279,7 +226,6 @@ class ContextHandling:
             contexts = all_contexts_df[all_contexts_df["url"].isin(urls)].iloc[:k]
             return contexts.content.tolist()
 
-
 class RetrieverBuilder:
     @staticmethod
     def build_faiss_retriever(
@@ -324,7 +270,6 @@ class RetrieverBuilder:
 
             similar = criteria(similar)
 
-            print(similar)
             urls = [u for s in similar for u in index[s]]
 
             contexts = all_contexts_df
