@@ -6,7 +6,7 @@ import { FILTER_OPTIONS, type Topic } from "./post-options";
 
 export function getColor(categoryValue: string) {
   const categoryLabel = FILTER_OPTIONS.options.find(
-    (option) => option.value === categoryValue
+    (option) => option.value === categoryValue,
   )?.label;
 
   if (!categoryLabel) {

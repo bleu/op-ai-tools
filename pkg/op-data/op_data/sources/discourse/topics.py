@@ -6,6 +6,7 @@ import op_artifacts
 import importlib.resources
 from tortoise.functions import Max
 
+
 def estimate_reading_time(text: str, WPM: int = 200) -> str:
     total_words = len(re.findall(r"\w+", text))
     time_minutes = total_words // WPM + 1
@@ -19,13 +20,15 @@ def estimate_reading_time(text: str, WPM: int = 200) -> str:
 class TopicsService:
     @staticmethod
     async def fetch_summaries() -> List[str]:
-        latest_summaries = await RawTopicSummary.annotate(
-            latest_created=Max('createdAt')
-        ).group_by('url').order_by('-latest_created')
-        
+        latest_summaries = (
+            await RawTopicSummary.annotate(latest_created=Max("createdAt"))
+            .group_by("url")
+            .order_by("-latest_created")
+        )
+
         return await RawTopicSummary.filter(
             id__in=[s.id for s in latest_summaries]
-        ).order_by('-createdAt')
+        ).order_by("-createdAt")
 
     @staticmethod
     def parse_summary(summary: RawTopicSummary) -> Dict:
@@ -48,7 +51,8 @@ class TopicsService:
         )
         reaction_match = re.search(r"<reaction>\s*([\s\S]*?)<\/reaction>", summary_data)
         overview_match = re.search(r"<overview>\s*([\s\S]*?)<\/overview>", summary_data)
-        classification_match = re.search(            r"<classification>\s*([\s\S]*?)<\/classification>", summary_data
+        classification_match = re.search(
+            r"<classification>\s*([\s\S]*?)<\/classification>", summary_data
         )
 
         tldr_match = re.search(r"<tldr>\s*([\s\S]*?)<\/tldr>", summary_data)

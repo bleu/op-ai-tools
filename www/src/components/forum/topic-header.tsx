@@ -30,7 +30,7 @@ export function TopicHeader({
                 label={category.name}
                 className={cn(
                   { [getColor(category.externalId || "")]: true },
-                  "size-4 fill-current"
+                  "size-4 fill-current",
                 )}
               />
               <span className="text-muted-foreground w-auto whitespace-nowrap">
