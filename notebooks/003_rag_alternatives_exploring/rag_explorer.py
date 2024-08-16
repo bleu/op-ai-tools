@@ -15,28 +15,18 @@ import model_builder
 
 # general
 import pandas as pd
-import numpy as np
-import os, asyncio, time, re
-from getpass import getpass
-from datetime import datetime
-import tiktoken  # metrics
+import os
+import time
 import nest_asyncio
 
 nest_asyncio.apply()
-from typing import Callable
 
 # embedding and chat
-from langchain_openai import OpenAIEmbeddings
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_community.vectorstores import FAISS
-from langchain_anthropic import ChatAnthropic
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
 anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
 
 # for tracking
-import weave
 
 st.sidebar.write("# General Configs")
 
@@ -119,7 +109,7 @@ for i, tab in enumerate(tabs):
                 key=f"{arch}_chat_model",
             )
 
-            prompt_template = f"Answer politely the question at the end, using only the following context. The user is not necessarily a specialist, so please avoid jargon and explain any technical terms. \n\n<context> \n{{context}} \n</context> \n\nQuestion: {{question}}"
+            prompt_template = "Answer politely the question at the end, using only the following context. The user is not necessarily a specialist, so please avoid jargon and explain any technical terms. \n\n<context> \n{context} \n</context> \n\nQuestion: {question}"
             prompt_template = st.text_area(
                 "Prompt Template",
                 prompt_template,
@@ -149,7 +139,7 @@ for i, tab in enumerate(tabs):
                     return [
                         (
                             "system",
-                            f"You are a machine that helps people to find information about the Optimism Governance. Your task is not to provide an answer. Expand the user prompt in order to clarify what the human wants to know. The output will be used to search algorithmically for relevant information.",
+                            "You are a machine that helps people to find information about the Optimism Governance. Your task is not to provide an answer. Expand the user prompt in order to clarify what the human wants to know. The output will be used to search algorithmically for relevant information.",
                         ),
                         ("human", question),
                     ]

@@ -1,11 +1,10 @@
-from typing import Iterator, List, Dict, Any, Callable, Tuple
-import os, re
+from typing import List, Dict, Any, Callable
+import re
 from datetime import date
 
 TODAY = date.today()
 
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.vectorstores import FAISS
 from langchain_anthropic import ChatAnthropic
 from langchain.retrievers import ContextualCompressionRetriever

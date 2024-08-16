@@ -2,10 +2,8 @@ import pandas as pd
 
 TODAY = pd.to_datetime("today").strftime("%Y-%m-%d")
 
-from langchain_openai import ChatOpenAI
-from langchain_anthropic import ChatAnthropic
 
-from typing import Dict, Any, Union, Optional
+from typing import Dict, Any
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.documents.base import Document
 
@@ -35,11 +33,11 @@ class Prompt:
 
     proposal_summarizer = (
         default_summarizer
-        + f"""
+        + """
     This thread is a proposal discussion. Details about the proposal are provided below:
 
     <proposal_snapshot>
-    {{PROPOSAL}}
+    {PROPOSAL}
     </proposal_snapshot>
 
     Highlight the results and if it is already closed. If it is still open, mention the deadline.

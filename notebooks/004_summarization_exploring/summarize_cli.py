@@ -1,9 +1,7 @@
 import click
-import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
 
-import load_optimism, util
+import load_optimism
+import util
 
 DEFAULT_LLM = "gpt-4o"
 

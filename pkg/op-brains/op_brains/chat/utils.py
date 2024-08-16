@@ -96,7 +96,7 @@ def process_question(
                     if len(context) > 0:
                         return context
                 return default_retriever(query["question"])
-            
+
             if "query" in query:
                 if reasoning_level > 1:
                     return default_retriever(query["query"])

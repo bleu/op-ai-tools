@@ -119,7 +119,9 @@ class RAGSystem:
                     if len(questions) > 0:
                         questions = [{"question": q} for q in questions]
 
-                    type_search = [q[2] for q in queries_tags if q[0] == "type_search"][0]
+                    type_search = [q[2] for q in queries_tags if q[0] == "type_search"][
+                        0
+                    ]
                     new_questions = questions
 
                 return [knowledge_summary, new_questions, type_search], False

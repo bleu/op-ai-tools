@@ -1,12 +1,12 @@
 import streamlit as st
-import model_builder, time
+import model_builder
+import time
 
 from datetime import date
 
 TODAY = date.today()
 
 with st.echo():
-    from langchain_openai import OpenAIEmbeddings
 
     embedding_model = "text-embedding-ada-002"
     chat_pars = {
@@ -16,7 +16,6 @@ with st.echo():
         "timeout": 60,
     }
     dbs = ["summaries"]
-    from langchain_community.vectorstores import FAISS
 
     vectorstore = "faiss"
     reasoning_limit = 3

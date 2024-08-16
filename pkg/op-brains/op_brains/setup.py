@@ -8,7 +8,8 @@ from op_brains.documents import optimism
 all_contexts_df = optimism.DataExporter.get_dataframe()
 
 from typing import Any, Iterable
-import json, re
+import json
+import re
 import numpy as np
 
 import op_artifacts

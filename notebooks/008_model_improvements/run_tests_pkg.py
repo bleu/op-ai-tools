@@ -1,7 +1,8 @@
 from op_brains.chat.utils import process_question
 from op_brains.config import CHAT_MODEL
 
-import os, json, time
+import json
+import time
 import pandas as pd
 
 time_related_dataset = pd.read_csv("datasets/time_related.csv")
@@ -22,9 +23,7 @@ expected = {
     "from_fragments": from_fragments_expected,
 }
 
-models2test = [
-    CHAT_MODEL
-]
+models2test = [CHAT_MODEL]
 
 
 def batch_test():
@@ -71,10 +70,11 @@ def json2csv(answers):
                     {
                         f"answer_{m}": answer["answer"],
                         f"time_taken_{m}": answer["time_taken"],
-                        #f"reasoning_level_{m}": len(answer["reasoning"]),
+                        # f"reasoning_level_{m}": len(answer["reasoning"]),
                     }
                 )
         pd.DataFrame(out_answers).to_csv(f"test_results/{test_type}.csv", index=False)
+
 
 def single_test(query, desired_word):
     ok = 0
@@ -84,10 +84,8 @@ def single_test(query, desired_word):
             ok += 1
 
     print(ok)
-    
+
 
 if __name__ == "__main__":
-    #batch_test()
+    # batch_test()
     single_test("who is the grants council lead?", "Gonna")
-    
-

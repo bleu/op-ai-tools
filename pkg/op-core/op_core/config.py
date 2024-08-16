@@ -11,9 +11,6 @@ class Config:
     # Paths
     BASE_PATH = os.getenv("OP_CHAT_BASE_PATH", os.path.expanduser("../../data"))
 
-    # Model configurations
-    EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "text-embedding-ada-002")
-
     @classmethod
     def get_tortoise_config(cls):
         return {

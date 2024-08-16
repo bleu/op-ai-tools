@@ -1,4 +1,4 @@
-from typing import Iterator, List, Dict, Any, Callable, Tuple
+from typing import List, Dict, Any, Callable
 import os
 
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI

@@ -13,7 +13,7 @@ from op_brains.config import RAW_FORUM_DB, FORUM_SUMMARY_DB, DOCS_PATH, SNAPSHOT
 NOW = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
 
 
-class FragmentsProcessingStrategy():
+class FragmentsProcessingStrategy:
     name_source = "documentation"
 
     @staticmethod
@@ -80,7 +80,7 @@ class FragmentsProcessingStrategy():
         )
 
 
-class ForumPostsProcessingStrategy():
+class ForumPostsProcessingStrategy:
     @staticmethod
     def retrieve(only_not_summarized: bool = False):
         if only_not_summarized:
@@ -316,7 +316,8 @@ trust_level (0-4): {TRUST_LEVEL}
     def get_db_name(self) -> str:
         return "posts_forum_db"
 
-class SummaryProcessingStrategy():
+
+class SummaryProcessingStrategy:
     name_source = "summary"
 
     template_summary = """
@@ -358,7 +359,9 @@ class SummaryProcessingStrategy():
         return ret
 
     @staticmethod
-    def langchain_process(divide: str | None = "category_name") -> Dict[str, List[Document]]:
+    def langchain_process(
+        divide: str | None = "category_name",
+    ) -> Dict[str, List[Document]]:
         data = SummaryProcessingStrategy.retrieve()
 
         if isinstance(divide, str):

@@ -218,7 +218,7 @@ class ContextHandling:
         contexts_to_be_explored = {}
         for question, contexts in question_context.items():
             new_contexts = contexts
-            #new_contexts = [c for c in contexts if c.metadata.get("url") not in explored_contexts]
+            # new_contexts = [c for c in contexts if c.metadata.get("url") not in explored_contexts]
 
             if query is not None:
                 k_i = min(k, len(new_contexts))
@@ -226,7 +226,7 @@ class ContextHandling:
                     new_contexts = ContextHandling.reordering(
                         new_contexts, query, k=k_i, type_search=type_search
                     )
-                    
+
             contexts_to_be_explored[question] = new_contexts
 
         c = list(contexts_to_be_explored.values())[:k]
