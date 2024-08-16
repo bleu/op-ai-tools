@@ -3,7 +3,7 @@ from op_brains.chat import model_utils
 from op_brains.chat.system_structure import RAGSystem
 from typing import Dict, Any, List, Tuple
 
-from op_brains.config import DB_STORAGE_PATH
+from op_brains.config import DB_STORAGE_PATH, CHAT_MODEL
 
 
 def transform_memory_entries(entries: List[Dict[str, str]]) -> List[Tuple[str, str]]:
@@ -25,6 +25,7 @@ def process_question(
     memory: List[Dict[str, str]],
     # logger: StructuredLogger,
     # config: Dict[str, Any],
+    verbose: bool = False,
 ) -> Dict[str, Any]:
     """
     Processes a given question using a RAG model,
@@ -48,7 +49,7 @@ def process_question(
     """
 
     chat_model = (
-        "gpt-4o-mini",
+        CHAT_MODEL,
         {
             "temperature": 0.0,
             "max_retries": 5,
@@ -64,11 +65,11 @@ def process_question(
         dbs = [db for db in list_dbs if db not in filter_out_dbs]
 
         questions_index_retriever = model_utils.RetrieverBuilder.build_questions_index(
-            k_max=2, treshold=0.9
+            k_max=5, treshold=0.93
         )
 
         keywords_index_retriever = model_utils.RetrieverBuilder.build_keywords_index(
-            k_max=3, treshold=0.95
+            k_max=5, treshold=0.95
         )
 
         def contains(must_contain):
@@ -80,7 +81,7 @@ def process_question(
         )
 
         def retriever(query: dict, reasoning_level: int) -> list:
-            if reasoning_level < 2 and "keyword" in query:
+            if reasoning_level < 1 and "keyword" in query:
                 if "instance" in query:
                     context = keywords_index_retriever(
                         query["keyword"], criteria=contains(query["instance"])
@@ -90,15 +91,19 @@ def process_question(
                 return context
 
             if "question" in query:
-                if reasoning_level < 2:
+                if reasoning_level < 1:
                     context = questions_index_retriever(query["question"])
                     if len(context) > 0:
                         return context
                 return default_retriever(query["question"])
+            
+            if "query" in query:
+                if reasoning_level > 1:
+                    return default_retriever(query["query"])
             return []
 
         rag_model = RAGSystem(
-            REASONING_LIMIT=3,
+            REASONING_LIMIT=1,
             models_to_use=[chat_model, chat_model],
             retriever=retriever,
             context_filter=model_utils.ContextHandling.filter,
@@ -108,7 +113,7 @@ def process_question(
         )
 
         formatted_memory = transform_memory_entries(memory)
-        result = rag_model.predict(question, memory=formatted_memory, verbose=False)
+        result = rag_model.predict(question, memory=formatted_memory, verbose=verbose)
 
         # logger.log_query(question, result)
         return {"answer": result["answer"], "error": None}

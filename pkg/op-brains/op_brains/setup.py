@@ -11,7 +11,6 @@ from typing import Any, Iterable
 import json, re
 import numpy as np
 
-from op_brains.documents import optimism
 import op_artifacts
 from op_brains.chat import model_utils
 from op_brains.config import SCOPE, EMBEDDING_MODEL
@@ -171,7 +170,7 @@ def reorder_file(path):
 
 
 def main(model: str):
-    data = optimism.DataExporter.get_langchain_documents()
+    data = DataExporter.get_langchain_documents()
 
     llm = model_utils.access_APIs.get_llm(model)
     embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)

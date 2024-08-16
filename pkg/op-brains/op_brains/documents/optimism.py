@@ -6,7 +6,6 @@ from typing import Any, Dict, List
 from langchain_core.documents.base import Document
 from langchain_text_splitters import MarkdownHeaderTextSplitter
 
-from op_brains.documents import DocumentProcessingStrategy
 from op_brains.retriever import connect_db
 
 from op_brains.config import RAW_FORUM_DB, FORUM_SUMMARY_DB, DOCS_PATH, SNAPSHOT_DB
@@ -14,10 +13,12 @@ from op_brains.config import RAW_FORUM_DB, FORUM_SUMMARY_DB, DOCS_PATH, SNAPSHOT
 NOW = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
 
 
-class FragmentsProcessingStrategy(DocumentProcessingStrategy):
+class FragmentsProcessingStrategy():
+    name_source = "documentation"
+
     @staticmethod
     def langchain_process(
-        file_path: str, headers_to_split_on: List | None = None
+        file_path: str = DOCS_PATH, headers_to_split_on: List | None = []
     ) -> List[Document]:
         with open(file_path, "r") as f:
             docs_read = f.read()
@@ -79,7 +80,7 @@ class FragmentsProcessingStrategy(DocumentProcessingStrategy):
         )
 
 
-class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
+class ForumPostsProcessingStrategy():
     @staticmethod
     def retrieve(only_not_summarized: bool = False):
         if only_not_summarized:
@@ -315,8 +316,9 @@ trust_level (0-4): {TRUST_LEVEL}
     def get_db_name(self) -> str:
         return "posts_forum_db"
 
+class SummaryProcessingStrategy():
+    name_source = "summary"
 
-class SummaryProcessingStrategy(DocumentProcessingStrategy):
     template_summary = """
     <tldr>{TLDR}</tldr>
     <about>{ABOUT}</about>
@@ -356,7 +358,7 @@ class SummaryProcessingStrategy(DocumentProcessingStrategy):
         return ret
 
     @staticmethod
-    def langchain_process(divide: str | None = None) -> Dict[str, List[Document]]:
+    def langchain_process(divide: str | None = "category_name") -> Dict[str, List[Document]]:
         data = SummaryProcessingStrategy.retrieve()
 
         if isinstance(divide, str):

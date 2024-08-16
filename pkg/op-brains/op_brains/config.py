@@ -11,13 +11,15 @@ BASE_PATH = os.getenv("OP_CHAT_BASE_PATH", os.path.expanduser("../../data"))
 DOCS_PATH = importlib.resources.files(op_artifacts) / "governance_docs.txt"
 VECTORSTORE = os.getenv("VECTORSTORE", "faiss")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "text-embedding-ada-002")
-CHAT_MODEL_OPENAI = os.getenv("CHAT_MODEL_OPENAI", "gpt-4o")
-CHAT_MODEL_CLAUDE = os.getenv("CHAT_MODEL_CLAUDE", "claude-3-sonnet-20240229")
+
 CHAT_TEMPERATURE = float(os.getenv("CHAT_TEMPERATURE", "0"))
 MAX_RETRIES = int(os.getenv("MAX_RETRIES", "2"))
 K_RETRIEVER = int(os.getenv("K_RETRIEVER", "8"))
 LOG_FILE = os.path.join(BASE_PATH, "logs.csv")
 
+CHAT_MODEL_OPENAI = os.getenv("CHAT_MODEL_OPENAI", "gpt-4o")
+CHAT_MODEL_CLAUDE = os.getenv("CHAT_MODEL_CLAUDE", "claude-3-sonnet-20240229")
+CHAT_MODEL = os.getenv("CHAT_MODEL", "gpt-4o-mini")
 SUMMARIZER_MODEL = os.getenv("SUMMARIZER_MODEL", CHAT_MODEL_OPENAI)
 
 DB_STORAGE_PATH = importlib.resources.files(op_artifacts.dbs)

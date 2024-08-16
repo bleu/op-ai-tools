@@ -1,48 +1,45 @@
 query,expected,answer_gpt-4o-mini,time_taken_gpt-4o-mini
 What's the current state of Season 6 of Optimism's grants?,Season 6 of Optimism's grants is in the proposal preliminar review phase (July 25th to July 31st),"
-Season 6 of Optimism's grants is currently open for applications, running from July 31, 2024, to August 31, 2024. A total of $1 million is available to fund projects that enhance the Optimism ecosystem. This initiative aims to support innovative projects that contribute to the growth of the Optimism network and its community [1].
+Season 6 of the Optimism grants program is currently active and will run until December 11, 2024. Grant applications opened on July 18 and will continue every three weeks until December. The current Voting Cycle 25 is taking place from July 19 to August 7, 2024, and includes various phases such as engagement, nomination, approval, voting, and veto. The Citizens' House will have a veto period from August 8 to August 14, 2024, after the Token House voting. A unified rubric for evaluating Mission applications has also been implemented to ensure a fair review process [1][2].
 
 References:
-[1] https://optimism.io/grants
-",26.317710876464844
+[1] https://gov.optimism.io/t/season-6-banner/7332
+[2] https://gov.optimism.io/t/season-6-rubric-feedback-thread/8599
+",17.651108980178833
 What happens if i submit a proposal after the cycle deadline?,Any Application submitted after a Cycle deadline will be considered for the next Cycle.,"
-If you submit a proposal after the cycle deadline, it typically will not be considered for that specific cycle. However, there may be exceptions or alternative processes for late submissions. For instance, timely communication through channels like Discord could potentially help in some cases, as indicated by past experiences in the community [1].
+If you submit a proposal after the cycle deadline, it will generally not be considered for that specific cycle. Proposals must be submitted on time to be reviewed by the Council [1]. Late submissions are typically not accepted, as indicated in discussions about past proposal deadlines [2].
 
 References:
 [1] https://gov.optimism.io/t/please-allow-me-to-submit-grant-proposal-i-saw-it-is-sept-14th-at-the-latest/6798
-",13.606291770935059
+[2] https://gov.optimism.io/t/optimism-retro-pgf-ranking-voting-system-implementation/7617
+",15.153546571731567
 What's the deadline for submiting a proposal in S5?,"We're currently at season 6, submissions are now continuously open (until November 6th)  and the next cycle is at August 8th. Season 5 happened between 04/01 and 08/05. The deadline for submiting a proposal at the last cycle (#22) was 29/03.","
-The deadline for submitting a proposal in Season 5 of the Optimism governance process was May 22, 2024, at 19:00 GMT. This deadline concluded the period for voters to review proposals and retrospectives from the previous season before voting commenced [1].
+The deadline for submitting a proposal in Season 6 is May 22nd, 2024, at 19:00 GMT. This period is part of the reflection and reading phase for voters to review important documents and retrospectives from Season 5 before the voting cycles begin [1].
 
 References:
 [1] https://gov.optimism.io/t/season-6-reflection-period-guide/8130
-",9.846224784851074
+",6.990932941436768
 In what voting cycle we are in?,"We're currently at voting cycle #25, season 6, at the revier period. ","
-You are currently in Voting Cycle #21 for Optimism governance, which runs from March 28 to April 17, 2024. Voting started on April 11, 2024, and will conclude on April 17, 2024. After this, there will be a veto period for the Citizens’ House from April 18 to April 24, 2024. Notable proposals in this cycle include improvements to delegation voting and a budget proposal for Season 5 [1].
+You are currently in the 17th voting cycle for Optimism governance, which runs from January 4th to January 24th, 2024. Voting will start on January 18th, 2024, at 19:00 GMT [1].
 
 References:
-[1] https://gov.optimism.io/t/voting-cycle-roundup-21/7967
-",9.607900142669678
+[1] https://gov.optimism.io/t/voting-cycle-roundup-17/7474
+",7.813202857971191
 When the next CoCC town Hall will happen? ,"The Code of Conduct Council Town Hall will be hosted on Tuesday, July 30th from 1pm - 2pm ET / 5pm - 6pm GMT.","
-The next town hall for the Grants Council will take place on June 11, 2024. This event will allow self-nominees to present themselves before the elections, which are scheduled for June 13 to June 20, 2024. Additionally, there will be a Developer Advisory Board town hall on the same date, providing further opportunities for candidate engagement [1][2][3].
+The next CoCC (Citizens' House Community Call) is scheduled for February 13th, 2024, at 10:00 PT / 13:00 ET / 18:00 GMT / 19:00 CET. This call will focus on governance discussions and community participation is encouraged [1].
 
 References:
-[1] https://gov.optimism.io/t/grants-council-s6-election-town-hall/8268
-[2] https://gov.optimism.io/t/developer-advisory-board-s6-election-town-hall/8269
-[3] https://gov.optimism.io/t/season-6-elections-grants-council/8115
-",8.097674131393433
+[1] https://gov.optimism.io/t/token-house-community-call-will-be-tuesday-february-13th-10-00-pt-13-00-et-18-00-gmt-19-00-cet/7645
+",7.3865272998809814
 How does the CoCc town hall works?,"the structure of the Town Hall will be each nominee will have 60 seconds to answer one question from the Foundation. 
 
 What unique skills or habits will you bring to the Code of Conduct Council to ensure it delivers measurable impact towards the approved KPIs?","
-The Code of Conduct Council (CoCC) operates by managing reports of violations related to community conduct within the Optimism governance framework. It follows a structured process that includes notification, investigation, and decision-making, ensuring transparency and accountability among its members [1]. The council holds town hall meetings to discuss governance issues, where community members can engage with self-nominees and provide feedback on past cases and council operations [4][5]. The council's budget is also a key aspect, with recent proposals indicating a revised budget of 26,000 OP for Season 6, reflecting community input and adjustments [2][3].
+The Code of Conduct Council (CoCC) town hall serves as a platform for discussing the election of council members and addressing community concerns regarding conduct violations. During the town hall, self-nominated candidates present their qualifications and respond to questions from the community. The event is structured to facilitate discussions about past conduct cases and the council's key performance indicators (KPIs) [1][4]. This approach aims to enhance transparency and community engagement in the governance process.
 
 References:
 [1] https://gov.optimism.io/t/code-of-conduct-council-internal-procedures/7341
-[2] https://gov.optimism.io/t/final-v2-code-of-conduct-council-operating-budget-re-scope-for-season-6-cycle-23b/8271
-[3] https://gov.optimism.io/t/final-code-of-conduct-council-cocc-operating-budget-for-season-6/8167
 [4] https://gov.optimism.io/t/code-of-conduct-council-s6-election-town-hall/8627
-[5] https://gov.optimism.io/t/season-6-code-of-conduct-council-renewal/8100
-",14.427330017089844
+",13.135101795196533
 What are the last Conduct Council nominees?,"@Bubli.eth (link to self-nomination)
 
 @CryptoReuMD (link to self-nomination)
@@ -66,42 +63,43 @@ What are the last Conduct Council nominees?,"@Bubli.eth (link to self-nomination
 @alexsotodigital (link to self-nomination)
 
 @eve633 (link to self-nomination)","
-The specific names of the last nominees for the Code of Conduct Council are not detailed in the available information. However, you can find the latest updates and a list of self-nominees in the announcement for the Season 6 Code of Conduct Council Election Town Hall [1].
+I couldn't find all the information I wanted to provide a complete answer. The latest nominations for the Code of Conduct Council were announced on May 10, 2024, with a self-nomination deadline of July 24, 2024. However, the specific names of the nominees have not been disclosed in the available context. For more details on the nomination process, you can refer to the nomination post [here](https://gov.optimism.io/t/season-6-nominations-code-of-conduct-council/8118) and the election details [here](https://gov.optimism.io/t/season-6-elections-code-of-conduct-council/8120) [1].
 
 References:
-[1] https://gov.optimism.io/t/code-of-conduct-council-s6-election-town-hall/8627
-",9.953143119812012
+[1] https://gov.optimism.io/t/season-6-nominations-code-of-conduct-council/8118
+[2] https://gov.optimism.io/t/season-6-elections-code-of-conduct-council/8120
+",29.490375757217407
 Who is the security council lead?,The Foundation has appointed Alisha.eth 30 as the first Security Council Lead.,"
-The current lead of the Security Council for Optimism is Alisha.eth. She was appointed as the first Security Council Lead during the initial member ratification process [1][2].
+The Security Council lead is Alisha.eth, who was appointed during the initial member ratification process for the Security Council in the Optimism governance framework [1].
 
 References:
 [1] https://gov.optimism.io/t/security-council-vote-2-initial-member-ratification/7118
-[2] https://gov.optimism.io/t/security-council-elections-cohort-a/8587
-",10.12828278541565
+",17.427428245544434
 When token house call will happen? ,"Tuesday, August 6th @ 11:00PT / 14:00 ET / 18:00 GMT / 19:00 CET","
-The Token House call will take place on Tuesday, August 6th, 2024, at 11:00 PT / 14:00 ET / 18:00 GMT / 19:00 CET. This special edition call will include an overview and an AMA on Blockspace Charters, hosted by @ben-chain. You can join the meeting via Google Meet [1].
+The next Token House Call will take place on Tuesday, August 6th, 2024, at 11:00 PT / 14:00 ET / 18:00 GMT / 19:00 CET. This session will include an overview and an AMA on Blockspace Charters, hosted by @ben-chain. You can join the call via Google Meet using this link: [Google Meet](https://meet.google.com/vme-ovto-jcn) [1].
 
 References:
 [1] https://gov.optimism.io/t/date-change-token-house-call-will-be-tuesday-august-6th-11-00pt-14-00-et-18-00-gmt-19-00-cet/8617
-",11.697788000106812
+",9.056629180908203
 What's the link to attend Token House Call?,"Google meet link:
 https://meet.google.com/vme-ovto-jcn","
-To attend the Token House Call on August 6th, 2024, you can join via Google Meet using the following link: [Google Meet](https://meet.google.com/vme-ovto-jcn). The call will start at 11:00 PT / 14:00 ET / 18:00 GMT / 19:00 CET and will include an overview and an AMA on Blockspace Charters [1].
+To attend the upcoming Token House Call on August 6th, 2024, you can join via Google Meet using this link: [https://meet.google.com/vme-ovto-jcn](https://meet.google.com/vme-ovto-jcn). The call will feature an overview and an AMA on Blockspace Charters, hosted by @ben-chain [1].
 
 References:
 [1] https://gov.optimism.io/t/date-change-token-house-call-will-be-tuesday-august-6th-11-00pt-14-00-et-18-00-gmt-19-00-cet/8617
-",9.392311096191406
+",7.739985942840576
 Was the budget for Conduct Council approved?,"The budget to renew the Code of Conduct Council during Season 6 was approved during Special Voting Cycle 23b.
 ","
-The budget for the Conduct Council has not been definitively approved yet. There are ongoing discussions and mixed opinions within the community regarding its appropriateness, with some members concerned that it may be too high. If the current budget proposal does not succeed, there is a consensus on the need for alternative proposals [1][2].
+Yes, the budget for the Code of Conduct Council (CoCC) was approved. After discussions addressing community feedback, a revised budget of 26,000 OP was agreed upon for Season 6. This decision followed a proposal that initially suggested a significant increase to 55,000 OP, which raised concerns among delegates [1][2].
 
 References:
-[1] https://gov.optimism.io/t/season-6-code-of-conduct-rescoping-2/8101
-[2] https://gov.optimism.io/t/grants-council-charter-season-6/8170
-",7.0597357749938965
+[1] https://gov.optimism.io/t/final-v2-code-of-conduct-council-operating-budget-re-scope-for-season-6-cycle-23b/8271
+[2] https://gov.optimism.io/t/final-code-of-conduct-council-cocc-operating-budget-for-season-6/8167
+",9.229743242263794
 Ws the proposal for ratify security council members approved?,"Yes, the proposal succeeded at december 6, 2023. ","
-Yes, the proposal to ratify Security Council members was approved during Special Voting Cycle #16c in the Optimism Collective. This approval is part of efforts to enhance network security and implement important technical upgrades [1].
+Yes, the proposal for ratifying Security Council members was approved during Special Voting Cycle #16c, which took place from November 23 to December 16, 2023. This cycle included the ratification of Security Council members as one of its key proposals [1][2].
 
 References:
 [1] https://gov.optimism.io/t/governance-report-special-voting-cycle-16c/7246
-",13.5659019947052
+[2] https://gov.optimism.io/t/special-voting-cycle-16c-roundup/7131
+",9.832027196884155
