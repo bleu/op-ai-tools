@@ -5,7 +5,7 @@ import re
 
 
 class RAGSystem:
-    REASONING_LIMIT: int
+    reasoning_limit: int
     models_to_use: list
     retriever: Callable
     context_filter: Callable
@@ -17,7 +17,7 @@ class RAGSystem:
     number_of_models: int = 2
 
     def __init__(self, **kwargs):
-        self.REASONING_LIMIT = kwargs.get("REASONING_LIMIT", 3)
+        self.reasoning_limit = kwargs.get("reasoning_limit", 3)
         self.models_to_use = kwargs.get("models_to_use")
         self.retriever = kwargs.get("retriever")
         self.context_filter = kwargs.get("context_filter")
@@ -119,7 +119,9 @@ class RAGSystem:
                     if len(questions) > 0:
                         questions = [{"question": q} for q in questions]
 
-                    type_search = [q[2] for q in queries_tags if q[0] == "type_search"][0]
+                    type_search = [q[2] for q in queries_tags if q[0] == "type_search"][
+                        0
+                    ]
                     new_questions = questions
 
                 return [knowledge_summary, new_questions, type_search], False
@@ -139,7 +141,7 @@ class RAGSystem:
 
             try:
                 return tags["answer"], True
-            except:
+            except Exception:
                 return "", True
 
     def predict(self, query: str, memory: list = [], verbose: bool = False) -> str:
@@ -166,7 +168,7 @@ class RAGSystem:
                 summary_of_explored_contexts, questions, type_search = result
                 try:
                     questions = [{"query": query}] + questions
-                except:
+                except Exception:
                     pass
 
                 context_dict = {
@@ -192,7 +194,7 @@ class RAGSystem:
                     context,
                     user_knowledge,
                     summary_of_explored_contexts,
-                    final=reasoning_level > self.REASONING_LIMIT,
+                    final=reasoning_level > self.reasoning_limit,
                 )
 
                 if verbose:

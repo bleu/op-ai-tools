@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from op_brains.exceptions import UnsupportedVectorstoreError
-from op_brains.structured_logger import StructuredLogger
 from op_brains.config import (
     POSTHOG_API_KEY,
 )
@@ -30,8 +29,6 @@ limiter = Limiter(
     default_limits=["100 per minute"],
     storage_uri="memory://",
 )
-
-logger = StructuredLogger()
 
 
 def handle_question(func):

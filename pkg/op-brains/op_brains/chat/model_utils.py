@@ -218,7 +218,8 @@ class ContextHandling:
         contexts_to_be_explored = {}
         for question, contexts in question_context.items():
             new_contexts = contexts
-            #new_contexts = [c for c in contexts if c.metadata.get("url") not in explored_contexts]
+            # TODO: is this used anywhere?
+            # new_contexts = [c for c in contexts if c.metadata.get("url") not in explored_contexts]
 
             if query is not None:
                 k_i = min(k, len(new_contexts))
@@ -226,14 +227,14 @@ class ContextHandling:
                     new_contexts = ContextHandling.reordering(
                         new_contexts, query, k=k_i, type_search=type_search
                     )
-                    
+
             contexts_to_be_explored[question] = new_contexts
 
         c = list(contexts_to_be_explored.values())[:k]
         if len(c) > 0:
             try:
                 max_c = max([len(cc) for cc in c])
-            except:
+            except Exception:
                 max_c = 0
             contexts_to_be_explored = []
             for i in range(max_c):
@@ -310,10 +311,10 @@ class RetrieverBuilder:
             if treshold < 1:
                 if treshold > 0:
                     query_embed = np.array(embeddings.embed_documents([query]))
-                    D, I = index_faiss.search(query_embed, k_max)
+                    distances, indices = index_faiss.search(query_embed, k_max)
 
-                    similar = [index_keys[i] for i in I[0]]
-                    dists = D[0]
+                    similar = [index_keys[i] for i in indices[0]]
+                    dists = distances[0]
 
                     dists = [d for d in dists if d >= treshold]
                     similar = [s for s, d in zip(similar, dists) if d >= treshold]

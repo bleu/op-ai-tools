@@ -2,9 +2,10 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 import atexit
 from op_data.cli import SYNC_COMMANDS, run_sync
-import logging
 
-logger = logging.getLogger(__name__)
+from op_core.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def configure_scheduler():

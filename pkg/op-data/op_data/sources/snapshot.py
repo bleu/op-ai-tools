@@ -1,11 +1,12 @@
 import asyncio
 import json
-import logging
 from typing import List, Dict
 from op_data.db.models import SnapshotProposal, Topic
 from op_data.utils.base_scraper import BaseScraper
 
-logger = logging.getLogger(__name__)
+from op_core.logger import get_logger
+
+logger = get_logger(__name__)
 
 SNAPSHOT_HUB_URL = "https://hub.snapshot.org/graphql"
 SPACE_IDS = ["citizenshouse.eth", "opcollective.eth"]

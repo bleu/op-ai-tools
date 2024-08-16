@@ -4,9 +4,9 @@ import asyncio
 import time
 
 
-import logging
+from op_core.logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class AsyncRateLimiter:

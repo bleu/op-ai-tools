@@ -9,11 +9,13 @@ from op_brains.config import SUMMARIZER_MODEL
 from op_brains.documents.optimism import ForumPostsProcessingStrategy
 from op_brains.summarizer.summarizer import summarize_thread
 from op_brains.exceptions import OpChatBrainsException
-from op_brains.structured_logger import StructuredLogger
+from op_core.logger import get_logger
+
 import op_artifacts
 
-logger = StructuredLogger()
 threads = ForumPostsProcessingStrategy.get_threads_documents()
+
+logger = get_logger(__name__)
 
 
 def get_some_thread_urls(proportion: float) -> List[str]:
@@ -28,10 +30,10 @@ def get_some_thread_urls(proportion: float) -> List[str]:
 def summarize_single_thread(url: str, model_name: str) -> Dict[str, str]:
     try:
         summary = summarize_thread(url, model_name)
-        logger.log_summary(url, summary)
+        logger.info(url, summary)
         return {url: summary}
     except OpChatBrainsException as e:
-        logger.logger.error(f"Error summarizing thread {url}: {str(e)}")
+        logger.error(f"Error summarizing thread {url}: {str(e)}")
         return {url: f"Error: {str(e)}"}
 
 
@@ -62,7 +64,7 @@ def summarize_some_threads(
                 result = future.result()
                 summaries.update(result)
             except Exception as exc:
-                logger.logger.error(f"Thread {url} generated an exception: {exc}")
+                logger.error(f"Thread {url} generated an exception: {exc}")
                 summaries[url] = f"Error: {str(exc)}"
 
     return summaries

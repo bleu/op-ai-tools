@@ -1,4 +1,3 @@
-import logging
 import datetime as dt
 from typing import Any, Dict, List, Tuple
 
@@ -14,7 +13,9 @@ import aiofiles
 from op_data.utils.base_scraper import BaseScraper
 
 
-logger = logging.getLogger(__name__)
+from op_core.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class TopicRepository:

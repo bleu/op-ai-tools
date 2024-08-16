@@ -1,5 +1,5 @@
 import asyncio
-import logging
+from op_core.logger import get_logger
 from typing import Callable, Dict
 from tortoise import Tortoise
 from op_data.sources.agora import AgoraProposalService
@@ -12,8 +12,7 @@ from op_core.config import Config
 
 from dotenv import load_dotenv
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 load_dotenv()
 

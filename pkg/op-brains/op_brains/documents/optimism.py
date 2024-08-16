@@ -98,6 +98,7 @@ class ForumPostsProcessingStrategy:
         posts, threads = {}, {}
         for line in out_db:
             id = int(line[3])
+            # TODO: is this used for anything?
             type_line = line[2]
             url_line = line[1]
             data_line = line[0]
@@ -109,6 +110,7 @@ class ForumPostsProcessingStrategy:
             threads[id] = data_line
             threads[id]["url"] = url_line
 
+        # TODO: is this used for anything?
         #     if type_line == "post":
         #         posts[id] = data_line
         #         posts[id]["url"] = url_line

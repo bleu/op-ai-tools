@@ -24,6 +24,7 @@ posthog = "^3.5.0"
 python-dotenv = "^1.0.1"
 psycopg = "^3.2.1"
 op-artifacts = { path = "../op-artifacts", develop = true }
+op-core = { path = "../op-core", develop = true }
 tqdm = "^4.66.5"
 langchain-voyageai = "^0.1.1"
 
