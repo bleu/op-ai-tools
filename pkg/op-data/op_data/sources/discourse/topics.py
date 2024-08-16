@@ -2,8 +2,6 @@ import re
 from typing import List, Dict
 import asyncio
 from op_data.db.models import Topic, TopicCategory, RawTopic, RawTopicSummary
-import op_artifacts
-import importlib.resources
 from tortoise.functions import Max
 
 

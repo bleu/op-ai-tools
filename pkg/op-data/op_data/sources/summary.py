@@ -1,4 +1,3 @@
-import os
 from typing import List, Dict
 import datetime as dt
 import asyncio
