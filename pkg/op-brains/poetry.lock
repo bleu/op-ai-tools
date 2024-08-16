@@ -119,6 +119,17 @@ yarl = ">=1.0,<2.0"
 speedups = ["Brotli", "aiodns (>=3.2.0)", "brotlicffi"]
 
 [[package]]
+name = "aiolimiter"
+version = "1.1.0"
+description = "asyncio rate limiter, a leaky bucket implementation"
+optional = false
+python-versions = ">=3.7,<4.0"
+files = [
+    {file = "aiolimiter-1.1.0-py3-none-any.whl", hash = "sha256:0b4997961fc58b8df40279e739f9cf0d3e255e63e9a44f64df567a8c17241e24"},
+    {file = "aiolimiter-1.1.0.tar.gz", hash = "sha256:461cf02f82a29347340d031626c92853645c099cb5ff85577b831a7bd21132b5"},
+]
+
+[[package]]
 name = "aioprocessing"
 version = "2.0.1"
 description = "A Python 3.5+ library that integrates the multiprocessing module with asyncio."
@@ -1261,6 +1272,21 @@ files = [
 
 [package.dependencies]
 langchain-core = ">=0.2.10,<0.3.0"
+
+[[package]]
+name = "langchain-voyageai"
+version = "0.1.1"
+description = "An integration package connecting VoyageAI and LangChain"
+optional = false
+python-versions = "<4.0,>=3.8.1"
+files = [
+    {file = "langchain_voyageai-0.1.1-py3-none-any.whl", hash = "sha256:a6e96ab9e18537616f7f13cfc022040b97bb27b1dc890096f5cc74ae4390831e"},
+    {file = "langchain_voyageai-0.1.1.tar.gz", hash = "sha256:5a0d9b4b2c53fe9e0a45ee9d0ef37f7baddf6f98cc1b0c72aceb0b692a663298"},
+]
+
+[package.dependencies]
+langchain-core = ">=0.1.52,<0.3"
+voyageai = ">=0.2.1,<1"
 
 [[package]]
 name = "langsmith"
@@ -2998,6 +3024,24 @@ socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
 zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
+name = "voyageai"
+version = "0.2.3"
+description = ""
+optional = false
+python-versions = "<4.0.0,>=3.7.1"
+files = [
+    {file = "voyageai-0.2.3-py3-none-any.whl", hash = "sha256:59c4958bd991e83cedb5a82d5e14ac698ce67e42713ea10467631a48ee272b15"},
+    {file = "voyageai-0.2.3.tar.gz", hash = "sha256:28322aa7a64cdaa774be6fcf3e4fd6a08694ea25acd5fadd1eff1b8ef8dab68a"},
+]
+
+[package.dependencies]
+aiohttp = ">=3.5,<4.0"
+aiolimiter = ">=1.1.0,<2.0.0"
+numpy = ">=1.11"
+requests = ">=2.20,<3.0"
+tenacity = ">=8.0.1"
+
+[[package]]
 name = "wandb"
 version = "0.17.6"
 description = "A CLI and library for interacting with the Weights & Biases API."
@@ -3282,4 +3326,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "6c068c5c60f02f41bf6c5669975b51bd403954637677601d824fe66982fc98e5"
+content-hash = "3542cbbb5318aa51a9f84ae653c5cf670bac21cbcf53455f648e0d8b11e0681a"

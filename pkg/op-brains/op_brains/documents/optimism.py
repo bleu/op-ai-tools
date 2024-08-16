@@ -18,7 +18,7 @@ from op_brains.config import (
 NOW = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
 
 
-class FragmentsProcessingStrategy():
+class FragmentsProcessingStrategy:
     name_source = "documentation"
 
     @staticmethod
@@ -80,10 +80,12 @@ class FragmentsProcessingStrategy():
         fragments = FragmentsProcessingStrategy.langchain_process(**kwargs)
         data = [(f.metadata["url"], NOW, f, "fragments_docs") for f in fragments]
 
-        return pd.DataFrame(data, columns=["url", "last_date", "content", "type_db_info"])
+        return pd.DataFrame(
+            data, columns=["url", "last_date", "content", "type_db_info"]
+        )
 
 
-class ForumPostsProcessingStrategy():
+class ForumPostsProcessingStrategy:
     @staticmethod
     def retrieve(only_not_summarized: bool = False):
         if only_not_summarized:
@@ -255,7 +257,7 @@ trust_level (0-4): {TRUST_LEVEL}
                     CREATED_AT=post["created_at"],
                     TRUST_LEVEL=post["trust_level"],
                     IS_REPLY=f"(reply to post #{post['reply_to_post_number']})\n"
-                    if post["reply_to_post_number"] != None
+                    if post["reply_to_post_number"] is not None
                     else "",
                     CONTENT=post["cooked"]
                     .replace("<\\content_user_input>", "")
@@ -303,7 +305,8 @@ trust_level (0-4): {TRUST_LEVEL}
     def get_db_name(self) -> str:
         return "posts_forum_db"
 
-class SummaryProcessingStrategy():
+
+class SummaryProcessingStrategy:
     name_source = "summary"
 
     template_summary = """
@@ -345,7 +348,9 @@ class SummaryProcessingStrategy():
         return ret
 
     @staticmethod
-    def langchain_process(divide: str | None = "category_name") -> Dict[str, List[Document]]:
+    def langchain_process(
+        divide: str | None = "category_name",
+    ) -> Dict[str, List[Document]]:
         data = SummaryProcessingStrategy.retrieve()
 
         if isinstance(divide, str):

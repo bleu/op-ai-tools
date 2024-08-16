@@ -9,7 +9,7 @@ readme = "README.md"
 python = "^3.12"
 pandas = "^2.2.2"
 langchain-openai = "^0.1.14"
-langchain-core = "^0.2.11"
+langchain-core = "~0.2"
 langchain-text-splitters = "^0.2.2"
 langchain-community = "^0.2.6"
 weave = "^0.50.9"
@@ -25,6 +25,7 @@ python-dotenv = "^1.0.1"
 psycopg = "^3.2.1"
 op-artifacts = { path = "../op-artifacts", develop = true }
 tqdm = "^4.66.5"
+langchain-voyageai = "^0.1.1"
 
 
 [tool.poetry.group.dev.dependencies]

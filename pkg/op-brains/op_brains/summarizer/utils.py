@@ -1,13 +1,10 @@
 import pandas as pd
 
-TODAY = pd.to_datetime("today").strftime("%Y-%m-%d")
-
 
 from typing import Dict, Any
 from langchain_core.documents.base import Document
 
-forum_path = "../../data/002-governance-forum-202406014/dataset/_out.jsonl"
-snapshot_path = "../../data/003-snapshot-spaces-proposals-20240711/dataset.jsonl"
+TODAY = pd.to_datetime("today").strftime("%Y-%m-%d")
 
 chat_models_openai = ["gpt-3.5-turbo-0125", "gpt-4o"]
 chat_models_anthropic = [
