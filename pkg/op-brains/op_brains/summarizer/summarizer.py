@@ -39,6 +39,7 @@ def summarize_thread(url: str, model_name: str) -> str:
         Prompt.default_summarizer.format(THREAD_CONTENT=thread.page_content)
     ).dict()
 
+
 if __name__ == "__main__":
     urls = [
         "https://gov.optimism.io/t/special-voting-cycle-9a-grants-council/4198",
@@ -48,7 +49,7 @@ if __name__ == "__main__":
         "https://gov.optimism.io/t/optimism-community-call-recaps-recordings-thread/6937",
         "https://gov.optimism.io/t/how-to-start-a-project-at-optimism/7220",
         "https://gov.optimism.io/t/grant-misuse-reporting-process/7346",
-        "https://gov.optimism.io/t/how-to-stay-up-to-date/6124"
+        "https://gov.optimism.io/t/how-to-stay-up-to-date/6124",
     ]
     model_name = "gpt-4o"
     for url in urls:

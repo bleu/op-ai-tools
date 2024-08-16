@@ -7,17 +7,10 @@ from typing import Any, Dict, List
 from langchain_core.documents.base import Document
 from langchain_text_splitters import MarkdownHeaderTextSplitter
 
-from op_brains.documents import (
-    DocumentProcessingStrategy
-)
+from op_brains.documents import DocumentProcessingStrategy
 from op_brains.retriever import connect_db
 
-from op_brains.config import (
-    RAW_FORUM_DB,
-    FORUM_SUMMARY_DB,
-    DOCS_PATH,
-    SNAPSHOT_DB
-)
+from op_brains.config import RAW_FORUM_DB, FORUM_SUMMARY_DB, DOCS_PATH, SNAPSHOT_DB
 
 NOW = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
 
@@ -82,7 +75,9 @@ class FragmentsProcessingStrategy(DocumentProcessingStrategy):
         fragments = FragmentsProcessingStrategy.langchain_process(**kwargs)
         data = [(f.metadata["url"], NOW, f, "fragments_docs") for f in fragments]
 
-        return pd.DataFrame(data, columns=["url", "last_date", "content", "type_db_info"])
+        return pd.DataFrame(
+            data, columns=["url", "last_date", "content", "type_db_info"]
+        )
 
 
 class ForumPostsProcessingStrategy(DocumentProcessingStrategy):
@@ -175,20 +170,22 @@ winning_option: {winning_option}
                 "scores": line[12],
                 "winning_option": line[13],
             }
-            proposals[discussion]["str"] = ForumPostsProcessingStrategy.template_snapshot_proposal.format(
-                title=line[1],
-                space_id=line[2],
-                space_name=line[3],
-                snapshot=line[4],
-                state=line[5],
-                type=line[6],
-                body=line[7],
-                start=line[8],
-                end=line[9],
-                votes=line[10],
-                choices=line[11],
-                scores=line[12],
-                winning_option=line[13],
+            proposals[discussion]["str"] = (
+                ForumPostsProcessingStrategy.template_snapshot_proposal.format(
+                    title=line[1],
+                    space_id=line[2],
+                    space_name=line[3],
+                    snapshot=line[4],
+                    state=line[5],
+                    type=line[6],
+                    body=line[7],
+                    start=line[8],
+                    end=line[9],
+                    votes=line[10],
+                    choices=line[11],
+                    scores=line[12],
+                    winning_option=line[13],
+                )
             )
 
         return proposals
@@ -376,17 +373,21 @@ class SummaryProcessingStrategy(DocumentProcessingStrategy):
 
 
 class DataExporter:
-    sources = [ # this list contains lists that are ordered by priority level. each inner list contains some sources that have the same priority level (entries will be ordered by last_date)
-        [{ 
-            "name": "documentation",
-            "class": FragmentsProcessingStrategy,
-            "pars": {"file_path": DOCS_PATH, "headers_to_split_on": []},
-        }],
-        [{
-            "name": "summary",
-            "class": SummaryProcessingStrategy,
-            "pars": {"divide": "category_name"}
-        }]
+    sources = [  # this list contains lists that are ordered by priority level. each inner list contains some sources that have the same priority level (entries will be ordered by last_date)
+        [
+            {
+                "name": "documentation",
+                "class": FragmentsProcessingStrategy,
+                "pars": {"file_path": DOCS_PATH, "headers_to_split_on": []},
+            }
+        ],
+        [
+            {
+                "name": "summary",
+                "class": SummaryProcessingStrategy,
+                "pars": {"divide": "category_name"},
+            }
+        ],
     ]
 
     @staticmethod
@@ -397,18 +398,24 @@ class DataExporter:
             for source in priority_class:
                 df_source = source["class"].dataframe_process(**source["pars"])
 
-                if not df_source.columns.tolist() == ["url", "last_date", "content", "type_db_info"]:
-                    raise ValueError(f"DataFrame columns are not as expected: {df_source.columns.tolist()}")
-                
+                if not df_source.columns.tolist() == [
+                    "url",
+                    "last_date",
+                    "content",
+                    "type_db_info",
+                ]:
+                    raise ValueError(
+                        f"DataFrame columns are not as expected: {df_source.columns.tolist()}"
+                    )
+
                 dfs_class.append(df_source)
-            
+
             dfs_class = pd.concat(dfs_class)
             dfs_class = dfs_class.sort_values(by="last_date", ascending=False)
             context_df.append(dfs_class)
-        
+
         context_df = pd.concat(context_df)
         return context_df
-
 
     @staticmethod
     def get_langchain_documents():
@@ -416,12 +423,14 @@ class DataExporter:
         for source in [x for xs in DataExporter.sources for x in xs]:
             documents = source["class"].langchain_process(**source["pars"])
             if isinstance(documents, dict):
-                documents = {f"{source['name']}_{key}": value for key, value in documents.items()}
+                documents = {
+                    f"{source['name']}_{key}": value for key, value in documents.items()
+                }
             elif isinstance(documents, list):
                 documents = {source["name"]: documents}
             else:
                 raise ValueError(f"Unexpected type of documents: {type(documents)}")
-            
+
             out.update(documents)
-            
+
         return out

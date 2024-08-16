@@ -1,8 +1,10 @@
 from ragatouille import RAGPretrainedModel
+
 RAG = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
 reranker_ragatouille = RAG.as_langchain_document_compressor()
 
 from op_brains.documents import optimism
+
 all_contexts_df = optimism.DataExporter.get_dataframe()
 
 from typing import Any, Iterable
@@ -17,6 +19,7 @@ import importlib.resources
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
 from langchain_voyageai import VoyageAIRerank
+
 reranker_voyager = VoyageAIRerank(model="rerank-1")
 
 prompt_question_generation = """
@@ -145,9 +148,13 @@ def reorder_index(index_dict):
         k = len(contexts)
         if k > 1:
             try:
-                contexts = reranker_voyager.compress_documents(query=key, documents=contexts)
+                contexts = reranker_voyager.compress_documents(
+                    query=key, documents=contexts
+                )
             except:
-                contexts = reranker_ragatouille.compress_documents(query=key, documents=contexts, k=k)
+                contexts = reranker_ragatouille.compress_documents(
+                    query=key, documents=contexts, k=k
+                )
             urls = [context.metadata["url"] for context in contexts]
             print(urls)
         output_dict[key] = urls
