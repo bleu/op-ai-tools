@@ -2,8 +2,6 @@ import pandas as pd
 
 TODAY = pd.to_datetime("today").strftime("%Y-%m-%d")
 
-from langchain_openai import ChatOpenAI
-from langchain_anthropic import ChatAnthropic
 
 from typing import Dict, Any
 from langchain_core.documents.base import Document

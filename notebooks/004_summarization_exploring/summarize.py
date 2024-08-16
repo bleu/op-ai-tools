@@ -1,11 +1,12 @@
 import streamlit as st
 import pandas as pd
-import random, time
-import matplotlib.pyplot as plt
+import random
+import time
 
 random.seed(42)
 
-import load_optimism, util
+import load_optimism
+import util
 
 """
 # Summarization Script
@@ -39,10 +40,10 @@ with st.expander("Posts Info"):
 """
 threads = load_optimism.ForumPostsProcessingStrategy.return_threads(forum_path)
 with st.expander("Threads Info"):
-    st.write(f"Threads Metadata:")
+    st.write("Threads Metadata:")
     st.write(threads[0].metadata.keys())
 
-    st.write(f"Template that will be used for inserting threads into the LLMs:")
+    st.write("Template that will be used for inserting threads into the LLMs:")
     st.text(load_optimism.ForumPostsProcessingStrategy.template_thread)
     st.text(load_optimism.ForumPostsProcessingStrategy.template_post)
 

@@ -1,5 +1,8 @@
-import system_structure, model_utils
-import os, json, time
+import system_structure
+import model_utils
+import os
+import json
+import time
 import streamlit as st
 
 with st.echo():

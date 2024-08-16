@@ -1,6 +1,9 @@
 # general
 import pandas as pd
-import os, asyncio, time, re, sys, json, nest_asyncio
+import os
+import re
+import sys
+import json
 from datetime import datetime
 # nest_asyncio.apply()
 
@@ -32,13 +35,13 @@ chat_temperature = 0
 max_retries = 2
 k_retriever = 8
 log_file = "logs.csv"
-prompt_template = f"""Answer politely the question at the end, using only the following context (that may contain docuentation parts, more reliable, and forum posts, less reliable). The user is not necessarily a specialist, so please avoid jargon and explain any technical terms. Be assertive. This is not a chatbot, so do not engage in longer conversations.
+prompt_template = """Answer politely the question at the end, using only the following context (that may contain docuentation parts, more reliable, and forum posts, less reliable). The user is not necessarily a specialist, so please avoid jargon and explain any technical terms. Be assertive. This is not a chatbot, so do not engage in longer conversations.
 
 <context>
-{{context}} 
+{context} 
 </context>
 
-Question: {{question}}
+Question: {question}
 """
 
 
@@ -141,7 +144,7 @@ def load_fragments(docs_path):
     docs = []
     path = []
     for d in docs_read:
-        if not "\n" in d:
+        if "\n" not in d:
             # if it's a path
             path = d.split("/")
         else:

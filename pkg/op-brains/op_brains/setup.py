@@ -6,7 +6,8 @@ from op_brains.documents import DataExporter
 all_contexts_df = DataExporter.get_dataframe()
 
 from typing import Any, Iterable
-import json, re
+import json
+import re
 import numpy as np
 
 import op_artifacts

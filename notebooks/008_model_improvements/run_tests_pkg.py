@@ -1,7 +1,8 @@
 from op_brains.chat.utils import process_question
 from op_brains.config import CHAT_MODEL
 
-import os, json, time
+import json
+import time
 import pandas as pd
 
 time_related_dataset = pd.read_csv("datasets/time_related.csv")
