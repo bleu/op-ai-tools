@@ -29,49 +29,6 @@ class TopicsService:
         ).order_by("-createdAt")
 
     @staticmethod
-    def parse_summary(summary: RawTopicSummary) -> Dict:
-        if summary.error:
-            return {
-                "url": summary.url,
-                "about": "",
-                "first_post": "",
-                "reaction": "",
-                "overview": "",
-                "tldr": "",
-                "classification": "",
-            }
-
-        summary_data = summary.data.get("summary", {})
-
-        about_match = re.search(r"<about>\s*([\s\S]*?)<\/about>", summary_data)
-        first_post_match = re.search(
-            r"<first_post>\s*([\s\S]*?)<\/first_post>", summary_data
-        )
-        reaction_match = re.search(r"<reaction>\s*([\s\S]*?)<\/reaction>", summary_data)
-        overview_match = re.search(r"<overview>\s*([\s\S]*?)<\/overview>", summary_data)
-        classification_match = re.search(
-            r"<classification>\s*([\s\S]*?)<\/classification>", summary_data
-        )
-
-        tldr_match = re.search(r"<tldr>\s*([\s\S]*?)<\/tldr>", summary_data)
-        tldr = tldr_match.group(1).strip() if tldr_match else ""
-        if not tldr:
-            start_index = summary_data.find("<tldr>\n") + len("<tldr>\n")
-            tldr = summary_data[start_index:].strip() or ""
-
-        return {
-            "url": summary.url,
-            "about": about_match.group(1).strip() if about_match else "",
-            "first_post": first_post_match.group(1).strip() if first_post_match else "",
-            "reaction": reaction_match.group(1).strip() if reaction_match else "",
-            "overview": overview_match.group(1).strip() if overview_match else "",
-            "tldr": tldr,
-            "classification": classification_match.group(1).strip()
-            if classification_match
-            else "",
-        }
-
-    @staticmethod
     async def acquire_and_save():
         # Fetch all data in parallel
         summaries, raw_topics, categories = await asyncio.gather(
@@ -80,22 +37,14 @@ class TopicsService:
             TopicCategory.all(),
         )
 
-        # Parse summaries
-        parsed_summaries = [
-            TopicsService.parse_summary(summary) for summary in summaries
-        ]
-
         # Create a lookup for raw posts and categories
-        # raw_posts_lookup = {post.url: post for post in raw_posts}
-        summary_lookup = {summary["url"]: summary for summary in parsed_summaries}
+        summary_lookup = {summary.url: summary for summary in summaries}
         categories_lookup = {cat.externalId: cat for cat in categories}
 
         forum_topics = []
         for raw_topic in raw_topics:
             summary = summary_lookup.get(raw_topic.url)
-
-            if not summary:
-                continue
+            summary_data = summary.data if summary else {}
 
             category = categories_lookup.get(
                 str(raw_topic.rawData.get("category_id", ""))
@@ -103,12 +52,12 @@ class TopicsService:
 
             all_text = " ".join(
                 [
-                    summary.get("about", ""),
-                    summary.get("first_post", ""),
-                    summary.get("reaction", ""),
-                    summary.get("overview", ""),
-                    summary.get("tldr", ""),
-                    summary.get("classification", ""),
+                    summary_data.get("about", ""),
+                    summary_data.get("first_post", ""),
+                    summary_data.get("reaction", ""),
+                    summary_data.get("overview", ""),
+                    summary_data.get("tldr", ""),
+                    summary_data.get("classification", ""),
                 ]
             )
 
@@ -125,15 +74,15 @@ class TopicsService:
                     or created_by.get("username", ""),
                     category=category,
                     rawTopic=raw_topic,
-                    firstPost=summary.get("first_post", ""),
-                    about=summary.get("about", ""),
-                    reaction=summary.get("reaction", ""),
-                    overview=summary.get("overview", ""),
-                    tldr=summary.get("tldr", ""),
-                    classification=summary.get("classification", ""),
                     lastActivity=raw_topic.rawData.get("last_posted_at"),
                     readTime=read_time,
                     createdAt=raw_topic.rawData.get("created_at"),
+                    firstPost=summary_data.get("first_post", ""),
+                    about=summary_data.get("about", ""),
+                    reaction=summary_data.get("reaction", ""),
+                    overview=summary_data.get("overview", ""),
+                    tldr=summary_data.get("tldr", ""),
+                    classification=summary_data.get("classification", ""),
                 )
             )
 

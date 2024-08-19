@@ -26,7 +26,7 @@ class RawTopicSummaryService:
             summary = summarize_thread(
                 url, model_name, use_mock_data=USE_SUMMARY_MOCK_DATA
             )
-            return {"url": url, "data": {"summary": summary}, "error": False}
+            return {"url": url, "data": summary, "error": False}
         except OpChatBrainsException as e:
             return {"url": url, "data": {"error": str(e)}, "error": True}
 
@@ -55,7 +55,7 @@ class RawTopicSummaryService:
                 url=summary["url"],
                 data=summary["data"],
                 error=summary["error"],
-                lastGeneratedAt=dt.datetime.now(),
+                lastGeneratedAt=dt.datetime.now(dt.UTC),
             )
             for summary in summaries
         ]
@@ -64,7 +64,7 @@ class RawTopicSummaryService:
 
     @staticmethod
     async def update_raw_topics_as_summarized(urls: List[str]) -> bool:
-        await RawTopic.filter(url__in=urls).update(lastSummarizedAt=dt.datetime.now())
+        await RawTopic.filter(url__in=urls).update(lastSummarizedAt=dt.datetime.now(dt.UTC))
 
     @staticmethod
     def get_summaries_urls(summaries: List[Dict[str, str]]) -> List[str]:
