@@ -108,7 +108,6 @@ def process_question(
             context_filter=model_utils.ContextHandling.filter,
             system_prompt_preprocessor=model_utils.Prompt.preprocessor,
             system_prompt_responder=model_utils.Prompt.responder,
-            system_prompt_final_responder=model_utils.Prompt.final_responder,
         )
 
         formatted_memory = transform_memory_entries(memory)

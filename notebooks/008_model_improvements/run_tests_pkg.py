@@ -88,7 +88,9 @@ def single_test(query, desired_word):
     
 
 if __name__ == "__main__":
-    #batch_test()
-    single_test("who is the grants council lead?", "Gonna")
-    
+    batch_test()
+    #single_test("who is the grants council lead?", "Gonna")
+    #single_test("Who is the security council lead?", "Alisha")
+    #single_test("What are some of the key metrics used to evaluate the performance of growth experiment programs?", "ETH")
+    #single_test("Is the Law of Chains a legally binding contract?", "No")
 
