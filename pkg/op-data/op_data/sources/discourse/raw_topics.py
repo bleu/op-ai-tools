@@ -169,7 +169,10 @@ class DiscourseTopicScraper(BaseScraper):
         ]
 
     async def fetch_topic_and_posts(self, topic_id: int) -> Optional[Dict[str, Any]]:
-        topic_data = await self.fetch_topic_data(topic_id)
+        try:
+            topic_data = await self.fetch_topic_data(topic_id)
+        except Exception as e:
+            topic_data = None
 
         if not topic_data:
             logger.warning(f"No data found for topic ID: {topic_id}")

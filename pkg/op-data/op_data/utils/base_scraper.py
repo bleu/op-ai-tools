@@ -48,7 +48,7 @@ class BaseScraper:
         params: Optional[Dict[str, Any]] = None,
         data: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
-        max_retries: int = 5,
+        max_retries: int = 15,
     ) -> Dict[str, Any]:
         for attempt in range(max_retries):
             try:
