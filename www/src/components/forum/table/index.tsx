@@ -21,8 +21,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { FilterSelect } from "./filter-select";
 import {
   FILTER_OPTIONS,
-  type ForumPost,
-  type ForumPostApiResponse,
+  type Topic,
+  type TopicApiResponse,
 } from "./post-options";
 import { SnapshotProposal } from "./table-row";
 
@@ -93,8 +93,8 @@ function ForumInfiniteScrollTable({
   ]);
 
   const { data, fetchNextPage, isFetching, isLoading } =
-    useInfiniteQuery<ForumPostApiResponse>({
-      queryKey: ["forumPosts", columnFilters, dates], // refetch when filters changes
+    useInfiniteQuery<TopicApiResponse>({
+      queryKey: ["topics", columnFilters, dates], // refetch when filters changes
       queryFn: getPosts as any,
       initialPageParam: {
         page: 0,
@@ -277,7 +277,7 @@ function ForumInfiniteScrollTable({
           }}
         >
           {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-            const row = rows[virtualRow.index] as Row<ForumPost>;
+            const row = rows[virtualRow.index] as Row<Topic>;
             return (
               <tr
                 data-index={virtualRow.index} // needed for dynamic row height measurement

@@ -23,7 +23,7 @@ export const CATEGORY_BY_SLUG: { [key: string]: string } =
 export const categoryBySlug = (slug: string): string =>
   CATEGORY_BY_SLUG[slug] || "";
 
-export type ForumPost = {
+export type Topic = {
   id: number;
   externalId?: string;
   url?: string;
@@ -48,8 +48,8 @@ export type ForumPost = {
   lastActivity?: string;
 };
 
-export type ForumPostApiResponse = {
-  data: ForumPost[];
+export type TopicApiResponse = {
+  data: Topic[];
   meta: {
     totalRowCount: number;
   };

@@ -23,7 +23,6 @@ def transform_memory_entries(entries: List[Dict[str, str]]) -> List[Tuple[str, s
 def process_question(
     question: str,
     memory: List[Dict[str, str]],
-    # logger: StructuredLogger,
     # config: Dict[str, Any],
     verbose: bool = False,
 ) -> Dict[str, Any]:
@@ -96,20 +95,19 @@ def process_question(
                     if len(context) > 0:
                         return context
                 return default_retriever(query["question"])
-            
+
             if "query" in query:
                 if reasoning_level > 1:
                     return default_retriever(query["query"])
             return []
 
         rag_model = RAGSystem(
-            REASONING_LIMIT=1,
+            reasoning_limit=1,
             models_to_use=[chat_model, chat_model],
             retriever=retriever,
             context_filter=model_utils.ContextHandling.filter,
             system_prompt_preprocessor=model_utils.Prompt.preprocessor,
             system_prompt_responder=model_utils.Prompt.responder,
-            system_prompt_final_responder=model_utils.Prompt.final_responder,
         )
 
         formatted_memory = transform_memory_entries(memory)
@@ -118,8 +116,6 @@ def process_question(
         # logger.log_query(question, result)
         return {"answer": result["answer"], "error": None}
     except Exception:
-        raise
-        # logger.logger.error(f"Unexpected error during prediction: {str(e)}")
         return {
             "answer": None,
             "error": "An unexpected error occurred during prediction",

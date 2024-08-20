@@ -1,5 +1,5 @@
 import asyncio
-import logging
+from op_core.logger import get_logger
 from typing import Callable, Dict
 from tortoise import Tortoise
 from op_data.sources.agora import AgoraProposalService
@@ -7,12 +7,12 @@ from op_data.sources.discourse.categories import CategoryScraper
 from op_data.sources.discourse.raw_topics import RawTopicsService
 from op_data.sources.discourse.topics import TopicsService
 from op_data.sources.snapshot import SnapshotService
+from op_data.sources.summary import RawTopicSummaryService
 from op_core.config import Config
 
 from dotenv import load_dotenv
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 load_dotenv()
 
@@ -52,7 +52,7 @@ async def sync_raw_topics():
     await RawTopicsService.update_relationships()
 
 
-async def sync_forum_posts():
+async def sync_topics():
     logger.debug("Syncing forum posts")
     await TopicsService.acquire_and_save()
     await TopicsService.update_relationships()
@@ -70,12 +70,18 @@ async def sync_agora():
     await AgoraProposalService.update_relationships()
 
 
+async def sync_summaries():
+    await RawTopicSummaryService.acquire_and_save()
+    await RawTopicSummaryService.update_relationships()
+
+
 SYNC_COMMANDS: Dict[str, Callable] = {
     "categories": sync_categories,
     "raw_topics": sync_raw_topics,
-    "topics": sync_forum_posts,
+    "topics": sync_topics,
     "snapshot": sync_snapshot,
     "agora": sync_agora,
+    "summaries": sync_summaries,
 }
 
 

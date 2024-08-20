@@ -1,9 +1,4 @@
-from ragatouille import RAGPretrainedModel
-RAG = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
-reranker_ragatouille = RAG.as_langchain_document_compressor()
-
 from op_brains.documents import DataExporter
-all_contexts_df = DataExporter.get_dataframe()
 
 from typing import Any, Iterable
 import json
@@ -17,7 +12,10 @@ import importlib.resources
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
 from langchain_voyageai import VoyageAIRerank
+
 reranker_voyager = VoyageAIRerank(model="rerank-1")
+all_contexts_df = DataExporter.get_dataframe()
+
 
 prompt_question_generation = """
 You are tasked with generating keywords and FAQ to help users to find information about {SCOPE}. Your goal is to create keywords that are useful and questions that are relevant, interesting, and could realistically be asked by someone unfamiliar with the content.
@@ -144,10 +142,9 @@ def reorder_index(index_dict):
         contexts = all_contexts_df[all_contexts_df["url"].isin(urls)].content.tolist()
         k = len(contexts)
         if k > 1:
-            try:
-                contexts = reranker_voyager.compress_documents(query=key, documents=contexts)
-            except:
-                contexts = reranker_ragatouille.compress_documents(query=key, documents=contexts, k=k)
+            contexts = reranker_voyager.compress_documents(
+                query=key, documents=contexts
+            )
             urls = [context.metadata["url"] for context in contexts]
             print(urls)
         output_dict[key] = urls

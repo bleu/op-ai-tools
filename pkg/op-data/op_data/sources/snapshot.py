@@ -1,11 +1,12 @@
 import asyncio
 import json
-import logging
 from typing import List, Dict
-from op_data.db.models import SnapshotProposal, ForumPost
+from op_data.db.models import SnapshotProposal, Topic
 from op_data.utils.base_scraper import BaseScraper
 
-logger = logging.getLogger(__name__)
+from op_core.logger import get_logger
+
+logger = get_logger(__name__)
 
 SNAPSHOT_HUB_URL = "https://hub.snapshot.org/graphql"
 SPACE_IDS = ["citizenshouse.eth", "opcollective.eth"]
@@ -103,7 +104,7 @@ class SnapshotService(BaseScraper):
                 update_fields=[
                     field
                     for field in SnapshotProposal._meta.fields
-                    if field != "id" and field != "forumPost"
+                    if field != "id" and field != "Topic"
                 ],
                 on_conflict=["externalId"],
             )
@@ -130,7 +131,7 @@ class SnapshotService(BaseScraper):
 
             forum_posts_to_update = []
             if forum_post_updates:
-                forum_posts = await ForumPost.filter(
+                forum_posts = await Topic.filter(
                     url__in=[u["url"] for u in forum_post_updates]
                 ).all()
 

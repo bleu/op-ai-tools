@@ -14,10 +14,10 @@ flask-cors = "^4.0.1"
 flask-limiter = "^3.8.0"
 cchardet = "2.2.0a2"
 redis = "^5.0.7"
-celery = "^5.4.0"
 python-dotenv = "^1.0.1"
 op-artifacts = { path = "../op-artifacts", develop = true }
 honeybadger = "^0.20.2"
+apscheduler = "^3.10.4"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.5.5"

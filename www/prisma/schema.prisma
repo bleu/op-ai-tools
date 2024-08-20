@@ -7,19 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model ForumPost {
-  id                 Int                @id @default(autoincrement())
-  externalId         String             @unique
-  url                String             @unique
+model Topic {
+  id                 Int               @id @default(autoincrement())
+  externalId         String            @unique
+  url                String            @unique
   title              String
   username           String
   displayUsername    String
   categoryId         Int?
-  category           ForumPostCategory? @relation(fields: [categoryId], references: [id])
-  rawForumPostId     Int?
-  rawForumPost       RawForumPost?      @relation(fields: [rawForumPostId], references: [id])
-  snapshotProposalId Int?               @unique
-  snapshotProposal   SnapshotProposal?  @relation(fields: [snapshotProposalId], references: [id])
+  category           TopicCategory?    @relation(fields: [categoryId], references: [id])
+  rawTopicId         Int?
+  rawTopic           RawTopic?         @relation(fields: [rawTopicId], references: [id])
+  snapshotProposalId Int?              @unique
+  snapshotProposal   SnapshotProposal? @relation(fields: [snapshotProposalId], references: [id])
   about              String?
   firstPost          String?
   reaction           String?
@@ -28,35 +28,36 @@ model ForumPost {
   classification     String?
   lastActivity       DateTime?
   readTime           String?
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 }
 
-model ForumPostCategory {
-  id          Int         @id @default(autoincrement())
-  externalId  String      @unique
+model TopicCategory {
+  id          Int     @id @default(autoincrement())
+  externalId  String  @unique
   name        String?
   color       String?
   slug        String?
   description String?
   topicUrl    String?
-  filterable  Boolean     @default(false)
-  forumPosts  ForumPost[] @relation
+  filterable  Boolean @default(false)
+  topics      Topic[] @relation
 }
 
-model RawForumPost {
-  id         Int         @id @default(autoincrement())
-  externalId String      @unique
-  url        String      @unique
-  type       String
-  rawData    Json
-  lastUpdatedAt DateTime  @default(now())
-  forumPosts ForumPost[] @relation
+model RawTopic {
+  id               Int       @id @default(autoincrement())
+  externalId       String    @unique
+  url              String    @unique
+  type             String
+  rawData          Json
+  lastUpdatedAt    DateTime  @default(now())
+  topics           Topic[]   @relation
+  lastSummarizedAt DateTime?
 }
 
 model SnapshotProposal {
-  id            Int       @id @default(autoincrement())
-  externalId    String    @unique
+  id            Int      @id @default(autoincrement())
+  externalId    String   @unique
   spaceId       String
   spaceName     String
   title         String
@@ -74,34 +75,42 @@ model SnapshotProposal {
   snapshot      String
   scores        Json
   winningOption String?
-  forumPost     ForumPost?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  topic         Topic?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
-
 model AgoraProposal {
-  id                     Int       @id @default(autoincrement())
-  externalId             String    @unique
-  proposer               String
-  snapshotBlockNumber    Int
-  createdTime            DateTime
-  startTime              DateTime
-  endTime                DateTime
-  cancelledTime          DateTime?
-  executedTime           DateTime?
-  markdownTitle          String
-  description            String
-  quorum                 String
-  approvalThreshold      String?
-  proposalData           Json
-  unformattedProposalData String?
-  proposalResults        Json
-  proposalType           String
-  status                 String
-  createdTransactionHash String?
+  id                       Int       @id @default(autoincrement())
+  externalId               String    @unique
+  proposer                 String
+  snapshotBlockNumber      Int
+  createdTime              DateTime
+  startTime                DateTime
+  endTime                  DateTime
+  cancelledTime            DateTime?
+  executedTime             DateTime?
+  markdownTitle            String
+  description              String
+  quorum                   String
+  approvalThreshold        String?
+  proposalData             Json
+  unformattedProposalData  String?
+  proposalResults          Json
+  proposalType             String
+  status                   String
+  createdTransactionHash   String?
   cancelledTransactionHash String?
-  executedTransactionHash String?
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @updatedAt
+  executedTransactionHash  String?
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+}
+
+model RawTopicSummary {
+  id        Int      @id @default(autoincrement())
+  url       String
+  data      Json
+  error     Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

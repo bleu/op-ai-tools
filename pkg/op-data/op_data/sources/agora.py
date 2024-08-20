@@ -1,10 +1,11 @@
-import logging
 from typing import Dict, Any, List
 from op_data.db.models import AgoraProposal
 import os
 from op_data.utils.base_scraper import BaseScraper
 
-logger = logging.getLogger(__name__)
+from op_core.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class AgoraProposalService(BaseScraper):

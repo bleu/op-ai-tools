@@ -13,12 +13,13 @@ from op_brains.config import (
     RAW_FORUM_DB,
     FORUM_SUMMARY_DB,
     DOCS_PATH,
+    SNAPSHOT_DB
 )
 
 NOW = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
 
 
-class FragmentsProcessingStrategy():
+class FragmentsProcessingStrategy:
     name_source = "documentation"
 
     @staticmethod
@@ -80,18 +81,25 @@ class FragmentsProcessingStrategy():
         fragments = FragmentsProcessingStrategy.langchain_process(**kwargs)
         data = [(f.metadata["url"], NOW, f, "fragments_docs") for f in fragments]
 
-        return pd.DataFrame(data, columns=["url", "last_date", "content", "type_db_info"])
-
-
-class ForumPostsProcessingStrategy():
-    @staticmethod
-    def retrieve():
-        out_db = connect_db.retrieve_data(
-            f'select "rawData", url, type, "externalId" from "{RAW_FORUM_DB}"'
+        return pd.DataFrame(
+            data, columns=["url", "last_date", "content", "type_db_info"]
         )
+
+
+class ForumPostsProcessingStrategy:
+    @staticmethod
+    def retrieve(only_not_summarized: bool = False):
+        if only_not_summarized:
+            query = f'SELECT "rawData", url, type, "externalId" FROM "{RAW_FORUM_DB}" WHERE "lastSummarizedAt" < "lastUpdatedAt" OR "lastSummarizedAt" IS NULL;'
+        else:
+            query = f'select "rawData", url, type, "externalId" from "{RAW_FORUM_DB}"'
+
+        out_db = connect_db.retrieve_data(query)
+
         posts, threads = {}, {}
         for line in out_db:
             id = int(line[3])
+            # TODO: is this used for anything?
             type_line = line[2]
             url_line = line[1]
             data_line = line[0]
@@ -103,6 +111,7 @@ class ForumPostsProcessingStrategy():
             threads[id] = data_line
             threads[id]["url"] = url_line
 
+        # TODO: is this used for anything?
         #     if type_line == "post":
         #         posts[id] = data_line
         #         posts[id]["url"] = url_line
@@ -151,30 +160,44 @@ winning_option: {winning_option}
     """
 
     @staticmethod
-    def return_snapshot_proposals(file_path: str) -> Dict[str, Any]:
-        with open(file_path, "r") as file:
-            proposals = {}
-            for line in file:
-                data_line = json.loads(line)
-                discussion = data_line["discussion"]
-                proposals[discussion] = data_line
-                proposals[discussion]["str"] = (
-                    ForumPostsProcessingStrategy.template_snapshot_proposal.format(
-                        title=data_line["title"],
-                        space_id=data_line["space_id"],
-                        space_name=data_line["space_name"],
-                        snapshot=data_line["snapshot"],
-                        state=data_line["state"],
-                        type=data_line["type"],
-                        body=data_line["body"],
-                        start=data_line["start"],
-                        end=data_line["end"],
-                        votes=data_line["votes"],
-                        choices=data_line["choices"],
-                        scores=data_line["scores"],
-                        winning_option=data_line["winning_option"],
-                    )
-                )
+    def return_snapshot_proposals() -> Dict[str, Any]:
+        out_db = connect_db.retrieve_data(
+            f'select "discussion", "title", "spaceId", "spaceName", "snapshot", "state", "type", "body", "start", "end", "votes", "choices", "scores", "winningOption" from "{SNAPSHOT_DB}"'
+        )
+        proposals = {}
+        for line in out_db:
+            discussion = line[0]
+            proposals[discussion] = {
+                "title": line[1],
+                "space_id": line[2],
+                "space_name": line[3],
+                "snapshot": line[4],
+                "state": line[5],
+                "type": line[6],
+                "body": line[7],
+                "start": line[8],
+                "end": line[9],
+                "votes": line[10],
+                "choices": line[11],
+                "scores": line[12],
+                "winning_option": line[13],
+            }
+            proposals[discussion]["str"] = ForumPostsProcessingStrategy.template_snapshot_proposal.format(
+                title=line[1],
+                space_id=line[2],
+                space_name=line[3],
+                snapshot=line[4],
+                state=line[5],
+                type=line[6],
+                body=line[7],
+                start=line[8],
+                end=line[9],
+                votes=line[10],
+                choices=line[11],
+                scores=line[12],
+                winning_option=line[13],
+            )
+
         return proposals
 
     template_thread = """
@@ -208,12 +231,18 @@ trust_level (0-4): {TRUST_LEVEL}
     """
 
     @staticmethod
-    def return_threads() -> List:
-        posts, threads_info = ForumPostsProcessingStrategy.retrieve()
+    def return_threads(only_not_summarized: bool = False) -> List:
+        posts, threads_info = ForumPostsProcessingStrategy.retrieve(
+            only_not_summarized=only_not_summarized
+        )
+
+        if not threads_info:
+            return []
+
         df_posts = pd.DataFrame(posts).T
         threads = []
         category_names = connect_db.retrieve_data(
-            'select "externalId", "name" from "ForumPostCategory"'
+            'select "externalId", "name" from "TopicCategory"'
         )
         category_names = {int(c[0]): c[1] for c in category_names}
         for t in df_posts["thread_id"].unique():
@@ -245,7 +274,7 @@ trust_level (0-4): {TRUST_LEVEL}
                     CREATED_AT=post["created_at"],
                     TRUST_LEVEL=post["trust_level"],
                     IS_REPLY=f"(reply to post #{post['reply_to_post_number']})\n"
-                    if post["reply_to_post_number"] != None
+                    if post["reply_to_post_number"] is not None
                     else "",
                     CONTENT=post["cooked"]
                     .replace("<\\content_user_input>", "")
@@ -283,8 +312,18 @@ trust_level (0-4): {TRUST_LEVEL}
 
         return threads_forum
 
+    @staticmethod
+    def get_threads_documents_not_summarized() -> List[Document]:
+        threads = ForumPostsProcessingStrategy.return_threads(only_not_summarized=True)
+        threads_forum = [Document(page_content=t[0], metadata=t[1]) for t in threads]
 
-class SummaryProcessingStrategy():
+        return threads_forum
+
+    def get_db_name(self) -> str:
+        return "posts_forum_db"
+
+
+class SummaryProcessingStrategy:
     name_source = "summary"
 
     template_summary = """
@@ -326,7 +365,9 @@ class SummaryProcessingStrategy():
         return ret
 
     @staticmethod
-    def langchain_process(divide: str | None = "category_name") -> Dict[str, List[Document]]:
+    def langchain_process(
+        divide: str | None = "category_name",
+    ) -> Dict[str, List[Document]]:
         data = SummaryProcessingStrategy.retrieve()
 
         if isinstance(divide, str):

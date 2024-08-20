@@ -9,9 +9,6 @@ load_dotenv()
 BASE_PATH = os.getenv("OP_CHAT_BASE_PATH", os.path.expanduser("../../data"))
 
 DOCS_PATH = importlib.resources.files(op_artifacts) / "governance_docs.txt"
-SNAPSHOT_PATH = os.path.join(
-    BASE_PATH, "003-snapshot-spaces-proposals-20240711/dataset.jsonl"
-)
 VECTORSTORE = os.getenv("VECTORSTORE", "faiss")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "text-embedding-ada-002")
 
@@ -29,9 +26,10 @@ SUMMARIZER_MODEL = os.getenv("SUMMARIZER_MODEL", CHAT_MODEL_OPENAI)
 DB_STORAGE_PATH = importlib.resources.files(op_artifacts.dbs)
 POSTHOG_API_KEY = os.getenv("POSTHOG_API_KEY", "")
 
-RAW_FORUM_DB = "RawForumPost"
-FORUM_SUMMARY_DB = "ForumPost"
-
+RAW_FORUM_DB = "RawTopic"
+FORUM_SUMMARY_DB = "Topic"
+USE_SUMMARY_MOCK_DATA = os.getenv("USE_SUMMARY_MOCK_DATA", "False") == "True"
+SNAPSHOT_DB = "SnapshotProposal"
 
 QUESTIONS_INDEX_JSON = importlib.resources.files(op_artifacts) / "index_questions.json"
 QUESTIONS_INDEX_NPZ = importlib.resources.files(op_artifacts) / "index_questions.npz"

@@ -1,10 +1,11 @@
 import asyncio
-import logging
 from typing import Optional, Dict, Any
 import aiohttp
 from op_data.utils.rate_limiter import AsyncRateLimiter
 
-logger = logging.getLogger(__name__)
+from op_core.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class BaseScraper:
