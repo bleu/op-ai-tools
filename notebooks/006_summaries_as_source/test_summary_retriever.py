@@ -7,7 +7,6 @@ from datetime import date
 TODAY = date.today()
 
 with st.echo():
-
     embedding_model = "text-embedding-ada-002"
     chat_pars = {
         "temperature": 0.0,

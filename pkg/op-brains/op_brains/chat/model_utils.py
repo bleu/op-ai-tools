@@ -26,9 +26,12 @@ all_contexts_df = DataExporter.get_dataframe()
 
 class Prompt:
     class NewSearch(BaseModel):
-        user_knowledge: str = Field(f"""Analyze the conversation history to determine what the user seems to know well about {SCOPE}. If you can't assume any knowledge, return just an empty string.""")
+        user_knowledge: str = Field(
+            f"""Analyze the conversation history to determine what the user seems to know well about {SCOPE}. If you can't assume any knowledge, return just an empty string."""
+        )
 
-        questions: List[str] = Field(f"""Formulate questions about that encompasses the information that is missing. These questions are going to be used by the system to retrieve a context that can provide this information. The user won't see these questions.
+        questions: List[str] = (
+            Field(f"""Formulate questions about that encompasses the information that is missing. These questions are going to be used by the system to retrieve a context that can provide this information. The user won't see these questions.
                                      
 When formulating questions, adhere to these guidelines:
     - Try to divide the lack of information into the smallest possible parts
@@ -38,24 +41,29 @@ When formulating questions, adhere to these guidelines:
     - Do not ask questions that you already know the answer to.
     - Search for the definition of terms linked to the user's input in the context of {SCOPE}.
     """)
-        
-        keywords: List[str] = Field(f"""List some keywords that are relevant to the user's query. These keywords are going to be used by the system to retrieve a context that can provide this information. The user won't see these keywords. 
+        )
+
+        keywords: List[str] = (
+            Field(f"""List some keywords that are relevant to the user's query. These keywords are going to be used by the system to retrieve a context that can provide this information. The user won't see these keywords. 
                                     
 When adding keywords, adhere to these guidelines:
     - Add the name of the main concepts or topics that the questions are about. Every question is about {SCOPE}, so don't need to add the words from {SCOPE} as a keyword. The keywords should be just specific terms.
     - If the text mentions an occurrence or instance of something (very commonly adding a number at the end), sinalize it by using "#" followed by the number of the occurrence. For example, if the question mentions "Airdrop 3", use "Airdrop #3" as a keyword.
     - If the text mentions an occurrence or instance of something, use only the specific term. For example, if the question mentions "Season 6", don't use "Season" as a keyword, use only "Season #3".
     - If the question is about the general term, and doesn't mention any specific instance, use only the general term. For example, if the question is about "Cycle", use only "Voting Cycle" as a keyword.""")
-        
+        )
+
         type_search: str = Field(f"""Classify the search as one of the following types:
                                  
 - "factual": the default case, will search the definition of terms and concepts.
 - "ocurrence": in the case of question about a specific event or ocurrence that happened.
 - "recent": in the case of questions about recent events, the current state of something or the most recent information available.""")
-        
+
     class JustifiedClaim(BaseModel):
         claim: str = Field("The information you have.")
-        url_supporting: str = Field(description="The URL source of the information you have. Never cite URLS that were not exactly provided.")
+        url_supporting: str = Field(
+            description="The URL source of the information you have. Never cite URLS that were not exactly provided."
+        )
 
     class Answer(BaseModel):
         answer: str = Field("""Provide an answer. Some guidelines to follow:
@@ -65,7 +73,10 @@ When adding keywords, adhere to these guidelines:
 - Never refer to past events as if they were happening now or in the future.
 - Keep in mind the <query>. Don't answer an user question if you don't know the answer to this question. What you know is listed in the knowledge_summary.
 - Never make up information.""")
-        url_supporting: List[str] = Field(default=[], description="""The URL sources of the information you have. Never cite URLS that were not exactly provided.""")
+        url_supporting: List[str] = Field(
+            default=[],
+            description="""The URL sources of the information you have. Never cite URLS that were not exactly provided.""",
+        )
 
     @staticmethod
     def preprocessor(llm: ChatOpenAI | ChatAnthropic, **kwargs):
@@ -83,22 +94,33 @@ The user now provided the following query:
 <user_input>
 {{QUERY}}
 </user_input>
-""" 
-    
+"""
+
         class Preprocessor(BaseModel):
-            related_to_scope: bool = Field(default=False, description=f"""Return False if you are 100% sure that the user's query is not related to the scope of {SCOPE}. Keep in mind that, most of the time, the user will ask a question related to the scope. 
+            related_to_scope: bool = Field(
+                default=False,
+                description=f"""Return False if you are 100% sure that the user's query is not related to the scope of {SCOPE}. Keep in mind that, most of the time, the user will ask a question related to the scope. 
                                            
-            Some terms as "Cycle", "Airdrop", "Citizens' House", "Token House", "Grant", "Proposal", "Retro Funding", "OP", "NERD", "Law of Chains"... are related to the scope. If a person/user is referred to, it is likely to be a member of the Optimism Collectiv Community.""")
-            
-            needs_info: bool = Field(default=False, description=f"""If related_to_scope is False, needs_info should be False. Else, return True if the user is not asking you to provide any information or if all the infor you need is in the <conversation_history>. Never make up information. If you don't have enough information to answer the user's query, needs_info should be True.""")
+            Some terms as "Cycle", "Airdrop", "Citizens' House", "Token House", "Grant", "Proposal", "Retro Funding", "OP", "NERD", "Law of Chains"... are related to the scope. If a person/user is referred to, it is likely to be a member of the Optimism Collectiv Community.""",
+            )
 
-            answer: str = Field(default=None, description=f"""Only if needs_info is False, that is, if you have enough information to answer the user's query, provide an answer to the user's query. Don't make up information. If related_to_scope is False, answer should be 'I'm sorry, but I can only answer questions about {SCOPE}. Is there anything specific about {SCOPE} you'd like to know?'""")
+            needs_info: bool = Field(
+                default=False,
+                description=f"""If related_to_scope is False, needs_info should be False. Else, return True if the user is not asking you to provide any information or if all the infor you need is in the <conversation_history>. Never make up information. If you don't have enough information to answer the user's query, needs_info should be True.""",
+            )
 
-            expansion: Prompt.NewSearch = Field(default=None, description=f"""Only if needs_info is True, that is, if you don't have enough information to answer the user's query, provide a new search that encompasses the information that is missing. The system will perform a search. This is going to be used by the system to retrieve a context that can provide this information. The user won't see this.""")
-            
+            answer: str = Field(
+                default=None,
+                description=f"""Only if needs_info is False, that is, if you have enough information to answer the user's query, provide an answer to the user's query. Don't make up information. If related_to_scope is False, answer should be 'I'm sorry, but I can only answer questions about {SCOPE}. Is there anything specific about {SCOPE} you'd like to know?'""",
+            )
+
+            expansion: Prompt.NewSearch = Field(
+                default=None,
+                description=f"""Only if needs_info is True, that is, if you don't have enough information to answer the user's query, provide a new search that encompasses the information that is missing. The system will perform a search. This is going to be used by the system to retrieve a context that can provide this information. The user won't see this.""",
+            )
+
         llm = llm.with_structured_output(Preprocessor)
         return llm.invoke(preprocessor_header.format(**kwargs)).dict()
-
 
     @staticmethod
     def responder(llm: ChatOpenAI | ChatAnthropic, final: bool = False, **kwargs):
@@ -129,15 +151,25 @@ Today's date is {TODAY}. Be aware of information that might be outdated.
 """
 
         class Responder(BaseModel):
-            knowledge_summary: List[Prompt.JustifiedClaim] = Field(f"""Summarize the information you have that is relevant to the user's query. Do not mention what's lacking and you don't know. Take it from the context and from your previous knowledge. Every claim should be supported by a reference. References must come from the provided context or your previous knowledge. Never cite URLS that were not provided.""") 
-            
-            if final:
-                answer: Prompt.Answer = Field("""If you don't have enough information to answer the query properly, start with "I couldn't find all the information I wanted to provide a complete answer." And provide some context about the information you have, how it relates to the query and what you think is missing to properly answer the user's query.""")
-            else:
-                answer: Prompt.Answer = Field(default=None, description="""Only if you have enough information to answer the query properly, provide an answer.""")
+            knowledge_summary: List[Prompt.JustifiedClaim] = Field(
+                f"""Summarize the information you have that is relevant to the user's query. Do not mention what's lacking and you don't know. Take it from the context and from your previous knowledge. Every claim should be supported by a reference. References must come from the provided context or your previous knowledge. Never cite URLS that were not provided."""
+            )
 
-                search: Prompt.NewSearch = Field(default=None, description="""If you didn't write an answer, provide a new search that encompasses the information that is missing. The system will perform a search. This is going to be used by the system to retrieve a context that can provide this information. The user won't see this.""")
-                
+            if final:
+                answer: Prompt.Answer = Field(
+                    """If you don't have enough information to answer the query properly, start with "I couldn't find all the information I wanted to provide a complete answer." And provide some context about the information you have, how it relates to the query and what you think is missing to properly answer the user's query."""
+                )
+            else:
+                answer: Prompt.Answer = Field(
+                    default=None,
+                    description="""Only if you have enough information to answer the query properly, provide an answer.""",
+                )
+
+                search: Prompt.NewSearch = Field(
+                    default=None,
+                    description="""If you didn't write an answer, provide a new search that encompasses the information that is missing. The system will perform a search. This is going to be used by the system to retrieve a context that can provide this information. The user won't see this.""",
+                )
+
         llm = llm.with_structured_output(Responder)
         try:
             out = llm.invoke(responder_header.format(**kwargs))
@@ -145,6 +177,7 @@ Today's date is {TODAY}. Be aware of information that might be outdated.
             return None
         print(out)
         return out.dict()
+
 
 class ContextHandling:
     summary_template = """
@@ -231,6 +264,7 @@ class ContextHandling:
             urls = [c.metadata["url"] for c in context]
             contexts = all_contexts_df[all_contexts_df["url"].isin(urls)].iloc[:k]
             return contexts.content.tolist()
+
 
 class RetrieverBuilder:
     @staticmethod

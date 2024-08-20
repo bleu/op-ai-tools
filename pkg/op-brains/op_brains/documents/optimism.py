@@ -9,12 +9,7 @@ from langchain_text_splitters import MarkdownHeaderTextSplitter
 
 from op_brains.retriever import connect_db
 
-from op_brains.config import (
-    RAW_FORUM_DB,
-    FORUM_SUMMARY_DB,
-    DOCS_PATH,
-    SNAPSHOT_DB
-)
+from op_brains.config import RAW_FORUM_DB, FORUM_SUMMARY_DB, DOCS_PATH, SNAPSHOT_DB
 
 NOW = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
 
@@ -182,20 +177,22 @@ winning_option: {winning_option}
                 "scores": line[12],
                 "winning_option": line[13],
             }
-            proposals[discussion]["str"] = ForumPostsProcessingStrategy.template_snapshot_proposal.format(
-                title=line[1],
-                space_id=line[2],
-                space_name=line[3],
-                snapshot=line[4],
-                state=line[5],
-                type=line[6],
-                body=line[7],
-                start=line[8],
-                end=line[9],
-                votes=line[10],
-                choices=line[11],
-                scores=line[12],
-                winning_option=line[13],
+            proposals[discussion]["str"] = (
+                ForumPostsProcessingStrategy.template_snapshot_proposal.format(
+                    title=line[1],
+                    space_id=line[2],
+                    space_name=line[3],
+                    snapshot=line[4],
+                    state=line[5],
+                    type=line[6],
+                    body=line[7],
+                    start=line[8],
+                    end=line[9],
+                    votes=line[10],
+                    choices=line[11],
+                    scores=line[12],
+                    winning_option=line[13],
+                )
             )
 
         return proposals
