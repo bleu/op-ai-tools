@@ -36,7 +36,7 @@ def configure_scheduler():
         id="sync_summaries",
     )
 
-    # Run 'sync_topics' every day at 02:00
+    # Run 'sync_topics' every day at 02:10
     scheduler.add_job(
         run_sync,
         trigger=CronTrigger(hour=2, minute=10),
@@ -52,7 +52,7 @@ def configure_scheduler():
         id="sync_snapshot",
     )
 
-    # Run 'sync_agora' every day at 02:30
+    # Run 'sync_agora' every day at 02:40
     scheduler.add_job(
         run_sync,
         trigger=CronTrigger(hour=0, minute=40),
