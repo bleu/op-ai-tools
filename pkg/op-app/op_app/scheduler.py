@@ -15,7 +15,7 @@ def configure_scheduler():
     # Run 'sync_categories' every day at 00:00
     scheduler.add_job(
         run_sync,
-        trigger=CronTrigger(hour=0, minute=0),
+        trigger=CronTrigger(minute=40),
         args=[SYNC_COMMANDS["categories"]],
         id="sync_categories",
     )
@@ -23,7 +23,7 @@ def configure_scheduler():
     # Run 'raw_topics' every day at 00:20
     scheduler.add_job(
         run_sync,
-        trigger=CronTrigger(hour=0, minute=20),
+        trigger=CronTrigger(minute=40),
         args=[SYNC_COMMANDS["raw_topics"]],
         id="sync_raw_topics",
     )
@@ -31,7 +31,7 @@ def configure_scheduler():
     # Run 'sync_summaries' every day at 01:20
     scheduler.add_job(
         run_sync,
-        trigger=CronTrigger(hour=1, minute=20),
+        trigger=CronTrigger(minute=40),
         args=[SYNC_COMMANDS["summaries"]],
         id="sync_summaries",
     )
@@ -39,7 +39,7 @@ def configure_scheduler():
     # Run 'sync_topics' every day at 02:10
     scheduler.add_job(
         run_sync,
-        trigger=CronTrigger(hour=2, minute=10),
+        trigger=CronTrigger(minute=40),
         args=[SYNC_COMMANDS["topics"]],
         id="sync_topics",
     )
@@ -47,7 +47,7 @@ def configure_scheduler():
     # Run 'sync_snapshot' every day at 02:30
     scheduler.add_job(
         run_sync,
-        trigger=CronTrigger(hour=2, minute=30),
+        trigger=CronTrigger(minute=40),
         args=[SYNC_COMMANDS["snapshot"]],
         id="sync_snapshot",
     )
@@ -55,7 +55,7 @@ def configure_scheduler():
     # Run 'sync_agora' every day at 02:40
     scheduler.add_job(
         run_sync,
-        trigger=CronTrigger(hour=0, minute=40),
+        trigger=CronTrigger(minute=40),
         args=[SYNC_COMMANDS["agora"]],
         id="sync_agora",
     )
