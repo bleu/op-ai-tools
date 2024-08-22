@@ -19,6 +19,7 @@ import { useToast } from "../ui/hooks/use-toast";
 import { Label } from "../ui/label";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Textarea } from "../ui/textarea";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface ChatListProps {
   messages?: Message[];
@@ -37,7 +38,7 @@ export function ChatList({
   onRegenerateMessage,
   loadingMessageId,
 }: ChatListProps) {
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<Message | null>(null);
   const [feedbackReason, setFeedbackReason] = useState<string>("");
   const [feedbackDetails, setFeedbackDetails] = useState<string>("");
@@ -45,11 +46,16 @@ export function ChatList({
   const posthog = usePostHog();
 
   useEffect(() => {
-    if (!messagesContainerRef.current) return;
-
-    messagesContainerRef.current.scrollTop =
-      messagesContainerRef.current.scrollHeight;
-  }, []);
+    if (messagesEndRef.current) {
+      setTimeout(() => {
+        // @ts-ignore-next-line
+        messagesEndRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+        });
+      }, 300);
+    }
+  }, [messages]);
 
   const deduplicateLineBreaks = (message: string | string[]) => {
     if (Array.isArray(message)) {
@@ -90,16 +96,13 @@ export function ChatList({
   };
 
   return (
-    <div
-      ref={messagesContainerRef}
-      className="w-full overflow-y-auto overflow-x-hidden h-full flex flex-col"
-    >
-      {messages?.map((message) => (
+    <ScrollArea className="w-full overflow-y-auto overflow-x-hidden h-full flex flex-col absolute">
+      {messages?.map((message, index) => (
         <div
           key={message.timestamp}
           className={cn(
             "flex flex-col gap-2 p-4",
-            message.name !== "Optimism GovGPT" ? "items-end" : "items-start",
+            message.name !== "Optimism GovGPT" ? "items-end" : "items-start"
           )}
         >
           <div className="flex gap-3 items-start">
@@ -117,7 +120,7 @@ export function ChatList({
             <div
               className={cn(
                 "p-3 rounded-md max-w-md overflow-hidden",
-                "bg-accent",
+                "bg-accent"
               )}
             >
               {loadingMessageId === message.id ? (
@@ -227,6 +230,7 @@ export function ChatList({
           </div>
         </div>
       ))}
-    </div>
+      <div ref={messagesEndRef} />
+    </ScrollArea>
   );
 }
