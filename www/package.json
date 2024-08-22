@@ -3,14 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently 'yarn dev:next' 'yarn start:mock'",
+    "dev:next": "next dev",
     "build": "next build",
     "start": "next start",
     "lint:fix": "yarn biome check --write ./src",
     "prisma:reset": "ts-node prisma/reset.ts",
     "prisma:migrate": "prisma migrate dev",
     "prisma:console": "prisma-repl",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "start:mock": "ts-node src/mocks/index.ts"
   },
   "dependencies": {
     "@faker-js/faker": "^8.4.1",
@@ -63,6 +65,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.4.20",
+    "concurrently": "^8.2.2",
     "cors": "^2.8.5",
     "eslint": "^9",
     "eslint-config-next": "14.2.5",
@@ -76,8 +79,6 @@
   },
   "packageManager": "yarn@4.3.0",
   "msw": {
-    "workerDirectory": [
-      "public"
-    ]
+    "workerDirectory": ["public"]
   }
 }

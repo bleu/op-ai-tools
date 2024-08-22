@@ -82,8 +82,11 @@ In summary, Optimism is an Ethereum Layer 2 focused on scalability through optim
     }
 
     const data = {
-      answer:
-        "\nOptimism, as a decentralized Layer 2 solution, does not have a centralized authority that can outright censor user transactions. However, there is a possibility that individual validators or operators could choose to censor transactions if they wish. The decentralized nature of blockchain technology makes it challenging for any single entity to enforce widespread censorship effectively. \n\nReferences:\n[1] https://optimism.io\n",
+      answer: `To participate in voting on Optimism governance proposals, you need to hold OP tokens. You can vote directly on proposals through the Optimism Governance Portal. If you prefer, you can also delegate your voting power to someone else. For detailed instructions on how to set up as a delegator and vote, you can refer to the Optimism documentation [1].
+
+Engaging in governance discussions and providing feedback on proposals is also encouraged, as it helps shape the future of the Optimism ecosystem [2].
+
+References: [1] https://gov.optimism.io/t/setup-myself-as-a-delegator-deligate-and-vote-on-proposal/6538 [2] https://gov.optimism.io/t/participate-in-op-token-house-governance-on-tally/5285`,
       error: null,
     };
 
