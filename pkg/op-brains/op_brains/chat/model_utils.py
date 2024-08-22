@@ -21,8 +21,6 @@ from op_brains.config import (
 from op_brains.documents import DataExporter
 
 TODAY = time.strftime("%Y-%m-%d")
-all_contexts_df = DataExporter.get_dataframe()
-
 
 class Prompt:
     class NewSearch(BaseModel):
@@ -258,6 +256,8 @@ class ContextHandling:
 
     @staticmethod
     def reordering(context: list, query: str, k: int, type_search: str) -> list:
+        all_contexts_df = DataExporter.get_dataframe()
+
         if type_search == "factual" or type_search == "ocurrence":
             return context[:k]
         elif type_search == "recent":
