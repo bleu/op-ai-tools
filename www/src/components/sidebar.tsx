@@ -9,7 +9,7 @@ import {
 import { getChatName } from "@/lib/chat-utils";
 import { formatDate } from "@/lib/chat-utils";
 import { cn } from "@/lib/utils";
-import { MoreHorizontal, SquarePen } from "lucide-react";
+import { MoreHorizontal, SquarePen, Trash } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { ScrollArea } from "./ui/scroll-area";
@@ -27,6 +27,7 @@ interface SidebarProps {
   isMobile: boolean;
   onSelectChat: (id: string) => void;
   onNewChat: () => void;
+  onRemoveChat: (id: string) => void;
 }
 
 export function Sidebar({
@@ -35,6 +36,7 @@ export function Sidebar({
   isMobile,
   onSelectChat,
   onNewChat,
+  onRemoveChat,
 }: SidebarProps) {
   return (
     <div
@@ -53,7 +55,7 @@ export function Sidebar({
               href="#"
               className={cn(
                 buttonVariants({ variant: "ghost", size: "icon" }),
-                "h-9 w-9",
+                "h-9 w-9"
               )}
               onClick={onNewChat}
             >
@@ -76,7 +78,7 @@ export function Sidebar({
                         buttonVariants({ variant: link.variant, size: "icon" }),
                         "h-11 w-11 md:h-16 md:w-16",
                         link.variant === "grey" &&
-                          "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white",
+                          "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white"
                       )}
                     >
                       <span className="sr-only">{link.name}</span>
@@ -91,25 +93,41 @@ export function Sidebar({
                 </Tooltip>
               </TooltipProvider>
             ) : (
-              <Link
-                key={link.timestamp}
-                href="#"
-                onClick={() => onSelectChat(link.id)}
-                className={cn(
-                  buttonVariants({ variant: link.variant, size: "xl" }),
-                  link.variant === "grey" &&
-                    "dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white shrink",
-                  "justify-start gap-4",
-                )}
-              >
-                <div className="flex flex-col max-w-28">
-                  <span>{getChatName(link.messages)}</span>
-                  <span className="text-zinc-300 text-xs">
-                    {formatDate(link.timestamp)}
-                  </span>
-                </div>
-              </Link>
-            ),
+              <div key={index} className="relative group/link w-full">
+                <Link
+                  href="#"
+                  onClick={() => onSelectChat(link.id)}
+                  className={cn(
+                    buttonVariants({ variant: link.variant, size: "xl" }),
+                    link.variant === "grey" &&
+                      "dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white shrink",
+                    "justify-start gap-4 relative w-full"
+                  )}
+                >
+                  <div className="flex flex-col max-w-28">
+                    <span>{getChatName(link.messages)}</span>
+                    <span className="text-zinc-300 text-xs">
+                      {formatDate(link.timestamp)}
+                    </span>
+                  </div>
+                </Link>
+                <button
+                  className="absolute top-0 right-0 m-2 opacity-0 group-hover/link:opacity-100 transition-opacity rounded-full hover:scale-110"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemoveChat(link.id);
+                  }}
+                >
+                  <Trash
+                    size={16}
+                    className={cn({
+                      "text-white": link.variant === "default",
+                      "text-muted-foreground": link.variant !== "default",
+                    })}
+                  />
+                </button>
+              </div>
+            )
           )}
         </nav>
       </ScrollArea>
