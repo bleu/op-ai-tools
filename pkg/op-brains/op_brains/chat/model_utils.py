@@ -293,6 +293,8 @@ class RetrieverBuilder:
             index_faiss.add(index_embed)
 
         def find_similar(query: str, criteria: Callable = lambda x: x, **kwargs):
+            all_contexts_df = DataExporter.get_dataframe()
+
             if treshold < 1:
                 if treshold > 0:
                     query_embed = np.array(embeddings.embed_documents([query]))

@@ -9,7 +9,7 @@ import { useChatApi } from "./useChatApi";
 
 export function useChatState(
   selectedChat: ChatData,
-  onUpdateMessages: (newMessages: Message[]) => void,
+  onUpdateMessages: (newMessages: Message[]) => void
 ) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [inputMessage, setInputMessage] = useState("");
@@ -34,7 +34,7 @@ export function useChatState(
       const assistantMessage = generateMessageParams(
         selectedChat.id,
         "",
-        "Optimism GovGPT",
+        "Optimism GovGPT"
       );
 
       setLoadingMessageId(assistantMessage.id);
@@ -49,16 +49,16 @@ export function useChatState(
 
         const response = await sendMessageApi(
           newMessage.message,
-          messagesMemory,
+          messagesMemory
         );
 
         setLoadingMessageId(null);
 
         updatedMessages[updatedMessages.length - 1].message = Array.isArray(
-          response["answer"],
+          response["answer"]["answer"]
         )
-          ? response["answer"].join("\n")
-          : response["answer"];
+          ? response["answer"]["answer"].join("\n")
+          : response["answer"]["answer"];
         setCurrentMessages([...updatedMessages]);
         onUpdateMessages([...updatedMessages]);
 
@@ -73,14 +73,14 @@ export function useChatState(
         updatedMessages[updatedMessages.length - 1] = generateMessageParams(
           selectedChat.id,
           "Sorry, an error occurred while processing your request.",
-          "Optimism GovGPT",
+          "Optimism GovGPT"
         );
 
         setCurrentMessages([...updatedMessages]);
         onUpdateMessages([...updatedMessages]);
       }
     },
-    [currentMessages, onUpdateMessages, sendMessageApi, selectedChat.id],
+    [currentMessages, onUpdateMessages, sendMessageApi, selectedChat.id]
   );
 
   const handleRegenerateMessage = useCallback(
@@ -97,7 +97,7 @@ export function useChatState(
         sendMessage(userMessage);
       }
     },
-    [currentMessages, onUpdateMessages, sendMessage],
+    [currentMessages, onUpdateMessages, sendMessage]
   );
 
   return {

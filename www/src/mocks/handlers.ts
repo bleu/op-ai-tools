@@ -9,7 +9,7 @@ const randomDelay = (min: number, max: number) =>
 
 const streamText = async (
   text: string,
-  controller: ReadableStreamDefaultController,
+  controller: ReadableStreamDefaultController
 ) => {
   const words = text.split(" ");
   for (const word of words) {
@@ -77,13 +77,21 @@ In summary, Optimism is an Ethereum Layer 2 focused on scalability through optim
           headers: {
             "Content-Type": "application/json",
           },
-        },
+        }
       );
     }
 
     const data = {
-      answer:
-        "\nOptimism, as a decentralized Layer 2 solution, does not have a centralized authority that can outright censor user transactions. However, there is a possibility that individual validators or operators could choose to censor transactions if they wish. The decentralized nature of blockchain technology makes it challenging for any single entity to enforce widespread censorship effectively. \n\nReferences:\n[1] https://optimism.io\n",
+      answer: {
+        answer:
+          "The OP token distribution is designed to support governance, ecosystem development, and community engagement within the Optimism network. Key aspects include:\n\n1. **Governance**: OP token holders can participate in governance decisions, influencing the direction of the Optimism ecosystem.\n2. **Ecosystem Development**: A portion of the tokens is allocated to support projects and initiatives that enhance the Optimism network.\n3. **Community Incentives**: The Retro Funding initiative rewards contributors to the OP Stack with OP tokens, promoting active participation and development within the community.\n\nOverall, the distribution aims to foster a vibrant and engaged community while ensuring that governance remains decentralized and inclusive.",
+        url_supporting: [
+          "https://gov.optimism.io/t/will-there-be-anyusecase-of-op-beside-voting/2342",
+          "https://gov.optimism.io/t/will-there-be-any-usecase-of-op-beside-voting/2342",
+          "https://gov.optimism.io/t/clarification-on-op-token-supply/5589",
+          "https://gov.optimism.io/t/cycle-19-final-grants-roundup/7850",
+        ],
+      },
       error: null,
     };
 
