@@ -18,12 +18,12 @@ chat_sources = [
 
 class DataExporter:
     @staticmethod
-    def get_dataframe():
+    async def get_dataframe():
         context_df = []
         for priority_class in chat_sources:
             dfs_class = []
             for source in priority_class:
-                df_source = source.dataframe_process()
+                df_source = await source.dataframe_process()
 
                 if not df_source.columns.tolist() == [
                     "url",
@@ -45,10 +45,10 @@ class DataExporter:
         return context_df
 
     @staticmethod
-    def get_langchain_documents():
+    async def get_langchain_documents():
         out = {}
         for source in [x for xs in chat_sources for x in xs]:
-            documents = source.langchain_process()
+            documents = await source.langchain_process()
             if isinstance(documents, dict):
                 documents = {
                     f"{source.name_source}_{key}": value

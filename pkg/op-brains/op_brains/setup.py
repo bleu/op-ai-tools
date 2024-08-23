@@ -133,8 +133,8 @@ def generate_indexes_from_fragment(list_contexts: Iterable, llm: Any) -> dict:
     return q_index, kw_index
 
 
-def reorder_index(index_dict):
-    all_contexts_df = DataExporter.get_dataframe()
+async def reorder_index(index_dict):
+    all_contexts_df = await DataExporter.get_dataframe()
 
     output_dict = {}
     for key, urls in index_dict.items():
@@ -153,16 +153,16 @@ def reorder_index(index_dict):
     return output_dict
 
 
-def reorder_file(path):
+async def reorder_file(path):
     with open(path, "r") as f:
         index = json.load(f)
-    index = reorder_index(index)
+    index = await reorder_index(index)
     with open(path, "w") as f:
         json.dump(index, f, indent=4)
 
 
-def main(model: str):
-    data = DataExporter.get_langchain_documents()
+async def main(model: str):
+    data = await DataExporter.get_langchain_documents()
 
     llm = model_utils.access_APIs.get_llm(model)
     embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
@@ -202,8 +202,8 @@ def main(model: str):
         op_artifacts_pkg.joinpath("index_keywords.npz"), index_keywords_embed
     )
 
-    reorder_file(op_artifacts_pkg.joinpath("index_questions.json"))
-    reorder_file(op_artifacts_pkg.joinpath("index_keywords.json"))
+    await reorder_file(op_artifacts_pkg.joinpath("index_questions.json"))
+    await reorder_file(op_artifacts_pkg.joinpath("index_keywords.json"))
 
 
 if __name__ == "__main__":

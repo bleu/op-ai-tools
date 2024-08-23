@@ -3,7 +3,7 @@ import time
 import json
 import faiss
 import numpy as np
-
+import pandas as pd
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
@@ -21,6 +21,7 @@ from op_brains.config import (
 from op_brains.documents import DataExporter
 
 TODAY = time.strftime("%Y-%m-%d")
+
 
 class Prompt:
     class NewSearch(BaseModel):
@@ -194,6 +195,7 @@ class ContextHandling:
     def filter(
         question_context: dict,
         explored_contexts: list,
+        contexts_df: pd.DataFrame,
         query: str | None = None,
         type_search: str = "factual",
         k: int = 10,
@@ -208,7 +210,11 @@ class ContextHandling:
                 k_i = min(k, len(new_contexts))
                 if k_i > 0:
                     new_contexts = ContextHandling.reordering(
-                        new_contexts, query, k=k_i, type_search=type_search
+                        new_contexts,
+                        query,
+                        contexts_df=contexts_df,
+                        k=k_i,
+                        type_search=type_search,
                     )
 
             contexts_to_be_explored[question] = new_contexts
@@ -255,9 +261,9 @@ class ContextHandling:
         return "".join(out), urls
 
     @staticmethod
-    def reordering(context: list, query: str, k: int, type_search: str) -> list:
-        all_contexts_df = DataExporter.get_dataframe()
-
+    def reordering(
+        context: list, query: str, k: int, type_search: str, contexts_df: pd.DataFrame
+    ) -> list:
         if type_search == "factual" or type_search == "ocurrence":
             return context[:k]
         elif type_search == "recent":
@@ -292,9 +298,9 @@ class RetrieverBuilder:
             index_faiss = faiss.IndexFlatIP(index_embed.shape[1])
             index_faiss.add(index_embed)
 
-        def find_similar(query: str, criteria: Callable = lambda x: x, **kwargs):
-            all_contexts_df = DataExporter.get_dataframe()
-
+        async def find_similar(
+            query: str, contexts_df: pd.DataFrame, criteria: Callable = lambda x: x, **kwargs
+        ):
             if treshold < 1:
                 if treshold > 0:
                     query_embed = np.array(embeddings.embed_documents([query]))
@@ -314,7 +320,7 @@ class RetrieverBuilder:
 
             urls = [u for s in similar for u in index[s]]
 
-            contexts = all_contexts_df
+            contexts = contexts_df
             if "type_db_info" in kwargs:
                 contexts = contexts[
                     contexts["type_db_info"].isin(kwargs["type_db_info"])
