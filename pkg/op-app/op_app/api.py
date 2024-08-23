@@ -1,40 +1,54 @@
-from flask import Flask, request, jsonify
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+from quart import Quart, request, jsonify
+from quart_cors import cors
+from quart_rate_limiter import RateLimiter, rate_limit
 from op_brains.exceptions import UnsupportedVectorstoreError
-from op_brains.config import (
-    POSTHOG_API_KEY,
-)
+from op_brains.config import POSTHOG_API_KEY
 from op_brains.chat.utils import process_question
-from flask_cors import CORS
 from posthog import Posthog
+from datetime import timedelta
 from functools import wraps
 import os
-from honeybadger.contrib import FlaskHoneybadger
-from .scheduler import configure_scheduler
+from op_core.config import Config
+from tortoise.contrib.quart import register_tortoise
+from quart_tasks import QuartTasks
+import asyncio
+from op_data.cli import (
+    sync_categories,
+    sync_raw_topics,
+    sync_topics,
+    sync_summaries,
+    sync_snapshot,
+    sync_agora,
+)
+from honeybadger import honeybadger
 
-app = Flask(__name__)
-CORS(app)
+
+app = Quart(__name__)
 app.config["SECRET_KEY"] = os.getenv("FLASK_API_SECRET_KEY")
 app.config["HONEYBADGER_ENVIRONMENT"] = os.getenv("ENV")
 app.config["HONEYBADGER_API_KEY"] = os.getenv("HONEYBADGER_API_KEY")
 
-FlaskHoneybadger(app, report_exceptions=True)
-
+app = cors(app)
+tasks = QuartTasks(app)
 posthog = Posthog(POSTHOG_API_KEY, host="https://us.i.posthog.com", sync_mode=True)
+limiter = RateLimiter(app)
 
-limiter = Limiter(
-    get_remote_address,
-    app=app,
-    default_limits=["100 per minute"],
-    storage_uri="memory://",
+honeybadger.configure(
+    api_key=app.config["HONEYBADGER_API_KEY"],
+    environment=app.config["HONEYBADGER_ENVIRONMENT"],
+)
+
+register_tortoise(
+    app,
+    config=Config.get_tortoise_config(),
+    generate_schemas=False,
 )
 
 
 def handle_question(func):
     @wraps(func)
-    def wrapper(*args, **kwargs):
-        data = request.json
+    async def wrapper(*args, **kwargs):
+        data = await request.get_json()
         if data is not None:
             question = data.get("question")
             memory = data.get("memory", [])
@@ -45,23 +59,31 @@ def handle_question(func):
         if not question:
             return jsonify({"error": "No question provided"}), 400
 
-        return func(question, memory, *args, **kwargs)
+        return await func(question, memory, *args, **kwargs)
 
     return wrapper
 
 
 @app.errorhandler(Exception)
 def handle_exception(e):
+    honeybadger.notify(e)
     if isinstance(e, UnsupportedVectorstoreError):
         return jsonify({"error": str(e)}), 400
     return jsonify({"error": "An unexpected error occurred during prediction"}), 500
 
 
 @app.route("/predict", methods=["POST"])
-@limiter.limit("100 per minute")
+@rate_limit(100, timedelta(minutes=1))
 @handle_question
-def predict(question, memory):
-    result = process_question(question, memory)
+async def predict(question, memory):
+    async def process_question_coroutine():
+        loop = asyncio.get_running_loop()
+
+        return await loop.run_in_executor(
+            None, lambda: process_question(question, memory)
+        )
+
+    result = await process_question_coroutine()
 
     user_token = request.headers.get("x-user-id")
     posthog.capture(
@@ -84,7 +106,17 @@ def after_request(response):
     return response
 
 
-scheduler = configure_scheduler()
+@tasks.cron("*/1 * * * *")
+async def frequent_task():
+    await asyncio.gather(
+        sync_categories(),
+        sync_raw_topics(),
+        sync_topics(),
+        sync_summaries(),
+        sync_snapshot(),
+        sync_agora(),
+    )
+
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=3123, debug=True)
+    app.run(host="0.0.0.0")

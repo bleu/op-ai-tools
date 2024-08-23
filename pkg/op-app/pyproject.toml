@@ -9,15 +9,16 @@ op-core = { path = "../op-core", develop = true }
 op-brains = { path = "../op-brains", develop = true }
 op-data = { path = "../op-data", develop = true }
 python = "^3.12"
-flask = "^3.0.3"
-flask-cors = "^4.0.1"
-flask-limiter = "^3.8.0"
 cchardet = "2.2.0a2"
 redis = "^5.0.7"
 python-dotenv = "^1.0.1"
 op-artifacts = { path = "../op-artifacts", develop = true }
 honeybadger = "^0.20.2"
-apscheduler = "^3.10.4"
+uvicorn = "^0.30.6"
+quart = "^0.19.6"
+quart-cors = "^0.7.0"
+quart-rate-limiter = "^0.10.0"
+quart-tasks = "^0.2.2"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.5.5"
