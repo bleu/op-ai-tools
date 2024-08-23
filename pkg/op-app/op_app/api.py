@@ -106,7 +106,7 @@ def after_request(response):
     return response
 
 
-@tasks.cron("*/1 * * * *")
+@tasks.cron("*/30 * * * *")
 async def frequent_task():
     await asyncio.gather(
         sync_categories(),
