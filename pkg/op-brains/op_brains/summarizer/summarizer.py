@@ -8,26 +8,28 @@ from op_brains.exceptions import OpChatBrainsException
 from op_brains.summarizer.sample import get_sample_summary
 from op_brains.summarizer.utils import Prompt, SummaryStructured
 
-threads = ForumPostsProcessingStrategy.get_threads_documents()
 
+async def get_thread_from_url(url: str) -> Document:
+    threads = await ForumPostsProcessingStrategy.get_threads_documents()
 
-def get_thread_from_url(url: str) -> Document:
     thread = next((t for t in threads if t.metadata["url"] == url), None)
     if not thread:
         raise OpChatBrainsException(f"Thread not found for URL: {url}")
     return thread
 
 
-def load_snapshot_proposals() -> Dict[str, Any]:
-    return ForumPostsProcessingStrategy.return_snapshot_proposals()
+async def load_snapshot_proposals() -> Dict[str, Any]:
+    return await ForumPostsProcessingStrategy.return_snapshot_proposals()
 
 
-def summarize_thread(url: str, model_name: str, use_mock_data: bool = False) -> str:
+async def summarize_thread(
+    url: str, model_name: str, use_mock_data: bool = False
+) -> str:
     if use_mock_data:
         return get_sample_summary()
 
-    thread = get_thread_from_url(url)
-    snapshot_proposals = load_snapshot_proposals()
+    thread = await get_thread_from_url(url)
+    snapshot_proposals = await load_snapshot_proposals()
 
     llm = (
         ChatOpenAI(temperature=0, model_name=model_name)

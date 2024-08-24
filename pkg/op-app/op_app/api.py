@@ -76,14 +76,7 @@ def handle_exception(e):
 @rate_limit(100, timedelta(minutes=1))
 @handle_question
 async def predict(question, memory):
-    async def process_question_coroutine():
-        loop = asyncio.get_running_loop()
-
-        return await loop.run_in_executor(
-            None, lambda: process_question(question, memory)
-        )
-
-    result = await process_question_coroutine()
+    result = await process_question(question, memory)
 
     user_token = request.headers.get("x-user-id")
     posthog.capture(

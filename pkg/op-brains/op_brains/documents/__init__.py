@@ -3,9 +3,11 @@ from op_brains.documents.optimism import (
     FragmentsProcessingStrategy,
     SummaryProcessingStrategy,
 )
+from typing import Optional, Dict
+import asyncio
+import aiohttp
+import time
 
-# this list contains lists that are ordered by priority level
-# each inner list contains some sources that have the same priority level (entries will be ordered by last_date)
 chat_sources = [
     [
         FragmentsProcessingStrategy,
@@ -17,48 +19,80 @@ chat_sources = [
 
 
 class DataExporter:
-    @staticmethod
-    def get_dataframe():
-        context_df = []
-        for priority_class in chat_sources:
-            dfs_class = []
-            for source in priority_class:
-                df_source = source.dataframe_process()
+    _dataframe_cache: Optional[pd.DataFrame] = None
+    _dataframe_cache_time: Optional[float] = None
+    _langchain_documents_cache: Optional[Dict] = None
+    _langchain_documents_cache_time: Optional[float] = None
+    _cache_lock = asyncio.Lock()
+    CACHE_TTL = 60 * 60 * 24  # day in seconds
 
-                if not df_source.columns.tolist() == [
-                    "url",
-                    "last_date",
-                    "content",
-                    "type_db_info",
-                ]:
-                    raise ValueError(
-                        f"DataFrame columns are not as expected: {df_source.columns.tolist()}"
+    @classmethod
+    async def get_dataframe(cls):
+        async with cls._cache_lock:
+            current_time = time.time()
+            if (
+                cls._dataframe_cache is None
+                or (current_time - cls._dataframe_cache_time) > cls.CACHE_TTL
+            ):
+                context_df = []
+                for priority_class in chat_sources:
+                    dfs_class = await asyncio.gather(
+                        *[source.dataframe_process() for source in priority_class]
                     )
+                    dfs_class = pd.concat(dfs_class)
+                    dfs_class = dfs_class.sort_values(by="last_date", ascending=False)
+                    context_df.append(dfs_class)
 
-                dfs_class.append(df_source)
+                cls._dataframe_cache = pd.concat(context_df)
+                cls._dataframe_cache_time = current_time
 
-            dfs_class = pd.concat(dfs_class)
-            dfs_class = dfs_class.sort_values(by="last_date", ascending=False)
-            context_df.append(dfs_class)
+        return cls._dataframe_cache
 
-        context_df = pd.concat(context_df)
-        return context_df
+    @classmethod
+    async def get_langchain_documents(cls):
+        async with cls._cache_lock:
+            current_time = time.time()
+            if (
+                cls._langchain_documents_cache is None
+                or (current_time - cls._langchain_documents_cache_time) > cls.CACHE_TTL
+            ):
+                out = {}
+                async with aiohttp.ClientSession() as session:
+                    tasks = []
+                    for source in [x for xs in chat_sources for x in xs]:
+                        tasks.append(cls._fetch_documents(session, source))
+                    results = await asyncio.gather(*tasks)
+
+                    for result in results:
+                        out.update(result)
+
+                cls._langchain_documents_cache = out
+                cls._langchain_documents_cache_time = current_time
+
+        return cls._langchain_documents_cache
 
     @staticmethod
-    def get_langchain_documents():
-        out = {}
-        for source in [x for xs in chat_sources for x in xs]:
-            documents = source.langchain_process()
-            if isinstance(documents, dict):
-                documents = {
-                    f"{source.name_source}_{key}": value
-                    for key, value in documents.items()
-                }
-            elif isinstance(documents, list):
-                documents = {source.name_source: documents}
-            else:
-                raise ValueError(f"Unexpected type of documents: {type(documents)}")
+    async def _fetch_documents(session, source):
+        documents = await source.langchain_process()
+        if isinstance(documents, dict):
+            return {
+                f"{source.name_source}_{key}": value for key, value in documents.items()
+            }
+        elif isinstance(documents, list):
+            return {source.name_source: documents}
+        else:
+            raise ValueError(f"Unexpected type of documents: {type(documents)}")
 
-            out.update(documents)
+    @classmethod
+    async def clear_cache(cls):
+        async with cls._cache_lock:
+            cls._dataframe_cache = None
+            cls._dataframe_cache_time = None
+            cls._langchain_documents_cache = None
+            cls._langchain_documents_cache_time = None
 
-        return out
+    @classmethod
+    async def refresh_data(cls):
+        await cls.clear_cache()
+        await cls.get_dataframe()
+        await cls.get_langchain_documents()

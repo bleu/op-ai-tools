@@ -2,14 +2,14 @@ import re
 import json
 import time
 import pandas as pd
-from typing import Any, Dict, List
-
+from typing import Any, Dict, List, Tuple
+import datetime as dt
 from langchain_core.documents.base import Document
 from langchain_text_splitters import MarkdownHeaderTextSplitter
-
-from op_brains.retriever import connect_db
-
+from op_data.db.models import RawTopic, Topic, TopicCategory, SnapshotProposal
 from op_brains.config import RAW_FORUM_DB, FORUM_SUMMARY_DB, DOCS_PATH, SNAPSHOT_DB
+import aiofiles
+from tortoise.expressions import Q, F
 
 NOW = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
 
@@ -18,11 +18,11 @@ class FragmentsProcessingStrategy:
     name_source = "documentation"
 
     @staticmethod
-    def langchain_process(
+    async def langchain_process(
         file_path: str = DOCS_PATH, headers_to_split_on: List | None = []
     ) -> List[Document]:
-        with open(file_path, "r") as f:
-            docs_read = f.read()
+        async with aiofiles.open(file_path, "r") as f:
+            docs_read = await f.read()
 
         docs_read = re.split(r"==> | <==", docs_read)
         docs = []
@@ -72,8 +72,8 @@ class FragmentsProcessingStrategy:
         return fragments_docs
 
     @staticmethod
-    def dataframe_process(**kwargs) -> pd.DataFrame:
-        fragments = FragmentsProcessingStrategy.langchain_process(**kwargs)
+    async def dataframe_process(**kwargs) -> pd.DataFrame:
+        fragments = await FragmentsProcessingStrategy.langchain_process(**kwargs)
         data = [(f.metadata["url"], NOW, f, "fragments_docs") for f in fragments]
 
         return pd.DataFrame(
@@ -83,39 +83,32 @@ class FragmentsProcessingStrategy:
 
 class ForumPostsProcessingStrategy:
     @staticmethod
-    def retrieve(only_not_summarized: bool = False):
+    async def retrieve(only_not_summarized: bool = False) -> Tuple[Dict, Dict]:
         if only_not_summarized:
-            query = f'SELECT "rawData", url, type, "externalId" FROM "{RAW_FORUM_DB}" WHERE "lastSummarizedAt" < "lastUpdatedAt" OR "lastSummarizedAt" IS NULL;'
+            raw_topics = await RawTopic.filter(
+                Q(lastSummarizedAt__lt=F("lastUpdatedAt"))
+                | Q(lastSummarizedAt__isnull=True)
+            ).values("rawData", "url", "type", "externalId")
         else:
-            query = f'select "rawData", url, type, "externalId" from "{RAW_FORUM_DB}"'
-
-        out_db = connect_db.retrieve_data(query)
+            raw_topics = await RawTopic.all().values(
+                "rawData", "url", "type", "externalId"
+            )
 
         posts, threads = {}, {}
-        for line in out_db:
-            id = int(line[3])
-            # TODO: is this used for anything?
-            type_line = line[2]
-            url_line = line[1]
-            data_line = line[0]
-            for post in data_line["post_stream"]["posts"]:
-                posts[post["id"]] = post
-                posts[post["id"]]["url"] = f"{url_line}/{post["id"]}"
-                posts[post["id"]]["thread_id"] = int(id)
+        for line in raw_topics:
+            id = int(line["externalId"])
+            type_line = line["type"]
+            url_line = line["url"]
+            data_line = line["rawData"]
+            for post in data_line.get("post_stream", {}).get("posts", []):
+                post_id = post.get("id")
+                posts[post_id] = post
+                posts[post_id]["url"] = f"{url_line}/{post_id}"
+                posts[post_id]["thread_id"] = int(id)
 
             threads[id] = data_line
             threads[id]["url"] = url_line
 
-        # TODO: is this used for anything?
-        #     if type_line == "post":
-        #         posts[id] = data_line
-        #         posts[id]["url"] = url_line
-        #         posts[id]["thread_id"] = int(url_line.split("/")[-2])
-        #     elif type_line == "thread":
-        #         threads[id] = data_line
-        #         threads[id]["url"] = url_line
-
-        # print(len(posts))
         to_del = []
         for key in posts:
             try:
@@ -126,7 +119,6 @@ class ForumPostsProcessingStrategy:
             except KeyError:
                 to_del.append(posts[key]["thread_id"])
         posts = {k: v for k, v in posts.items() if k not in to_del}
-        # print(len(posts))
 
         return posts, threads
 
@@ -155,43 +147,57 @@ winning_option: {winning_option}
     """
 
     @staticmethod
-    def return_snapshot_proposals() -> Dict[str, Any]:
-        out_db = connect_db.retrieve_data(
-            f'select "discussion", "title", "spaceId", "spaceName", "snapshot", "state", "type", "body", "start", "end", "votes", "choices", "scores", "winningOption" from "{SNAPSHOT_DB}"'
+    async def return_snapshot_proposals() -> Dict[str, Any]:
+        snapshot_proposals = await SnapshotProposal.all().values(
+            "discussion",
+            "title",
+            "spaceId",
+            "spaceName",
+            "snapshot",
+            "state",
+            "type",
+            "body",
+            "start",
+            "end",
+            "votes",
+            "choices",
+            "scores",
+            "winningOption",
         )
+
         proposals = {}
-        for line in out_db:
-            discussion = line[0]
+        for line in snapshot_proposals:
+            discussion = line["discussion"]
             proposals[discussion] = {
-                "title": line[1],
-                "space_id": line[2],
-                "space_name": line[3],
-                "snapshot": line[4],
-                "state": line[5],
-                "type": line[6],
-                "body": line[7],
-                "start": line[8],
-                "end": line[9],
-                "votes": line[10],
-                "choices": line[11],
-                "scores": line[12],
-                "winning_option": line[13],
+                "title": line["title"],
+                "space_id": line["spaceId"],
+                "space_name": line["spaceName"],
+                "snapshot": line["snapshot"],
+                "state": line["state"],
+                "type": line["type"],
+                "body": line["body"],
+                "start": line["start"],
+                "end": line["end"],
+                "votes": line["votes"],
+                "choices": line["choices"],
+                "scores": line["scores"],
+                "winning_option": line["winningOption"],
             }
             proposals[discussion]["str"] = (
                 ForumPostsProcessingStrategy.template_snapshot_proposal.format(
-                    title=line[1],
-                    space_id=line[2],
-                    space_name=line[3],
-                    snapshot=line[4],
-                    state=line[5],
-                    type=line[6],
-                    body=line[7],
-                    start=line[8],
-                    end=line[9],
-                    votes=line[10],
-                    choices=line[11],
-                    scores=line[12],
-                    winning_option=line[13],
+                    title=line["title"],
+                    space_id=line["spaceId"],
+                    space_name=line["spaceName"],
+                    snapshot=line["snapshot"],
+                    state=line["state"],
+                    type=line["type"],
+                    body=line["body"],
+                    start=line["start"],
+                    end=line["end"],
+                    votes=line["votes"],
+                    choices=line["choices"],
+                    scores=line["scores"],
+                    winning_option=line["winningOption"],
                 )
             )
 
@@ -228,8 +234,8 @@ trust_level (0-4): {TRUST_LEVEL}
     """
 
     @staticmethod
-    def return_threads(only_not_summarized: bool = False) -> List:
-        posts, threads_info = ForumPostsProcessingStrategy.retrieve(
+    async def return_threads(only_not_summarized: bool = False) -> List:
+        posts, threads_info = await ForumPostsProcessingStrategy.retrieve(
             only_not_summarized=only_not_summarized
         )
 
@@ -238,10 +244,9 @@ trust_level (0-4): {TRUST_LEVEL}
 
         df_posts = pd.DataFrame(posts).T
         threads = []
-        category_names = connect_db.retrieve_data(
-            'select "externalId", "name" from "TopicCategory"'
-        )
-        category_names = {int(c[0]): c[1] for c in category_names}
+        categories = await TopicCategory.all().values("externalId", "name")
+        category_names = {int(c["externalId"]): c["name"] for c in categories}
+
         for t in df_posts["thread_id"].unique():
             posts_thread = df_posts[df_posts["thread_id"] == t].sort_values(
                 by="created_at"
@@ -303,15 +308,17 @@ trust_level (0-4): {TRUST_LEVEL}
         return threads
 
     @staticmethod
-    def get_threads_documents() -> List[Document]:
-        threads = ForumPostsProcessingStrategy.return_threads()
+    async def get_threads_documents() -> List[Document]:
+        threads = await ForumPostsProcessingStrategy.return_threads()
         threads_forum = [Document(page_content=t[0], metadata=t[1]) for t in threads]
 
         return threads_forum
 
     @staticmethod
-    def get_threads_documents_not_summarized() -> List[Document]:
-        threads = ForumPostsProcessingStrategy.return_threads(only_not_summarized=True)
+    async def get_threads_documents_not_summarized() -> List[Document]:
+        threads = await ForumPostsProcessingStrategy.return_threads(
+            only_not_summarized=True
+        )
         threads_forum = [Document(page_content=t[0], metadata=t[1]) for t in threads]
 
         return threads_forum
@@ -331,30 +338,32 @@ class SummaryProcessingStrategy:
     """
 
     @staticmethod
-    def retrieve() -> List:
-        out_db = connect_db.retrieve_data(
-            f'select url, tldr, about, overview, reaction from "{FORUM_SUMMARY_DB}"'
+    async def retrieve() -> List[dict]:
+        out_db = await Topic.all().values(
+            "url", "tldr", "about", "overview", "reaction"
         )
 
         ret = []
         for o in out_db:
             str_summary = SummaryProcessingStrategy.template_summary.format(
-                TLDR=o[1],
-                ABOUT=o[2],
-                OVERVIEW=o[3],
-                REACTION=o[4],
+                TLDR=o["tldr"],
+                ABOUT=o["about"],
+                OVERVIEW=o["overview"],
+                REACTION=o["reaction"],
             )
-            item = {"content": str_summary, "url": o[0], "classification": ""}
+            item = {"content": str_summary, "url": o["url"], "classification": ""}
             ret.append(item)
-        threads = ForumPostsProcessingStrategy.return_threads()
+
+        threads = await ForumPostsProcessingStrategy.return_threads()
 
         for entry in ret:
             url = entry["url"]
             thread = next((t for t in threads if t[1]["url"] == url), None)
-            entry["metadata"] = thread[1]
-            entry["metadata"]["whole_thread"] = thread[0]
-            entry["metadata"]["classification"] = entry["classification"]
-            entry["metadata"]["type_db_info"] = "forum_thread_summary"
+            if thread:
+                entry["metadata"] = thread[1]
+                entry["metadata"]["whole_thread"] = thread[0]
+                entry["metadata"]["classification"] = entry["classification"]
+                entry["metadata"]["type_db_info"] = "forum_thread_summary"
 
         ret = [x for x in ret if x is not None]
         ret = [x for x in ret if "metadata" in x.keys()]
@@ -362,10 +371,10 @@ class SummaryProcessingStrategy:
         return ret
 
     @staticmethod
-    def langchain_process(
+    async def langchain_process(
         divide: str | None = "category_name",
     ) -> Dict[str, List[Document]]:
-        data = SummaryProcessingStrategy.retrieve()
+        data = await SummaryProcessingStrategy.retrieve()
 
         if isinstance(divide, str):
             classes = set([entry["metadata"][divide] for entry in data])
@@ -385,8 +394,8 @@ class SummaryProcessingStrategy:
             return docs
 
     @staticmethod
-    def dataframe_process(**kwargs) -> pd.DataFrame:
-        summaries = SummaryProcessingStrategy.langchain_process(**kwargs)
+    async def dataframe_process(**kwargs) -> pd.DataFrame:
+        summaries = await SummaryProcessingStrategy.langchain_process(**kwargs)
         pattern = r"[^A-Za-z0-9_]+"
         summaries = [
             (s.metadata["url"], s.metadata["last_posted_at"], s, re.sub(pattern, "", k))
