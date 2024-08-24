@@ -299,7 +299,10 @@ class RetrieverBuilder:
             index_faiss.add(index_embed)
 
         async def find_similar(
-            query: str, contexts_df: pd.DataFrame, criteria: Callable = lambda x: x, **kwargs
+            query: str,
+            contexts_df: pd.DataFrame,
+            criteria: Callable = lambda x: x,
+            **kwargs,
         ):
             if treshold < 1:
                 if treshold > 0:
