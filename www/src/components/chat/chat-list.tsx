@@ -215,11 +215,12 @@ export function ChatList({
                 <>
                   {isEditable === message.id &&
                   message.name !== "Optimism GovGPT" ? (
-                    <div key="input" className="w-64 relative">
+                    <div key="input">
                       <Textarea
                         value={editMessage}
                         onChange={(e) => setEditMessage(e.target.value)}
-                        className="w-full resize-none overflow-hidden border-none"
+                        autoResize={true}
+                        className="min-w-96"
                       />
                       <div className="flex justify-end space-x-2 mt-2">
                         <Button
