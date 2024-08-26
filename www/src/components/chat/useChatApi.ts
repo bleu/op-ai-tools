@@ -7,13 +7,14 @@ export function useChatApi() {
   const sendMessage = useCallback(
     async (
       message: string,
-      memory: { name: string; message: string }[] = [],
+      memory: { name: string; message: string }[] = []
     ) => {
-      if (!process.env.NEXT_PUBLIC_CHAT_API_URL) {
-        throw new Error("Chat API URL is not defined");
-      }
+      console.log(process.env.NEXT_PUBLIC_CHAT_API_URL);
+      // if (!process.env.NEXT_PUBLIC_CHAT_API_URL) {
+      //   throw new Error("Chat API URL is not defined");
+      // }
 
-      const response = await fetch(process.env.NEXT_PUBLIC_CHAT_API_URL, {
+      const response = await fetch("http://localhost:9090/predict", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -28,7 +29,7 @@ export function useChatApi() {
 
       return await response.json();
     },
-    [posthog],
+    [posthog]
   );
 
   return { sendMessage };

@@ -5,7 +5,7 @@ import { useChatApi } from "./useChatApi";
 
 export function useChatState(
   selectedChat: ChatData,
-  onUpdateMessages: (newMessages: Message[]) => void,
+  onUpdateMessages: (newMessages: Message[]) => void
 ) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [inputMessage, setInputMessage] = useState("");
@@ -30,7 +30,7 @@ export function useChatState(
       const assistantMessage = generateMessageParams(
         selectedChat.id,
         "",
-        "Optimism GovGPT",
+        "Optimism GovGPT"
       );
 
       setLoadingMessageId(assistantMessage.id);
@@ -45,13 +45,13 @@ export function useChatState(
 
         const response = await sendMessageApi(
           newMessage.message,
-          messagesMemory,
+          messagesMemory
         );
 
         setLoadingMessageId(null);
 
         updatedMessages[updatedMessages.length - 1].message = Array.isArray(
-          response["answer"],
+          response["answer"]
         )
           ? response["answer"].join("\n")
           : response["answer"];
@@ -69,14 +69,19 @@ export function useChatState(
         updatedMessages[updatedMessages.length - 1] = generateMessageParams(
           selectedChat.id,
           "Sorry, an error occurred while processing your request.",
-          "Optimism GovGPT",
+          "Optimism GovGPT"
         );
 
         setCurrentMessages([...updatedMessages]);
         onUpdateMessages([...updatedMessages]);
       }
     },
-    [currentMessages, onUpdateMessages, sendMessageApi, selectedChat.id],
+    [
+      currentMessages,
+      onUpdateMessages,
+      sendMessageApi,
+      selectedChat.id,
+    ]
   );
 
   const handleRegenerateMessage = useCallback(
@@ -97,7 +102,7 @@ export function useChatState(
   );
 
   const handleOnEditMessage = useCallback(
-    async (messageId: string) => {
+     (messageId: string, newMessage: Message) => {
       const messageIndex = currentMessages.findIndex((m) => m.id === messageId);
       if (messageIndex === -1) return;
 
@@ -105,8 +110,9 @@ export function useChatState(
       setCurrentMessages(updatedMessages);
       onUpdateMessages(updatedMessages);
 
+      sendMessage(newMessage)
     },
-    [currentMessages, onUpdateMessages, setCurrentMessages, setIsTyping, setIsStreaming]
+    [currentMessages, onUpdateMessages, setCurrentMessages, setIsTyping, setIsStreaming, sendMessage]
   );
 
   return {

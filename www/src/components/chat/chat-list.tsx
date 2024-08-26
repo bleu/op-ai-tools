@@ -28,7 +28,8 @@ interface ChatListProps {
   isStreaming: boolean;
   onRegenerateMessage: (messageId: string) => void;
   loadingMessageId: string | null;
-  onEditMessage: (messageId: string) => void;
+  onEditMessage: (messageId: string, message: Message) => void;
+  onSendMessage: (message: Message) => void
 }
 
 export function ChatList({
@@ -39,6 +40,7 @@ export function ChatList({
   onRegenerateMessage,
   loadingMessageId,
   onEditMessage,
+  onSendMessage
 }: ChatListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<Message | null>(null);
@@ -99,24 +101,68 @@ export function ChatList({
       });
     });
   };
+
+  const formatTextWithReferences = (text) => {
+    // Regex para encontrar a seção de referências no final do texto
+    const referenceSectionRegex =
+      /References:\s*((\[\d+\]\shttps?:\/\/[^\s]+(\s)*)+)/i;
+
+    const match = text.match(referenceSectionRegex);
+
+    if (match) {
+      // Extrai a parte das referências
+      const referencesText = match[1];
+      // Remove as referências do texto original
+      let cleanedText = text.replace(referenceSectionRegex, "").trim();
+
+      // Regex para encontrar todas as referências e seus links
+      const individualReferenceRegex = /\[(\d+)\]\s(https?:\/\/[^\s]+)/g;
+      const references = {};
+      let refMatch;
+      while (
+        (refMatch = individualReferenceRegex.exec(referencesText)) !== null
+      ) {
+        const index = refMatch[1];
+        const url = refMatch[2];
+        references[index] = url;
+      }
+
+      // Substitui as referências no texto pelo link apropriado
+      cleanedText = cleanedText.replace(/\[(\d+)\]/g, (match, p1) => {
+        const link = references[p1];
+        if (link) {
+          return `[[${p1}]](${link})`;
+        }
+        return match;
+      });
+
+      return cleanedText;
+    }
+
+    // Se não houver referências, retorna o texto original
+    return text;
+  };
+
   const handleOnClickEditMessage = (message: Message) => {
     setEditMessage(message.message);
     setIsEditable(message.id);
   };
 
+  const messageContent = (messageText: string) => {
+    const formattedText = formatTextWithReferences(messageText);
+    return deduplicateLineBreaks(formattedText);
+  };
+
   const handleOnSendEditMessage = useCallback(
-    async (messageID: string) => {
+    (messageID: string) => {
       const newMessage: Message = generateMessageParams(
         selectedChat.id,
         editMessage.trim()
       );
 
-      onEditMessage(messageID);
-
+      onEditMessage(messageID, newMessage);
       setEditMessage("");
       setIsEditable("");
-
-      onSendMessage(newMessage)
     },
     [selectedChat, editMessage, onEditMessage]
   );
@@ -170,7 +216,7 @@ export function ChatList({
               ) : (
                 <>
                   {isEditable === message.id &&
-                  message.name !== "Optimism GovGPT" ? (
+                    message.name !== "Optimism GovGPT" ? (
                     <div key="input" className="w-64 relative">
                       <Textarea
                         value={editMessage}
@@ -194,9 +240,9 @@ export function ChatList({
                       </div>
                     </div>
                   ) : (
-                  <FormattedMessage
-                    content={deduplicateLineBreaks(message.message)}
-                  />
+                    <FormattedMessage
+                      content={messageContent(message.message)}
+                    />
                   )}
                   {!isStreaming && message.name === "Optimism GovGPT" && (
                     <div className="mt-2 flex gap-3 ">

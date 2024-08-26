@@ -57,6 +57,7 @@ export function Chat({
             onRegenerateMessage={handleRegenerateMessage}
             loadingMessageId={loadingMessageId}
             onEditMessage={handleOnEditMessage}
+            onSendMessage={sendMessage}
           />
         )}
       </div>
