@@ -1,5 +1,5 @@
 import type { Message } from "@/app/data";
-import { generateMessageParams, type ChatData } from "@/lib/chat-utils";
+import { type ChatData, generateMessageParams } from "@/lib/chat-utils";
 import { cn } from "@/lib/utils";
 import { Clipboard, Pencil, ThumbsDown } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
@@ -18,29 +18,26 @@ import { FormattedMessage } from "../ui/formatted-message";
 import { useToast } from "../ui/hooks/use-toast";
 import { Label } from "../ui/label";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { Textarea } from "../ui/textarea";
 import { ScrollArea } from "../ui/scroll-area";
+import { Textarea } from "../ui/textarea";
+import { useChatStore } from "./useChatState";
 
 interface ChatListProps {
   messages?: Message[];
-  selectedChat: ChatData;
   isMobile: boolean;
   isStreaming: boolean;
-  onRegenerateMessage: (messageId: string) => void;
   loadingMessageId: string | null;
   onEditMessage: (messageId: string, message: Message) => void;
-  onSendMessage: (message: Message) => void
+  onSendMessage: (message: Message) => void;
 }
 
 export function ChatList({
   messages,
-  selectedChat,
   isMobile,
   isStreaming,
-  onRegenerateMessage,
   loadingMessageId,
   onEditMessage,
-  onSendMessage
+  onSendMessage,
 }: ChatListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<Message | null>(null);
@@ -48,6 +45,7 @@ export function ChatList({
   const [feedbackDetails, setFeedbackDetails] = useState<string>("");
   const [isEditable, setIsEditable] = useState<string>("");
   const [editMessage, setEditMessage] = useState<string>("");
+  const { selectedChat } = useChatStore();
 
   const { toast } = useToast();
   const posthog = usePostHog();
@@ -157,14 +155,14 @@ export function ChatList({
     (messageID: string) => {
       const newMessage: Message = generateMessageParams(
         selectedChat.id,
-        editMessage.trim()
+        editMessage.trim(),
       );
 
       onEditMessage(messageID, newMessage);
       setEditMessage("");
       setIsEditable("");
     },
-    [selectedChat, editMessage, onEditMessage]
+    [selectedChat, editMessage, onEditMessage],
   );
 
   return (
@@ -174,7 +172,7 @@ export function ChatList({
           key={message.id}
           className={cn(
             "flex flex-col gap-2 p-4",
-            message.name === "Optimism GovGPT" ? "items-start" : "items-end"
+            message.name === "Optimism GovGPT" ? "items-start" : "items-end",
           )}
         >
           <div className="flex gap-3 items-start">
@@ -204,7 +202,7 @@ export function ChatList({
             <div
               className={cn(
                 "p-3 rounded-md max-w-md overflow-hidden",
-                "bg-accent"
+                "bg-accent",
               )}
             >
               {loadingMessageId === message.id ? (
@@ -216,7 +214,7 @@ export function ChatList({
               ) : (
                 <>
                   {isEditable === message.id &&
-                    message.name !== "Optimism GovGPT" ? (
+                  message.name !== "Optimism GovGPT" ? (
                     <div key="input" className="w-64 relative">
                       <Textarea
                         value={editMessage}
@@ -254,14 +252,6 @@ export function ChatList({
                       >
                         <Clipboard className="h-3.5 w-3.5" />
                       </Button>
-                      {/* <Button
-                        variant="ghost"
-                        className="px-0"
-                        size="sm"
-                        onClick={() => onRegenerateMessage(message.id)}
-                      >
-                        <RotateCcw className="h-3.5 w-3.5" />
-                      </Button> */}
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button

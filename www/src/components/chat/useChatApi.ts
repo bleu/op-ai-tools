@@ -7,7 +7,7 @@ export function useChatApi() {
   const sendMessage = useCallback(
     async (
       message: string,
-      memory: { name: string; message: string }[] = []
+      memory: { name: string; message: string }[] = [],
     ) => {
       console.log(process.env.NEXT_PUBLIC_CHAT_API_URL);
       // if (!process.env.NEXT_PUBLIC_CHAT_API_URL) {
@@ -29,7 +29,7 @@ export function useChatApi() {
 
       return await response.json();
     },
-    [posthog]
+    [posthog],
   );
 
   return { sendMessage };

@@ -7,13 +7,13 @@ import type React from "react";
 import { useEffect, useRef } from "react";
 import { buttonVariants } from "../ui/button";
 import { Textarea } from "../ui/textarea";
+import { useChatStore } from "./useChatState";
 
 interface ChatBottombarProps {
   sendMessage: (newMessage: Message) => void;
   isMobile: boolean;
   isStreaming: boolean;
   inputMessage: string;
-  selectedChat: ChatData;
   setInputMessage: (message: string | ((prev: string) => string)) => void;
 }
 
@@ -23,9 +23,9 @@ export default function ChatBottombar({
   isStreaming,
   inputMessage,
   setInputMessage,
-  selectedChat,
 }: ChatBottombarProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const { selectedChat } = useChatStore();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {

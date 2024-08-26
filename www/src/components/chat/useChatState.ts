@@ -1,119 +1,135 @@
+import { create } from "zustand";
+
 import type { Message } from "@/app/data";
-import { generateMessageParams, type ChatData } from "@/lib/chat-utils";
-import { useCallback, useEffect, useState } from "react";
+import { type ChatData, generateMessageParams } from "@/lib/chat-utils";
+import React, { useEffect } from "react";
 import { useChatApi } from "./useChatApi";
 
-export function useChatState(
-  selectedChat: ChatData,
-  onUpdateMessages: (newMessages: Message[]) => void
-) {
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [inputMessage, setInputMessage] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
-  const [loadingMessageId, setLoadingMessageId] = useState<string | null>(null);
+interface ChatState {
+  selectedChat: ChatData | null;
+  currentMessages: Message[];
+  isStreaming: boolean;
+  isTyping: boolean;
+  loadingMessageId: string | null;
+  inputMessage: string;
+  setSelectedChat: (chat: ChatData) => void;
+  addMessage: (message: Message) => void;
+  updateLastMessage: (content: string) => void;
+  setIsStreaming: (isStreaming: boolean) => void;
+  setIsTyping: (isTyping: boolean) => void;
+  setLoadingMessageId: (id: string | null) => void;
+  setInputMessage: (message: string) => void;
+  editMessage: (messageId: string, newMessage: Message) => void;
+}
 
-  const { sendMessage: sendMessageApi } = useChatApi();
-
-  useEffect(() => {
-    setCurrentMessages(selectedChat.messages || []);
-  }, [selectedChat]);
-
-  const sendMessage = useCallback(
-    async (newMessage: Message) => {
-      const updatedMessages = [...currentMessages, newMessage];
-      setCurrentMessages(updatedMessages);
-      onUpdateMessages(updatedMessages);
-      setIsStreaming(true);
-      setIsTyping(true);
-
-      const assistantMessage = generateMessageParams(
-        selectedChat.id,
-        "",
-        "Optimism GovGPT"
+const useChatStore = create<ChatState>((set) => ({
+  selectedChat: null,
+  currentMessages: [],
+  isStreaming: false,
+  isTyping: false,
+  loadingMessageId: null,
+  inputMessage: "",
+  setSelectedChat: (chat) => {
+    console.log("Setting selected chat", chat);
+    set({ selectedChat: chat, currentMessages: chat.messages || [] });
+  },
+  addMessage: (message) =>
+    set((state) => ({ currentMessages: [...state.currentMessages, message] })),
+  updateLastMessage: (content) =>
+    set((state) => {
+      const updatedMessages = [...state.currentMessages];
+      const lastIndex = updatedMessages.length - 1;
+      if (lastIndex >= 0) {
+        updatedMessages[lastIndex] = {
+          ...updatedMessages[lastIndex],
+          message: content,
+        };
+      }
+      return { currentMessages: updatedMessages };
+    }),
+  setIsStreaming: (isStreaming) => set({ isStreaming }),
+  setIsTyping: (isTyping) => set({ isTyping }),
+  setLoadingMessageId: (id) => set({ loadingMessageId: id }),
+  setInputMessage: (message) => set({ inputMessage: message }),
+  editMessage: (messageId, newMessage) =>
+    set((state) => {
+      const messageIndex = state.currentMessages.findIndex(
+        (m) => m.id === messageId,
       );
+      if (messageIndex === -1) return state;
+      const updatedMessages = state.currentMessages.slice(0, messageIndex);
+      return { currentMessages: updatedMessages };
+    }),
+}));
 
-      setLoadingMessageId(assistantMessage.id);
-      updatedMessages.push(assistantMessage);
-      setCurrentMessages([...updatedMessages]);
-      onUpdateMessages([...updatedMessages]);
+export function useChatState() {
+  const { sendMessage: sendMessageApi } = useChatApi();
+  const {
+    currentMessages,
+    isStreaming,
+    isTyping,
+    loadingMessageId,
+    inputMessage,
+    selectedChat,
+    addMessage,
+    updateLastMessage,
+    setIsStreaming,
+    setIsTyping,
+    setLoadingMessageId,
+    setInputMessage,
+    editMessage,
+  } = useChatStore();
 
-      try {
-        // DO NOT SEND MEMORY FOR NOW
-        // const messagesMemory = generateMessagesMemory(currentMessages);
-        const messagesMemory = [] as any;
+  const createAssistantMessage = () => {
+    return generateMessageParams(selectedChat?.id || "", "", "Optimism GovGPT");
+  };
 
-        const response = await sendMessageApi(
-          newMessage.message,
-          messagesMemory
-        );
+  const handleApiResponse = (response: any) => {
+    const content = Array.isArray(response.answer)
+      ? response.answer.join("\n")
+      : response.answer;
+    updateLastMessage(content);
+  };
 
-        setLoadingMessageId(null);
+  const handleApiError = () => {
+    const errorMessage =
+      "Sorry, an error occurred while processing your request.";
+    updateLastMessage(errorMessage);
+  };
 
-        updatedMessages[updatedMessages.length - 1].message = Array.isArray(
-          response["answer"]
-        )
-          ? response["answer"].join("\n")
-          : response["answer"];
-        setCurrentMessages([...updatedMessages]);
-        onUpdateMessages([...updatedMessages]);
+  const resetChatState = () => {
+    setIsStreaming(false);
+    setIsTyping(false);
+    setLoadingMessageId(null);
+  };
 
-        setIsStreaming(false);
-        setIsTyping(false);
-      } catch (error) {
-        console.error("Error:", error);
-        setIsStreaming(false);
-        setIsTyping(false);
-        setLoadingMessageId(null);
+  const sendMessage = async (newMessage: Message) => {
+    addMessage(newMessage);
+    setIsStreaming(true);
+    setIsTyping(true);
 
-        updatedMessages[updatedMessages.length - 1] = generateMessageParams(
-          selectedChat.id,
-          "Sorry, an error occurred while processing your request.",
-          "Optimism GovGPT"
-        );
+    const assistantMessage = createAssistantMessage();
+    setLoadingMessageId(assistantMessage.id);
+    addMessage(assistantMessage);
 
-        setCurrentMessages([...updatedMessages]);
-        onUpdateMessages([...updatedMessages]);
-      }
-    },
-    [
-      currentMessages,
-      onUpdateMessages,
-      sendMessageApi,
-      selectedChat.id,
-    ]
-  );
+    try {
+      const response = await sendMessageApi(
+        newMessage.message,
+        currentMessages,
+      );
+      handleApiResponse(response);
+    } catch (error) {
+      console.error("Error:", error);
+      handleApiError();
+    } finally {
+      resetChatState();
+    }
+  };
 
-  const handleRegenerateMessage = useCallback(
-    (messageId: string) => {
-      const messageIndex = currentMessages.findIndex((m) => m.id === messageId);
-      if (messageIndex === -1) return;
-
-      const updatedMessages = currentMessages.slice(0, messageIndex);
-      setCurrentMessages(updatedMessages);
-      onUpdateMessages(updatedMessages);
-
-      const userMessage = currentMessages[messageIndex - 1];
-      if (userMessage) {
-        sendMessage(userMessage);
-      }
-    },
-    [currentMessages, onUpdateMessages, sendMessage]
-  );
-
-  const handleOnEditMessage = useCallback(
-     (messageId: string, newMessage: Message) => {
-      const messageIndex = currentMessages.findIndex((m) => m.id === messageId);
-      if (messageIndex === -1) return;
-
-      const updatedMessages = currentMessages.slice(0, messageIndex);
-      setCurrentMessages(updatedMessages);
-      onUpdateMessages(updatedMessages);
-
-      sendMessage(newMessage)
-    },
-    [currentMessages, onUpdateMessages, setCurrentMessages, setIsTyping, setIsStreaming, sendMessage]
-  );
+  const handleOnEditMessage = (messageId: string, newMessage: Message) => {
+    editMessage(messageId, newMessage);
+    sendMessage(newMessage);
+  };
 
   return {
     isStreaming,
@@ -122,8 +138,9 @@ export function useChatState(
     isTyping,
     currentMessages,
     sendMessage,
-    handleRegenerateMessage,
     handleOnEditMessage,
     loadingMessageId,
   };
 }
+
+export { useChatStore };

@@ -11,6 +11,7 @@ import { formatDate } from "@/lib/chat-utils";
 import { cn } from "@/lib/utils";
 import { MoreHorizontal, SquarePen, Trash } from "lucide-react";
 import Link from "next/link";
+import { useChatState, useChatStore } from "./chat/useChatState";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { ScrollArea } from "./ui/scroll-area";
 
@@ -25,7 +26,6 @@ interface SidebarProps {
   }[];
   onClick?: () => void;
   isMobile: boolean;
-  onSelectChat: (id: string) => void;
   onNewChat: () => void;
   onRemoveChat: (id: string) => void;
 }
@@ -34,10 +34,10 @@ export function Sidebar({
   links,
   isCollapsed,
   isMobile,
-  onSelectChat,
   onNewChat,
   onRemoveChat,
 }: SidebarProps) {
+  const { setSelectedChat: onSelectChat } = useChatStore();
   return (
     <div
       data-collapsed={isCollapsed}
@@ -55,7 +55,7 @@ export function Sidebar({
               href="#"
               className={cn(
                 buttonVariants({ variant: "ghost", size: "icon" }),
-                "h-9 w-9"
+                "h-9 w-9",
               )}
               onClick={onNewChat}
             >
@@ -73,12 +73,12 @@ export function Sidebar({
                   <TooltipTrigger asChild>
                     <Link
                       href="#"
-                      onClick={() => onSelectChat(link.id)}
+                      onClick={() => onSelectChat(link)}
                       className={cn(
                         buttonVariants({ variant: link.variant, size: "icon" }),
                         "h-11 w-11 md:h-16 md:w-16",
                         link.variant === "grey" &&
-                          "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white"
+                          "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white",
                       )}
                     >
                       <span className="sr-only">{link.name}</span>
@@ -96,12 +96,12 @@ export function Sidebar({
               <div key={index} className="relative group/link w-full">
                 <Link
                   href="#"
-                  onClick={() => onSelectChat(link.id)}
+                  onClick={() => onSelectChat(link)}
                   className={cn(
                     buttonVariants({ variant: link.variant, size: "xl" }),
                     link.variant === "grey" &&
                       "dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white shrink",
-                    "justify-start gap-4 relative w-full"
+                    "justify-start gap-4 relative w-full",
                   )}
                 >
                   <div className="flex flex-col max-w-28">
@@ -127,7 +127,7 @@ export function Sidebar({
                   />
                 </button>
               </div>
-            )
+            ),
           )}
         </nav>
       </ScrollArea>

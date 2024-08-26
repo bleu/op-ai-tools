@@ -167,7 +167,7 @@ function ForumInfiniteScrollTable({
     updater,
   ) => {
     setColumnFilters(updater);
-    if (!!table.getRowModel().rows.length) {
+    if (table.getRowModel().rows.length) {
       rowVirtualizer.scrollToIndex?.(0);
     }
   };
@@ -217,7 +217,7 @@ function ForumInfiniteScrollTable({
         startDate: toLocaleDateString(dates?.from),
         endDate: toLocaleDateString(dates?.to),
       };
-      router.push(pathname + "?" + createQueryString(query));
+      router.push(`${pathname}?${createQueryString(query)}`);
     }
     setColumnFilters([
       {
@@ -238,7 +238,7 @@ function ForumInfiniteScrollTable({
       endDate: toLocaleDateString(dates?.to),
     };
 
-    router.push(pathname + "?" + createQueryString(query));
+    router.push(`${pathname}?${createQueryString(query)}`);
   }, [category, dates]);
 
   if (isLoading) {

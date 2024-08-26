@@ -8,18 +8,11 @@ import ChatTopbar from "./chat-topbar";
 import { useChatState } from "./useChatState";
 
 interface ChatProps {
-  selectedChat: ChatData;
   isMobile: boolean;
-  onUpdateMessages: (newMessages: Message[]) => void;
   onToggleSidebar: () => void;
 }
 
-export function Chat({
-  selectedChat,
-  isMobile,
-  onUpdateMessages,
-  onToggleSidebar,
-}: ChatProps) {
+export function Chat({ isMobile, onToggleSidebar }: ChatProps) {
   const {
     isStreaming,
     inputMessage,
@@ -27,10 +20,9 @@ export function Chat({
     isTyping,
     currentMessages,
     sendMessage,
-    handleRegenerateMessage,
     handleOnEditMessage,
     loadingMessageId,
-  } = useChatState(selectedChat, onUpdateMessages);
+  } = useChatState();
 
   const handleSuggestionClick = (suggestion: string) => {
     setInputMessage(suggestion);
@@ -51,10 +43,8 @@ export function Chat({
         ) : (
           <ChatList
             messages={currentMessages}
-            selectedChat={selectedChat}
             isMobile={isMobile}
             isStreaming={isStreaming}
-            onRegenerateMessage={handleRegenerateMessage}
             loadingMessageId={loadingMessageId}
             onEditMessage={handleOnEditMessage}
             onSendMessage={sendMessage}
@@ -62,7 +52,6 @@ export function Chat({
         )}
       </div>
       <ChatBottombar
-        selectedChat={selectedChat}
         sendMessage={sendMessage}
         isMobile={isMobile}
         isStreaming={isStreaming}

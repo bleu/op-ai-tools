@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import React, { useEffect, useState, useCallback } from "react";
 import { Sidebar } from "../sidebar";
 import { Chat } from "./chat";
+import { useChatStore } from "./useChatState";
 
 interface ChatLayoutProps {
   defaultLayout?: number[] | undefined;
@@ -31,7 +32,7 @@ export function ChatLayout({
   navCollapsedSize,
 }: ChatLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
-  const [selectedChat, setSelectedChat] = useState<ChatData | null>(null);
+  const { selectedChat, setSelectedChat } = useChatStore();
   const [isMobile, setIsMobile] = useState(false);
   const [chats, setChats] = useState<ChatData[]>([]);
   const [showSidebar, setShowSidebar] = useState(!isMobile);
@@ -82,7 +83,7 @@ export function ChatLayout({
         }
       }
     },
-    [chats, isMobile]
+    [chats, isMobile],
   );
 
   const handleRemoveChat = useCallback(
@@ -100,43 +101,43 @@ export function ChatLayout({
         return updatedChats;
       });
     },
-    [chats, selectedChat]
+    [chats, selectedChat],
   );
 
-  const handleUpdateMessages = useCallback(
-    (newMessages: Message[]) => {
-      if (!selectedChat) return;
+  // const handleUpdateMessages = useCallback(
+  //   (newMessages: Message[]) => {
+  //     if (!selectedChat) return;
 
-      setChats((prevChats) => {
-        const updatedChats = prevChats.map((chat) =>
-          chat.id === selectedChat.id
-            ? {
-                ...chat,
-                messages: newMessages,
-                name: getChatName(newMessages),
-                timestamp: getValidTimestamp(
-                  newMessages[newMessages.length - 1]?.timestamp
-                ),
-              }
-            : chat
-        );
-        saveChatsToLocalStorage(updatedChats);
-        return updatedChats;
-      });
-      setSelectedChat((prevSelected) => {
-        if (!prevSelected) return null;
-        return {
-          ...prevSelected,
-          messages: newMessages,
-          name: getChatName(newMessages),
-          timestamp: getValidTimestamp(
-            newMessages[newMessages.length - 1]?.timestamp
-          ),
-        };
-      });
-    },
-    [selectedChat]
-  );
+  //     setChats((prevChats) => {
+  //       const updatedChats = prevChats.map((chat) =>
+  //         chat.id === selectedChat.id
+  //           ? {
+  //               ...chat,
+  //               messages: newMessages,
+  //               name: getChatName(newMessages),
+  //               timestamp: getValidTimestamp(
+  //                 newMessages[newMessages.length - 1]?.timestamp
+  //               ),
+  //             }
+  //           : chat
+  //       );
+  //       saveChatsToLocalStorage(updatedChats);
+  //       return updatedChats;
+  //     });
+  //     setSelectedChat((prevSelected) => {
+  //       if (!prevSelected) return null;
+  //       return {
+  //         ...prevSelected,
+  //         messages: newMessages,
+  //         name: getChatName(newMessages),
+  //         timestamp: getValidTimestamp(
+  //           newMessages[newMessages.length - 1]?.timestamp
+  //         ),
+  //       };
+  //     });
+  //   },
+  //   [selectedChat]
+  // );
 
   const toggleSidebar = useCallback(() => {
     setShowSidebar((prev) => !prev);
@@ -147,7 +148,7 @@ export function ChatLayout({
       direction="horizontal"
       onLayout={(sizes: number[]) => {
         document.cookie = `react-resizable-panels:layout=${JSON.stringify(
-          sizes
+          sizes,
         )}`;
       }}
       className="h-full items-stretch"
@@ -170,7 +171,7 @@ export function ChatLayout({
           className={cn(
             isCollapsed &&
               "min-w-[50px] md:min-w-[70px] transition-all duration-300 ease-in-out",
-            isMobile && "absolute z-10 h-full bg-background"
+            isMobile && "absolute z-10 h-full bg-background",
           )}
         >
           <Sidebar
@@ -182,7 +183,6 @@ export function ChatLayout({
               timestamp: chat.timestamp,
               variant: selectedChat?.id === chat.id ? "default" : "ghost",
             }))}
-            onSelectChat={handleSelectChat}
             onNewChat={handleNewChat}
             onRemoveChat={handleRemoveChat}
             isMobile={isMobile}
@@ -192,12 +192,7 @@ export function ChatLayout({
       {!isMobile && <ResizableHandle withHandle />}
       <ResizablePanel defaultSize={defaultLayout[1]} minSize={30}>
         {selectedChat ? (
-          <Chat
-            selectedChat={selectedChat}
-            isMobile={isMobile}
-            onUpdateMessages={handleUpdateMessages}
-            onToggleSidebar={toggleSidebar}
-          />
+          <Chat isMobile={isMobile} onToggleSidebar={toggleSidebar} />
         ) : (
           <div className="flex items-center justify-center h-full">
             <p>Select a chat or start a new one</p>

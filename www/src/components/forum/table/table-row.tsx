@@ -10,7 +10,7 @@ export function getColor(categoryValue: string) {
   )?.label;
 
   if (!categoryLabel) {
-    return CATEGORY_COLORS["Others"];
+    return CATEGORY_COLORS.Others;
   }
 
   // @ts-ignore
