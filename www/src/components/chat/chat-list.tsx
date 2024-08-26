@@ -1,9 +1,9 @@
 import type { Message } from "@/app/data";
-import type { ChatData } from "@/lib/chat-utils";
+import { generateMessageParams, type ChatData } from "@/lib/chat-utils";
 import { cn } from "@/lib/utils";
-import { Clipboard, ThumbsDown } from "lucide-react";
+import { Clipboard, Pencil, ThumbsDown } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
-import React, { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Avatar, AvatarImage, BoringAvatar } from "../ui/avatar";
 import { Button } from "../ui/button";
 import {
@@ -28,6 +28,7 @@ interface ChatListProps {
   isStreaming: boolean;
   onRegenerateMessage: (messageId: string) => void;
   loadingMessageId: string | null;
+  onEditMessage: (messageId: string) => void;
 }
 
 export function ChatList({
@@ -37,11 +38,15 @@ export function ChatList({
   isStreaming,
   onRegenerateMessage,
   loadingMessageId,
+  onEditMessage,
 }: ChatListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<Message | null>(null);
   const [feedbackReason, setFeedbackReason] = useState<string>("");
   const [feedbackDetails, setFeedbackDetails] = useState<string>("");
+  const [isEditable, setIsEditable] = useState<string>("");
+  const [editMessage, setEditMessage] = useState<string>("");
+
   const { toast } = useToast();
   const posthog = usePostHog();
 
@@ -94,15 +99,36 @@ export function ChatList({
       });
     });
   };
+  const handleOnClickEditMessage = (message: Message) => {
+    setEditMessage(message.message);
+    setIsEditable(message.id);
+  };
+
+  const handleOnSendEditMessage = useCallback(
+    async (messageID: string) => {
+      const newMessage: Message = generateMessageParams(
+        selectedChat.id,
+        editMessage.trim()
+      );
+
+      onEditMessage(messageID);
+
+      setEditMessage("");
+      setIsEditable("");
+
+      onSendMessage(newMessage)
+    },
+    [selectedChat, editMessage, onEditMessage]
+  );
 
   return (
     <ScrollArea className="w-full overflow-y-auto overflow-x-hidden h-full flex flex-col absolute">
       {messages?.map((message, index) => (
         <div
-          key={message.timestamp}
+          key={message.id}
           className={cn(
             "flex flex-col gap-2 p-4",
-            message.name !== "Optimism GovGPT" ? "items-end" : "items-start"
+            message.name === "Optimism GovGPT" ? "items-start" : "items-end"
           )}
         >
           <div className="flex gap-3 items-start">
@@ -117,6 +143,18 @@ export function ChatList({
                 />
               </Avatar>
             )}
+
+            {message.name !== "Optimism GovGPT" && !isEditable && (
+              <Button
+                variant="ghost"
+                className="px-0"
+                size="sm"
+                onClick={() => handleOnClickEditMessage(message)}
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+            )}
+
             <div
               className={cn(
                 "p-3 rounded-md max-w-md overflow-hidden",
@@ -131,9 +169,35 @@ export function ChatList({
                 </div>
               ) : (
                 <>
+                  {isEditable === message.id &&
+                  message.name !== "Optimism GovGPT" ? (
+                    <div key="input" className="w-64 relative">
+                      <Textarea
+                        value={editMessage}
+                        onChange={(e) => setEditMessage(e.target.value)}
+                        className="w-full resize-none overflow-hidden border-none"
+                      />
+                      <div className="flex justify-end space-x-2 mt-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsEditable("")}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => handleOnSendEditMessage(message.id)}
+                        >
+                          Send
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
                   <FormattedMessage
                     content={deduplicateLineBreaks(message.message)}
                   />
+                  )}
                   {!isStreaming && message.name === "Optimism GovGPT" && (
                     <div className="mt-2 flex gap-3 ">
                       <Button

@@ -1,9 +1,5 @@
 import type { Message } from "@/app/data";
-import {
-  type ChatData,
-  generateMessageParams,
-  generateMessagesMemory,
-} from "@/lib/chat-utils";
+import { generateMessageParams, type ChatData } from "@/lib/chat-utils";
 import { useCallback, useEffect, useState } from "react";
 import { useChatApi } from "./useChatApi";
 
@@ -97,7 +93,20 @@ export function useChatState(
         sendMessage(userMessage);
       }
     },
-    [currentMessages, onUpdateMessages, sendMessage],
+    [currentMessages, onUpdateMessages, sendMessage]
+  );
+
+  const handleOnEditMessage = useCallback(
+    async (messageId: string) => {
+      const messageIndex = currentMessages.findIndex((m) => m.id === messageId);
+      if (messageIndex === -1) return;
+
+      const updatedMessages = currentMessages.slice(0, messageIndex);
+      setCurrentMessages(updatedMessages);
+      onUpdateMessages(updatedMessages);
+
+    },
+    [currentMessages, onUpdateMessages, setCurrentMessages, setIsTyping, setIsStreaming]
   );
 
   return {
@@ -108,6 +117,7 @@ export function useChatState(
     currentMessages,
     sendMessage,
     handleRegenerateMessage,
+    handleOnEditMessage,
     loadingMessageId,
   };
 }

@@ -28,6 +28,7 @@ export function Chat({
     currentMessages,
     sendMessage,
     handleRegenerateMessage,
+    handleOnEditMessage,
     loadingMessageId,
   } = useChatState(selectedChat, onUpdateMessages);
 
@@ -55,6 +56,7 @@ export function Chat({
             isStreaming={isStreaming}
             onRegenerateMessage={handleRegenerateMessage}
             loadingMessageId={loadingMessageId}
+            onEditMessage={handleOnEditMessage}
           />
         )}
       </div>
