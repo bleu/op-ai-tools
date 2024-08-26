@@ -129,7 +129,7 @@ export function ChatList({
       cleanedText = cleanedText.replace(/\[(\d+)\]/g, (match, p1) => {
         const link = references[p1];
         if (link) {
-          return `[[${p1}]](${link})`;
+          return `<a href="${link}" target="_blank">${match}</a>`;
         }
         return match;
       });
@@ -148,7 +148,7 @@ export function ChatList({
 
   const messageContent = (messageText: string) => {
     const formattedText = formatTextWithReferences(messageText);
-    return deduplicateLineBreaks(formattedText);
+    return formattedText.replace(/\n/g, "<br />");
   };
 
   const handleOnSendEditMessage = useCallback(
