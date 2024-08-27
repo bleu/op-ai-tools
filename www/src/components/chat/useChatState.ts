@@ -85,9 +85,9 @@ export function useChatState() {
   };
 
   const handleApiResponse = (response: any) => {
-    const content = Array.isArray(response.answer)
-      ? response.answer.join("\n")
-      : response.answer;
+    const content = Array.isArray(response?.answer)
+      ? response?.answer?.answer?.join("\n")
+      : response?.answer?.answer;
     updateLastMessage(content);
   };
 
