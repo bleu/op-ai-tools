@@ -13,7 +13,7 @@ export function useChatApi() {
         throw new Error("Chat API URL is not defined");
       }
 
-      const response = await fetch("http://localhost:9090/predict", {
+      const response = await fetch(process.env.NEXT_PUBLIC_CHAT_API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
