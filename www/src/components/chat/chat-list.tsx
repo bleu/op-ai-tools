@@ -1,5 +1,5 @@
 import type { Message } from "@/app/data";
-import { type ChatData, generateMessageParams } from "@/lib/chat-utils";
+import { type ChatData, formatTextWithReferences, generateMessageParams } from "@/lib/chat-utils";
 import { cn } from "@/lib/utils";
 import { Clipboard, Pencil, ThumbsDown } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
@@ -33,7 +33,6 @@ interface ChatListProps {
 
 export function ChatList({
   messages,
-  isMobile,
   isStreaming,
   loadingMessageId,
   onEditMessage,
@@ -99,48 +98,7 @@ export function ChatList({
       });
     });
   };
-
-  const formatTextWithReferences = (text) => {
-    // Regex para encontrar a seção de referências no final do texto
-    const referenceSectionRegex =
-      /References:\s*((\[\d+\]\shttps?:\/\/[^\s]+(\s)*)+)/i;
-
-    const match = text.match(referenceSectionRegex);
-
-    if (match) {
-      // Extrai a parte das referências
-      const referencesText = match[1];
-      // Remove as referências do texto original
-      let cleanedText = text.replace(referenceSectionRegex, "").trim();
-
-      // Regex para encontrar todas as referências e seus links
-      const individualReferenceRegex = /\[(\d+)\]\s(https?:\/\/[^\s]+)/g;
-      const references = {};
-      let refMatch;
-      while (
-        (refMatch = individualReferenceRegex.exec(referencesText)) !== null
-      ) {
-        const index = refMatch[1];
-        const url = refMatch[2];
-        references[index] = url;
-      }
-
-      // Substitui as referências no texto pelo link apropriado
-      cleanedText = cleanedText.replace(/\[(\d+)\]/g, (match, p1) => {
-        const link = references[p1];
-        if (link) {
-          return `<a href="${link}" target="_blank">${match}</a>`;
-        }
-        return match;
-      });
-
-      return cleanedText;
-    }
-
-    // Se não houver referências, retorna o texto original
-    return text;
-  };
-
+ 
   const handleOnClickEditMessage = (message: Message) => {
     setEditMessage(message.message);
     setIsEditable(message.id);
@@ -154,7 +112,7 @@ export function ChatList({
   const handleOnSendEditMessage = useCallback(
     (messageID: string) => {
       const newMessage: Message = generateMessageParams(
-        selectedChat.id,
+        selectedChat?.id || "",
         editMessage.trim(),
       );
 

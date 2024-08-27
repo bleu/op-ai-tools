@@ -8,6 +8,10 @@ export interface ChatData {
   timestamp: number;
 }
 
+export interface References {
+  [key: string]: string;
+}
+
 export const getChatName = (messages: Message[]): string => {
   const firstQuestion = messages.find((m) => m.name !== "Optimism GovGPT");
   if (firstQuestion) {
@@ -110,4 +114,33 @@ export const formatDate = (timestamp: number) => {
     return format(date, "MMM d, yyyy h:mm a");
   }
   return "Invalid date";
+};
+
+export const formatTextWithReferences = (text: string): string => {
+  const REFERENCE_SECTION_REGEX = /References:\s*((\[\d+\]\shttps?:\/\/[^\s]+(\s)*)+)/i;
+  const INDIVIDUAL_REFERENCE_REGEX = /\[(\d+)\]\s(https?:\/\/[^\s]+)/g;
+
+  const match = text.match(REFERENCE_SECTION_REGEX);
+
+  if (!match) {
+    return text;
+  }
+
+  const [_, referencesText] = match;
+  let cleanedText = text.replace(REFERENCE_SECTION_REGEX, "").trim();
+
+  const references: References = {};
+  let refMatch: RegExpExecArray | null;
+
+  while ((refMatch = INDIVIDUAL_REFERENCE_REGEX.exec(referencesText)) !== null) {
+    const [, index, url] = refMatch;
+    references[index] = url;
+  }
+
+  cleanedText = cleanedText.replace(/\[(\d+)\]/g, (match, p1: string) => {
+    const link = references[p1];
+    return link ? `<a href="${link}" target="_blank">${match}</a>` : match;
+  });
+
+  return cleanedText;
 };

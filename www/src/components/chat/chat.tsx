@@ -28,6 +28,15 @@ export function Chat({ isMobile, onToggleSidebar }: ChatProps) {
     setInputMessage(suggestion);
   };
 
+
+  const handleSetInputMessage = (value: string | ((prevState: string) => string)) => {
+    if (typeof value === 'function') {
+      setInputMessage(value(inputMessage));
+    } else {
+      setInputMessage(value);
+    }
+  };
+
   return (
     <div className="flex flex-col w-full h-full">
       <ChatTopbar
@@ -56,7 +65,7 @@ export function Chat({ isMobile, onToggleSidebar }: ChatProps) {
         isMobile={isMobile}
         isStreaming={isStreaming}
         inputMessage={inputMessage}
-        setInputMessage={setInputMessage}
+        setInputMessage={handleSetInputMessage}
       />
     </div>
   );

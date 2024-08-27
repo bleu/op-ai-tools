@@ -41,7 +41,7 @@ export default function ChatBottombar({
   const handleSend = () => {
     if (inputMessage.trim() && !isStreaming) {
       const newMessage: Message = generateMessageParams(
-        selectedChat.id,
+        selectedChat?.id || "",
         inputMessage.trim(),
       );
 

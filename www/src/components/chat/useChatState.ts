@@ -1,8 +1,9 @@
+import React from "react";
 import { create } from "zustand";
 
 import type { Message } from "@/app/data";
 import { type ChatData, generateMessageParams } from "@/lib/chat-utils";
-import React, { useEffect } from "react";
+
 import { useChatApi } from "./useChatApi";
 
 interface ChatState {
