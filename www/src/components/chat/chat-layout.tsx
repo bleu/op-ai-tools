@@ -1,5 +1,4 @@
 "use client";
-import type { Message } from "@/app/data";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -9,8 +8,6 @@ import {
   type ChatData,
   addNewChat,
   generateChatParams,
-  getChatName,
-  getValidTimestamp,
   loadChatsFromLocalStorage,
   saveChatsToLocalStorage,
 } from "@/lib/chat-utils";
@@ -25,6 +22,13 @@ interface ChatLayoutProps {
   defaultCollapsed?: boolean;
   navCollapsedSize?: number;
 }
+
+const defaultChatData: ChatData = {
+  id: '',
+  name: 'Default Chat',
+  messages: [],
+  timestamp: Date.now()
+};
 
 export function ChatLayout({
   defaultLayout = [320, 480],
@@ -72,20 +76,6 @@ export function ChatLayout({
     }
   }, [isMobile]);
 
-  const handleSelectChat = useCallback(
-    (id: string) => {
-      const selected = chats.find((chat) => chat.id === id);
-      if (selected) {
-        setSelectedChat(selected);
-
-        if (isMobile) {
-          setShowSidebar(false);
-        }
-      }
-    },
-    [chats, isMobile],
-  );
-
   const handleRemoveChat = useCallback(
     (id: string) => {
       setChats((prevChats) => {
@@ -95,7 +85,7 @@ export function ChatLayout({
         if (updatedChats.length > 0) {
           setSelectedChat(updatedChats[0]);
         } else {
-          setSelectedChat(null);
+          setSelectedChat(defaultChatData);
         }
 
         return updatedChats;
@@ -104,40 +94,6 @@ export function ChatLayout({
     [chats, selectedChat],
   );
 
-  // const handleUpdateMessages = useCallback(
-  //   (newMessages: Message[]) => {
-  //     if (!selectedChat) return;
-
-  //     setChats((prevChats) => {
-  //       const updatedChats = prevChats.map((chat) =>
-  //         chat.id === selectedChat.id
-  //           ? {
-  //               ...chat,
-  //               messages: newMessages,
-  //               name: getChatName(newMessages),
-  //               timestamp: getValidTimestamp(
-  //                 newMessages[newMessages.length - 1]?.timestamp
-  //               ),
-  //             }
-  //           : chat
-  //       );
-  //       saveChatsToLocalStorage(updatedChats);
-  //       return updatedChats;
-  //     });
-  //     setSelectedChat((prevSelected) => {
-  //       if (!prevSelected) return null;
-  //       return {
-  //         ...prevSelected,
-  //         messages: newMessages,
-  //         name: getChatName(newMessages),
-  //         timestamp: getValidTimestamp(
-  //           newMessages[newMessages.length - 1]?.timestamp
-  //         ),
-  //       };
-  //     });
-  //   },
-  //   [selectedChat]
-  // );
 
   const toggleSidebar = useCallback(() => {
     setShowSidebar((prev) => !prev);

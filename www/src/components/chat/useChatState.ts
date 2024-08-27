@@ -31,7 +31,6 @@ const useChatStore = create<ChatState>((set) => ({
   loadingMessageId: null,
   inputMessage: "",
   setSelectedChat: (chat) => {
-    console.log("Setting selected chat", chat);
     set({ selectedChat: chat, currentMessages: chat.messages || [] });
   },
   addMessage: (message) =>
