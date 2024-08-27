@@ -1,13 +1,18 @@
 import type { Message } from "@/app/data";
 import {
-  type ChatData,
   formatTextWithReferences,
   generateMessageParams,
 } from "@/lib/chat-utils";
 import { cn } from "@/lib/utils";
 import { Clipboard, Pencil, ThumbsDown } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+} from "react";
 import { Avatar, AvatarImage, BoringAvatar } from "../ui/avatar";
 import { Button } from "../ui/button";
 import {
@@ -24,112 +29,125 @@ import { Label } from "../ui/label";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { ScrollArea } from "../ui/scroll-area";
 import { Textarea } from "../ui/textarea";
-import { useChatStore } from "./useChatState";
+import { getCurrentChat, useChatStore } from "./use-chat-state";
 
-interface ChatListProps {
-  messages?: Message[];
-  isMobile: boolean;
-  isStreaming: boolean;
-  loadingMessageId: string | null;
-  onEditMessage: (messageId: string, message: Message) => void;
-  onSendMessage: (message: Message) => void;
-}
-
-export function ChatList({
-  messages,
-  isStreaming,
-  loadingMessageId,
-  onEditMessage,
-  onSendMessage,
-}: ChatListProps) {
+export const ChatList: React.FC = React.memo(() => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<Message | null>(null);
   const [feedbackReason, setFeedbackReason] = useState<string>("");
   const [feedbackDetails, setFeedbackDetails] = useState<string>("");
   const [isEditable, setIsEditable] = useState<string>("");
-  const [editMessage, setEditMessage] = useState<string>("");
-  const { selectedChat } = useChatStore();
+  const [editMessageContent, setEditMessageContent] = useState<string>("");
+
+  const isStreaming = useChatStore.use.isStreaming();
+  const loadingMessageId = useChatStore.use.loadingMessageId();
+  const sendMessage = useChatStore.use.sendMessage();
+  const selectedChatId = useChatStore.use.selectedChatId();
 
   const { toast } = useToast();
   const posthog = usePostHog();
 
+  const currentChat = getCurrentChat();
+  const currentMessages = useMemo(
+    () => currentChat?.messages || [],
+    [currentChat],
+  );
+
   useEffect(() => {
-    if (messagesEndRef.current) {
-      setTimeout(() => {
-        // @ts-ignore-next-line
-        messagesEndRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "end",
-        });
-      }, 300);
-    }
-  }, [messages]);
+    const timer = setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }, 100);
 
-  const deduplicateLineBreaks = (message: string | string[]) => {
-    if (Array.isArray(message)) {
-      return message.map((m) => m?.replace(/\n{3,}/g, "\n\n")).join("\n");
-    }
-    return message ? message?.replace(/\n{3,}/g, "\n\n") : message;
-  };
+    return () => clearTimeout(timer);
+  }, [currentMessages]);
 
-  const handleNegativeReaction = (message: Message) => {
-    posthog.capture("USER_REACTED_NEGATIVELY_TO_MESSAGE", {
-      messageId: message.id,
-      messages: messages,
-    });
+  const handleNegativeReaction = useCallback(
+    (message: Message) => {
+      posthog.capture("USER_REACTED_NEGATIVELY_TO_MESSAGE", {
+        messageId: message.id,
+        currentMessages,
+      });
+      setFeedbackMessage(message);
+    },
+    [posthog, currentMessages],
+  );
 
-    setFeedbackMessage(message);
-  };
-
-  const handleFeedbackSubmit = () => {
+  const handleFeedbackSubmit = useCallback(() => {
     posthog.capture("USER_SENT_FEEDBACK", {
       messageId: feedbackMessage?.id,
-      messages: messages,
+      currentMessages,
       reason: feedbackReason,
       details: feedbackDetails,
     });
-
     setFeedbackMessage(null);
     setFeedbackReason("");
     setFeedbackDetails("");
-  };
+  }, [
+    posthog,
+    feedbackMessage,
+    currentMessages,
+    feedbackReason,
+    feedbackDetails,
+  ]);
 
-  const handleCopyMessage = (message: string) => {
-    navigator.clipboard.writeText(message).then(() => {
-      toast({
-        title: "Copied to clipboard",
-        description: "The message has been copied to your clipboard.",
+  const handleCopyMessage = useCallback(
+    (message: string) => {
+      navigator.clipboard.writeText(message).then(() => {
+        toast({
+          title: "Copied to clipboard",
+          description: "The message has been copied to your clipboard.",
+        });
       });
-    });
-  };
-
-  const handleOnClickEditMessage = (message: Message) => {
-    setEditMessage(message.message);
-    setIsEditable(message.id);
-  };
-
-  const messageContent = (messageText: string) => {
-    const formattedText = formatTextWithReferences(messageText);
-    return formattedText.replace(/\n/g, "<br />");
-  };
-
-  const handleOnSendEditMessage = useCallback(
-    (messageID: string) => {
-      const newMessage: Message = generateMessageParams(
-        selectedChat?.id || "",
-        editMessage.trim(),
-      );
-
-      onEditMessage(messageID, newMessage);
-      setEditMessage("");
-      setIsEditable("");
     },
-    [selectedChat, editMessage, onEditMessage],
+    [toast],
   );
 
+  const handleOnClickEditMessage = useCallback((message: Message) => {
+    setEditMessageContent(message.message);
+    setIsEditable(message.id);
+  }, []);
+
+  const messageContent = useCallback((messageText: string) => {
+    const formattedText = formatTextWithReferences(messageText);
+    return formattedText.replace(/\n/g, "<br />");
+  }, []);
+
+  const handleOnEditMessage = useCallback(
+    (messageId: string, newContent: string) => {
+      if (!selectedChatId) {
+        console.error("No current chat selected");
+        return;
+      }
+      const messageToEdit = currentMessages.find((m) => m.id === messageId);
+      if (messageToEdit) {
+        const editedMessage: Message = {
+          ...messageToEdit,
+          message: newContent,
+        };
+        sendMessage(editedMessage);
+      }
+    },
+    [selectedChatId, sendMessage, currentMessages],
+  );
+
+  const handleOnSendEditMessage = useCallback(
+    (messageId: string) => {
+      if (!selectedChatId) {
+        console.error("No current chat selected");
+        return;
+      }
+      handleOnEditMessage(messageId, editMessageContent.trim());
+      setEditMessageContent("");
+      setIsEditable("");
+    },
+    [selectedChatId, editMessageContent, handleOnEditMessage],
+  );
   return (
     <ScrollArea className="w-full overflow-y-auto overflow-x-hidden h-full flex flex-col absolute">
-      {messages?.map((message, index) => (
+      {currentMessages.map((message) => (
         <div
           key={message.id}
           className={cn(
@@ -150,16 +168,17 @@ export function ChatList({
               </Avatar>
             )}
 
-            {message.name !== "Optimism GovGPT" && !isEditable && (
-              <Button
-                variant="ghost"
-                className="px-0"
-                size="sm"
-                onClick={() => handleOnClickEditMessage(message)}
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </Button>
-            )}
+            {message.name !== "Optimism GovGPT" &&
+              isEditable !== message.id && (
+                <Button
+                  variant="ghost"
+                  className="px-0"
+                  size="sm"
+                  onClick={() => handleOnClickEditMessage(message)}
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+              )}
 
             <div
               className={cn(
@@ -179,9 +198,8 @@ export function ChatList({
                   message.name !== "Optimism GovGPT" ? (
                     <div key="input">
                       <Textarea
-                        value={editMessage}
-                        onChange={(e) => setEditMessage(e.target.value)}
-                        autoResize={true}
+                        value={editMessageContent}
+                        onChange={(e) => setEditMessageContent(e.target.value)}
                         className="min-w-96"
                       />
                       <div className="flex justify-end space-x-2 mt-2">
@@ -296,4 +314,4 @@ export function ChatList({
       <div ref={messagesEndRef} />
     </ScrollArea>
   );
-}
+});

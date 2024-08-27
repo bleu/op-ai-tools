@@ -11,7 +11,7 @@ import { formatDate } from "@/lib/chat-utils";
 import { cn } from "@/lib/utils";
 import { MoreHorizontal, SquarePen, Trash } from "lucide-react";
 import Link from "next/link";
-import { useChatState, useChatStore } from "./chat/useChatState";
+import { useChatStore } from "./chat/use-chat-state";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { ScrollArea } from "./ui/scroll-area";
 
@@ -37,7 +37,7 @@ export function Sidebar({
   onNewChat,
   onRemoveChat,
 }: SidebarProps) {
-  const { setSelectedChat: onSelectChat } = useChatStore();
+  const { setSelectedChatId: onSelectChatId } = useChatStore();
   return (
     <div
       data-collapsed={isCollapsed}
@@ -73,7 +73,7 @@ export function Sidebar({
                   <TooltipTrigger asChild>
                     <Link
                       href="#"
-                      onClick={() => onSelectChat(link)}
+                      onClick={() => onSelectChatId(link.id)}
                       className={cn(
                         buttonVariants({ variant: link.variant, size: "icon" }),
                         "h-11 w-11 md:h-16 md:w-16",
@@ -93,10 +93,10 @@ export function Sidebar({
                 </Tooltip>
               </TooltipProvider>
             ) : (
-              <div key={index} className="relative group/link w-full">
+              <div key={`${link.id}`} className="relative group/link w-full">
                 <Link
                   href="#"
-                  onClick={() => onSelectChat(link)}
+                  onClick={() => onSelectChatId(link.id)}
                   className={cn(
                     buttonVariants({ variant: link.variant, size: "xl" }),
                     link.variant === "grey" &&
@@ -112,6 +112,7 @@ export function Sidebar({
                   </div>
                 </Link>
                 <button
+                  type="button"
                   className="absolute top-0 right-0 m-2 opacity-0 group-hover/link:opacity-100 transition-opacity rounded-full hover:scale-110"
                   onClick={(e) => {
                     e.stopPropagation();

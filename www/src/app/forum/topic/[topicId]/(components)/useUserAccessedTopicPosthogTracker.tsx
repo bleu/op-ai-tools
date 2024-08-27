@@ -20,7 +20,7 @@ export function useUserAccessedTopicPosthogTracker(
       topicTitle: topic.title,
       topicUrl: topic.url,
     });
-  }, [topic]);
+  }, [topic, posthog.capture]);
 
   return null;
 }
