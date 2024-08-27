@@ -2,6 +2,7 @@ import os
 from op_brains.chat import model_utils
 from op_brains.chat.system_structure import RAGSystem
 from typing import Dict, Any, List, Tuple
+from op_brains.documents import DataExporter
 
 from op_brains.config import DB_STORAGE_PATH, CHAT_MODEL
 
@@ -20,7 +21,7 @@ def transform_memory_entries(entries: List[Dict[str, str]]) -> List[Tuple[str, s
     return [(entry["name"], entry["message"]) for entry in entries]
 
 
-def process_question(
+async def process_question(
     question: str,
     memory: List[Dict[str, str]],
     # config: Dict[str, Any],
@@ -46,6 +47,8 @@ def process_question(
         Exception: Any unexpected error that occurs during the prediction process
             is caught and logged, with a user-friendly error message returned in the dictionary.
     """
+
+    contexts_df = await DataExporter.get_dataframe()
 
     chat_model = (
         CHAT_MODEL,
@@ -79,19 +82,25 @@ def process_question(
             k=5,
         )
 
-        def retriever(query: dict, reasoning_level: int) -> list:
+        async def retriever(query: dict, reasoning_level: int) -> list:
             if reasoning_level < 1 and "keyword" in query:
                 if "instance" in query:
-                    context = keywords_index_retriever(
-                        query["keyword"], criteria=contains(query["instance"])
+                    context = await keywords_index_retriever(
+                        query["keyword"],
+                        contexts_df,
+                        criteria=contains(query["instance"]),
                     )
                 else:
-                    context = keywords_index_retriever(query["keyword"])
+                    context = await keywords_index_retriever(
+                        query["keyword"], contexts_df
+                    )
                 return context
 
             if "question" in query:
                 if reasoning_level < 1:
-                    context = questions_index_retriever(query["question"])
+                    context = await questions_index_retriever(
+                        query["question"], contexts_df
+                    )
                     if len(context) > 0:
                         return context
                 return default_retriever(query["question"])
@@ -111,7 +120,9 @@ def process_question(
         )
 
         formatted_memory = transform_memory_entries(memory)
-        result = rag_model.predict(question, memory=formatted_memory, verbose=verbose)
+        result = await rag_model.predict(
+            question, contexts_df, memory=formatted_memory, verbose=verbose
+        )
 
         # logger.log_query(question, result)
         return {"answer": result["answer"], "error": None}
@@ -122,7 +133,7 @@ def process_question(
         }
 
 
-if __name__ == "__main__":
-    print(
-        process_question("Can the length of the challenge period be changed?", [], "")
-    )
+# if __name__ == "__main__":
+#     print(
+#         process_question("Can the length of the challenge period be changed?", [], "")
+#     )

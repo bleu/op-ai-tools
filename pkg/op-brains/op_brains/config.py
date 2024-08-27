@@ -12,7 +12,7 @@ DOCS_PATH = importlib.resources.files(op_artifacts) / "governance_docs.txt"
 VECTORSTORE = os.getenv("VECTORSTORE", "faiss")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "text-embedding-ada-002")
 
-#CHAT_MODEL = os.getenv("CHAT_MODEL", "claude-3-sonnet-20240229")
+# CHAT_MODEL = os.getenv("CHAT_MODEL", "claude-3-sonnet-20240229")
 CHAT_MODEL = os.getenv("CHAT_MODEL", "gpt-4o-mini")
 
 CHAT_TEMPERATURE = float(os.getenv("CHAT_TEMPERATURE", "0"))

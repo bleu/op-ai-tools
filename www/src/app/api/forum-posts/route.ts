@@ -32,7 +32,20 @@ export async function GET(req: NextRequest) {
   const endDate = params.get("endDate");
 
   // Build the query conditions
-  const conditions: any = {};
+  const conditions: any = {
+    AND: [
+      {
+        NOT: {
+          tldr: "",
+        },
+      },
+      {
+        NOT: {
+          about: "",
+        },
+      },
+    ],
+  };
 
   const filterableCategories = await prisma.topicCategory
     .findMany({

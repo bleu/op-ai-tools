@@ -23,9 +23,7 @@ expected = {
     "from_fragments": from_fragments_expected,
 }
 
-models2test = [
-    CHAT_MODEL
-]
+models2test = [CHAT_MODEL]
 
 
 def batch_test():
@@ -72,10 +70,11 @@ def json2csv(answers):
                     {
                         f"answer_{m}": answer["answer"],
                         f"time_taken_{m}": answer["time_taken"],
-                        #f"reasoning_level_{m}": len(answer["reasoning"]),
+                        # f"reasoning_level_{m}": len(answer["reasoning"]),
                     }
                 )
         pd.DataFrame(out_answers).to_csv(f"test_results/{test_type}.csv", index=False)
+
 
 def single_test(query, desired_word):
     ok = 0
@@ -85,12 +84,11 @@ def single_test(query, desired_word):
             ok += 1
 
     print(ok)
-    
+
 
 if __name__ == "__main__":
     batch_test()
-    #single_test("who is the grants council lead?", "Gonna")
-    #single_test("Who is the security council lead?", "Alisha")
-    #single_test("What are some of the key metrics used to evaluate the performance of growth experiment programs?", "ETH")
-    #single_test("Is the Law of Chains a legally binding contract?", "No")
-
+    # single_test("who is the grants council lead?", "Gonna")
+    # single_test("Who is the security council lead?", "Alisha")
+    # single_test("What are some of the key metrics used to evaluate the performance of growth experiment programs?", "ETH")
+    # single_test("Is the Law of Chains a legally binding contract?", "No")

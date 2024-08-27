@@ -1,5 +1,6 @@
 from typing import Tuple, Any, Callable
 from op_brains.chat import model_utils
+import pandas as pd
 
 import re
 
@@ -35,10 +36,10 @@ class RAGSystem:
         if LLM is None:
             LLM = self.llm[0]
 
-        output_LLM = self.system_prompt_preprocessor(LLM,
-            QUERY=query, 
-            CONVERSATION_HISTORY=memory)
-        
+        output_LLM = self.system_prompt_preprocessor(
+            LLM, QUERY=query, CONVERSATION_HISTORY=memory
+        )
+
         print(output_LLM)
 
         if not output_LLM["needs_info"]:
@@ -67,11 +68,13 @@ class RAGSystem:
         if LLM is None:
             LLM = self.llm[1]
 
-            output_LLM = self.system_prompt_responder(LLM, final=final,
-                QUERY=query, 
-                CONTEXT=context, 
-                USER_KNOWLEDGE=user_knowledge, 
-                SUMMARY_OF_EXPLORED_CONTEXTS=summary_of_explored_contexts
+            output_LLM = self.system_prompt_responder(
+                LLM,
+                final=final,
+                QUERY=query,
+                CONTEXT=context,
+                USER_KNOWLEDGE=user_knowledge,
+                SUMMARY_OF_EXPLORED_CONTEXTS=summary_of_explored_contexts,
             )
 
             if output_LLM is None:
@@ -79,8 +82,12 @@ class RAGSystem:
 
             knowledge_summary = output_LLM["knowledge_summary"]
             if not output_LLM["answer"] is None:
-                output_LLM["answer"]["url_supporting"].extend([k["url_supporting"].strip() for k in knowledge_summary])
-                output_LLM["answer"]["url_supporting"] = list(set(output_LLM["answer"]["url_supporting"]))
+                output_LLM["answer"]["url_supporting"].extend(
+                    [k["url_supporting"].strip() for k in knowledge_summary]
+                )
+                output_LLM["answer"]["url_supporting"] = list(
+                    set(output_LLM["answer"]["url_supporting"])
+                )
                 return output_LLM["answer"], True
             else:
                 new_questions = output_LLM["search"]["questions"]
@@ -92,7 +99,13 @@ class RAGSystem:
 
             raise Exception("ERROR: Unexpected error during prediction")
 
-    def predict(self, query: str, memory: list = [], verbose: bool = False) -> str:
+    async def predict(
+        self,
+        query: str,
+        contexts_df: pd.DataFrame,
+        memory: list = [],
+        verbose: bool = False,
+    ) -> str:
         needs_info, preprocess_reasoning = self.query_preprocessing_LLM(
             query, memory=memory
         )
@@ -120,7 +133,7 @@ class RAGSystem:
                     pass
 
                 context_dict = {
-                    list(q.values())[0]: self.retriever(
+                    list(q.values())[0]: await self.retriever(
                         q, reasoning_level=reasoning_level
                     )
                     for q in questions
@@ -128,7 +141,11 @@ class RAGSystem:
                 # context_dict = {c.metadata['url']:c for cc in context_list for c in cc}
 
                 context, context_urls = self.context_filter(
-                    context_dict, explored_contexts_urls, query, type_search
+                    context_dict,
+                    explored_contexts_urls,
+                    contexts_df,
+                    query,
+                    type_search,
                 )
                 explored_contexts_urls.extend(context_urls)
 

@@ -50,7 +50,6 @@ export function ChatList({
   const posthog = usePostHog();
 
   useEffect(() => {
-    console.log(messagesEndRef.current)
     if (messagesEndRef.current) {
       setTimeout(() => {
         // @ts-ignore-next-line
