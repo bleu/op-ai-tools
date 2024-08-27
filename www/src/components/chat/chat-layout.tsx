@@ -24,10 +24,10 @@ interface ChatLayoutProps {
 }
 
 const defaultChatData: ChatData = {
-  id: '',
-  name: 'Default Chat',
+  id: "",
+  name: "Default Chat",
   messages: [],
-  timestamp: Date.now()
+  timestamp: Date.now(),
 };
 
 export function ChatLayout({
@@ -93,7 +93,6 @@ export function ChatLayout({
     },
     [chats, selectedChat],
   );
-
 
   const toggleSidebar = useCallback(() => {
     setShowSidebar((prev) => !prev);

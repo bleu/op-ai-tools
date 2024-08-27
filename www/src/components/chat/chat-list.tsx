@@ -1,5 +1,9 @@
 import type { Message } from "@/app/data";
-import { type ChatData, formatTextWithReferences, generateMessageParams } from "@/lib/chat-utils";
+import {
+  type ChatData,
+  formatTextWithReferences,
+  generateMessageParams,
+} from "@/lib/chat-utils";
 import { cn } from "@/lib/utils";
 import { Clipboard, Pencil, ThumbsDown } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
@@ -98,7 +102,7 @@ export function ChatList({
       });
     });
   };
- 
+
   const handleOnClickEditMessage = (message: Message) => {
     setEditMessage(message.message);
     setIsEditable(message.id);

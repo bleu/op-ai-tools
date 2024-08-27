@@ -117,7 +117,8 @@ export const formatDate = (timestamp: number) => {
 };
 
 export const formatTextWithReferences = (text: string): string => {
-  const REFERENCE_SECTION_REGEX = /References:\s*((\[\d+\]\shttps?:\/\/[^\s]+(\s)*)+)/i;
+  const REFERENCE_SECTION_REGEX =
+    /References:\s*((\[\d+\]\shttps?:\/\/[^\s]+(\s)*)+)/i;
   const INDIVIDUAL_REFERENCE_REGEX = /\[(\d+)\]\s(https?:\/\/[^\s]+)/g;
 
   const match = text.match(REFERENCE_SECTION_REGEX);
@@ -132,7 +133,9 @@ export const formatTextWithReferences = (text: string): string => {
   const references: References = {};
   let refMatch: RegExpExecArray | null;
 
-  while ((refMatch = INDIVIDUAL_REFERENCE_REGEX.exec(referencesText)) !== null) {
+  while (
+    (refMatch = INDIVIDUAL_REFERENCE_REGEX.exec(referencesText)) !== null
+  ) {
     const [, index, url] = refMatch;
     references[index] = url;
   }

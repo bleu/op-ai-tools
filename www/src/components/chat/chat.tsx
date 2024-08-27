@@ -28,9 +28,10 @@ export function Chat({ isMobile, onToggleSidebar }: ChatProps) {
     setInputMessage(suggestion);
   };
 
-
-  const handleSetInputMessage = (value: string | ((prevState: string) => string)) => {
-    if (typeof value === 'function') {
+  const handleSetInputMessage = (
+    value: string | ((prevState: string) => string),
+  ) => {
+    if (typeof value === "function") {
       setInputMessage(value(inputMessage));
     } else {
       setInputMessage(value);
