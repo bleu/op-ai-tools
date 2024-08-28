@@ -27,6 +27,17 @@ export default async function Page({ params }: { params: any }) {
           externalId: true,
         },
       },
+      relatedTopics: {
+        select: {
+          toTopic: {
+            select: {
+              id: true,
+              title: true,
+              about: true,
+            },
+          },
+        },
+      },
     },
   })) as TopicPageProps["topic"];
 

@@ -88,17 +88,6 @@ export async function GET(req: NextRequest) {
           externalId: true,
         },
       },
-      relatedTopics: {
-        select: {
-          toTopic: {
-            select: {
-              id: true,
-              title: true,
-              about: true,
-            },
-          },
-        },
-      },
     },
     where: conditions,
     orderBy: {
