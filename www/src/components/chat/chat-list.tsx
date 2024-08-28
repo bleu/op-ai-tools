@@ -1,8 +1,5 @@
-import type { Message } from "@/app/data";
-import {
-  formatTextWithReferences,
-  generateMessageParams,
-} from "@/lib/chat-utils";
+import { type Message, isStructuredMessage } from "@/app/data";
+import { formatAnswerWithReferences } from "@/lib/chat-utils";
 import { cn } from "@/lib/utils";
 import { Clipboard, Pencil, ThumbsDown } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
@@ -50,7 +47,7 @@ export const ChatList: React.FC = React.memo(() => {
   const currentChat = getCurrentChat();
   const currentMessages = useMemo(
     () => currentChat?.messages || [],
-    [currentChat],
+    [currentChat]
   );
 
   useEffect(() => {
@@ -72,7 +69,7 @@ export const ChatList: React.FC = React.memo(() => {
       });
       setFeedbackMessage(message);
     },
-    [posthog, currentMessages],
+    [posthog, currentMessages]
   );
 
   const handleFeedbackSubmit = useCallback(() => {
@@ -94,25 +91,34 @@ export const ChatList: React.FC = React.memo(() => {
   ]);
 
   const handleCopyMessage = useCallback(
-    (message: string) => {
-      navigator.clipboard.writeText(message).then(() => {
+    (message: Message) => {
+      const textToCopy = isStructuredMessage(message)
+        ? message.message.answer
+        : message.message;
+      navigator.clipboard.writeText(textToCopy).then(() => {
         toast({
           title: "Copied to clipboard",
           description: "The message has been copied to your clipboard.",
         });
       });
     },
-    [toast],
+    [toast]
   );
 
   const handleOnClickEditMessage = useCallback((message: Message) => {
-    setEditMessageContent(message.message);
+    setEditMessageContent(
+      isStructuredMessage(message) ? message.message.answer : message.message
+    );
     setIsEditable(message.id);
   }, []);
 
-  const messageContent = useCallback((messageText: string) => {
-    const formattedText = formatTextWithReferences(messageText);
-    return formattedText.replace(/\n/g, "<br />");
+  const messageContent = useCallback((message: Message) => {
+    if (!isStructuredMessage(message)) return message.message;
+    if (isStructuredMessage(message) && !message.message.url_supporting.length) return message.message.answer;
+
+
+    const formattedMessage = formatAnswerWithReferences(message);
+    return formattedMessage.replace(/\n/g, "<br /s>");
   }, []);
 
   const handleOnEditMessage = useCallback(
@@ -130,7 +136,7 @@ export const ChatList: React.FC = React.memo(() => {
         sendMessage(editedMessage);
       }
     },
-    [selectedChatId, sendMessage, currentMessages],
+    [selectedChatId, sendMessage, currentMessages]
   );
 
   const handleOnSendEditMessage = useCallback(
@@ -143,7 +149,7 @@ export const ChatList: React.FC = React.memo(() => {
       setEditMessageContent("");
       setIsEditable("");
     },
-    [selectedChatId, editMessageContent, handleOnEditMessage],
+    [selectedChatId, editMessageContent, handleOnEditMessage]
   );
   return (
     <ScrollArea className="w-full overflow-y-auto overflow-x-hidden h-full flex flex-col absolute">
@@ -152,7 +158,7 @@ export const ChatList: React.FC = React.memo(() => {
           key={message.id}
           className={cn(
             "flex flex-col gap-2 p-4",
-            message.name === "Optimism GovGPT" ? "items-start" : "items-end",
+            message.name === "Optimism GovGPT" ? "items-start" : "items-end"
           )}
         >
           <div className="flex gap-3 items-start">
@@ -183,7 +189,7 @@ export const ChatList: React.FC = React.memo(() => {
             <div
               className={cn(
                 "p-3 rounded-md max-w-md overflow-hidden",
-                "bg-accent",
+                "bg-accent"
               )}
             >
               {loadingMessageId === message.id ? (
@@ -219,9 +225,7 @@ export const ChatList: React.FC = React.memo(() => {
                       </div>
                     </div>
                   ) : (
-                    <FormattedMessage
-                      content={messageContent(message.message)}
-                    />
+                    <FormattedMessage content={messageContent(message)} />
                   )}
                   {!isStreaming && message.name === "Optimism GovGPT" && (
                     <div className="mt-2 flex gap-3 ">
@@ -229,7 +233,7 @@ export const ChatList: React.FC = React.memo(() => {
                         variant="ghost"
                         className="px-0"
                         size="sm"
-                        onClick={() => handleCopyMessage(message.message)}
+                        onClick={() => handleCopyMessage(message)}
                       >
                         <Clipboard className="h-3.5 w-3.5" />
                       </Button>

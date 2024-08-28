@@ -1,4 +1,8 @@
-import type { Message } from "@/app/data";
+import {
+  type Message,
+  type StructuredMessage,
+  isStructuredMessage,
+} from "@/app/data";
 import type { StoreApi, UseBoundStore } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
@@ -31,7 +35,7 @@ interface ChatStoreActions {
   setIsTyping: (isTyping: boolean) => void;
   setLoadingMessageId: (id: string | null) => void;
   setInputMessage: (
-    message: string | ((prevMessage: string) => string),
+    message: string | ((prevMessage: string) => string)
   ) => void;
   sendMessage: (newMessage: Message) => Promise<void>;
 }
@@ -43,7 +47,7 @@ type WithSelectors<S> = S extends { getState: () => infer T }
   : never;
 
 const createSelectors = <S extends UseBoundStore<StoreApi<object>>>(
-  _store: S,
+  _store: S
 ) => {
   const store = _store as WithSelectors<typeof _store>;
   store.use = {};
@@ -58,10 +62,20 @@ const createAssistantMessage = (chatId: string): Message => {
   return generateMessageParams(chatId, "", "Optimism GovGPT");
 };
 
-const processApiResponse = (response: any): string => {
-  return Array.isArray(response.answer)
-    ? response.answer.join("\n")
-    : response.answer;
+const processApiResponse = (response: any): StructuredMessage["message"] => {
+  if (
+    typeof response.data === "object" &&
+    "answer" in response.data &&
+    "url_supporting" in response.data
+  ) {
+    return response.data;
+  }
+  return {
+    answer: Array.isArray(response.data)
+      ? response.data.join("\n")
+      : response.data,
+    url_supporting: [],
+  };
 };
 
 const useChatStoreBase = create<ChatStore>()(
@@ -116,7 +130,7 @@ const useChatStoreBase = create<ChatStore>()(
         if (!chatId) return;
 
         const isEditing = state.chats[chatId].messages.some(
-          (m) => m.id === newMessage.id,
+          (m) => m.id === newMessage.id
         );
 
         set((state) => {
@@ -124,13 +138,13 @@ const useChatStoreBase = create<ChatStore>()(
           state.isTyping = true;
           if (isEditing) {
             const messageIndex = state.chats[chatId].messages.findIndex(
-              (m) => m.id === newMessage.id,
+              (m) => m.id === newMessage.id
             );
             if (messageIndex !== -1) {
               state.chats[chatId].messages[messageIndex] = newMessage;
               state.chats[chatId].messages = state.chats[chatId].messages.slice(
                 0,
-                messageIndex + 1,
+                messageIndex + 1
               );
             }
           } else {
@@ -147,8 +161,10 @@ const useChatStoreBase = create<ChatStore>()(
           });
 
           const response = await sendMessageApi(
-            newMessage.message,
-            generateMessagesMemory(get().chats[chatId].messages),
+            isStructuredMessage(newMessage)
+              ? newMessage.message.answer
+              : newMessage.message,
+            generateMessagesMemory(get().chats[chatId].messages)
           );
           const content = processApiResponse(response);
 
@@ -161,7 +177,7 @@ const useChatStoreBase = create<ChatStore>()(
               lastMessage.message = content;
             }
             state.chats[chatId].name = getChatName(
-              state.chats[chatId].messages,
+              state.chats[chatId].messages
             );
           });
         } catch (error) {
@@ -188,8 +204,8 @@ const useChatStoreBase = create<ChatStore>()(
     {
       name: "chat-storage",
       getStorage: () => localStorage,
-    },
-  ),
+    }
+  )
 );
 
 export const useChatStore = createSelectors(useChatStoreBase);
