@@ -111,5 +111,14 @@ class TopicsService:
 
     @staticmethod
     async def update_relationships():
-        # If there are any relationships to update, implement them here
-        pass
+        topics = await Topic.all().prefetch_related('rawTopic')
+
+        for topic in topics:
+            raw_related_topics = topic.rawTopic.rawData.get("related_topics", None)
+
+            if isinstance(raw_related_topics, list):
+                related_topics_ids = [item['id'] for item in raw_related_topics]
+
+                related_topics = await Topic.filter(externalId__in=related_topics_ids)
+
+                await topic.relatedTopics.add(*related_topics)
