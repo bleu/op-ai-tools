@@ -125,10 +125,10 @@ async def process_question(
         )
 
         # logger.log_query(question, result)
-        return {"answer": result["answer"], "error": None}
+        return {"data": result["answer"], "error": None}
     except Exception:
         return {
-            "answer": None,
+            "data": None,
             "error": "An unexpected error occurred during prediction",
         }
 
