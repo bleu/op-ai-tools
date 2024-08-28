@@ -81,22 +81,20 @@ In summary, Optimism is an Ethereum Layer 2 focused on scalability through optim
       );
     }
 
-    const data = {
-      answer: {
-        answer: `To participate in voting on Optimism governance proposals, you need to hold OP tokens. You can vote directly on proposals through the Optimism Governance Portal. If you prefer, you can also delegate your voting power to someone else. For detailed instructions on how to set up as a delegator and vote, you can refer to the Optimism documentation [1].
-
-Engaging in governance discussions and providing feedback on proposals is also encouraged, as it helps shape the future of the Optimism ecosystem [2].
-
-References: [1] https://gov.optimism.io/t/setup-myself-as-a-delegator-deligate-and-vote-on-proposal/6538 [2] https://gov.optimism.io/t/participate-in-op-token-house-governance-on-tally/5285`,
+    const response = {
+      data: {
+        answer:
+          "Optimism works as a Layer 2 scaling solution for Ethereum, utilizing a technology called optimistic rollups. This allows transactions to be processed off-chain, which significantly increases transaction speed and reduces costs while still ensuring security by periodically submitting batches of transactions to the Ethereum mainnet. The governance of Optimism is community-driven, enabling users to participate in decision-making processes regarding the protocol's development and funding. Additionally, the Retro Funding program rewards contributions to the Optimism ecosystem, focusing on community-driven projects and initiatives.",
         url_supporting: [
-          "https://gov.optimism.io/t/setup-myself-as-a-delegator-deligate-and-vote-on-proposal/6538 ",
-          "https://gov.optimism.io/t/participate-in-op-token-house-governance-on-tally/5285",
+          "https://gov.optimism.io/t/bi-weekly-op-mainnet-onchain-analysis-second-half-of-august/6769",
+          "https://gov.optimism.io/t/welcome-to-the-optimism-collective-discourse/7",
+          "https://gov.optimism.io/t/governance-fund-observations/3257",
         ],
       },
       error: null,
     };
 
-    return new HttpResponse(JSON.stringify(data), {
+    return new HttpResponse(JSON.stringify(response), {
       headers: {
         "Content-Type": "application/json",
       },
