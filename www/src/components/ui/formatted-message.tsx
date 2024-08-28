@@ -9,8 +9,9 @@ export const FormattedMessage: React.FC<FormattedMessageProps> = ({
   content,
 }) => {
   return (
-    <div className="prose prose-sm">
-      <Remark>{content}</Remark>
-    </div>
+    <div
+      className="prose prose-sm"
+      dangerouslySetInnerHTML={{ __html: content }}
+    />
   );
 };

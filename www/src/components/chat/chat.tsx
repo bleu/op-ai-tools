@@ -1,35 +1,19 @@
-import type { Message } from "@/app/data";
-import type { ChatData } from "@/lib/chat-utils";
 import React from "react";
 import ChatBottombar from "./chat-bottombar";
 import { ChatEmptyState } from "./chat-empty-state";
 import { ChatList } from "./chat-list";
 import ChatTopbar from "./chat-topbar";
-import { useChatState } from "./useChatState";
+import { getCurrentChat, useChatStore } from "./use-chat-state";
 
 interface ChatProps {
-  selectedChat: ChatData;
   isMobile: boolean;
-  onUpdateMessages: (newMessages: Message[]) => void;
   onToggleSidebar: () => void;
 }
 
-export function Chat({
-  selectedChat,
-  isMobile,
-  onUpdateMessages,
-  onToggleSidebar,
-}: ChatProps) {
-  const {
-    isStreaming,
-    inputMessage,
-    setInputMessage,
-    isTyping,
-    currentMessages,
-    sendMessage,
-    handleRegenerateMessage,
-    loadingMessageId,
-  } = useChatState(selectedChat, onUpdateMessages);
+export function Chat({ isMobile, onToggleSidebar }: ChatProps) {
+  const isTyping = useChatStore.use.isTyping();
+  const setInputMessage = useChatStore.use.setInputMessage();
+  const currentChat = getCurrentChat();
 
   const handleSuggestionClick = (suggestion: string) => {
     setInputMessage(suggestion);
@@ -43,29 +27,15 @@ export function Chat({
         isMobile={isMobile}
       />
       <div className="flex-grow overflow-hidden relative">
-        {currentMessages.length === 0 ? (
+        {!currentChat || currentChat.messages.length === 0 ? (
           <div className="absolute inset-0 flex items-center justify-center">
             <ChatEmptyState onSuggestionClick={handleSuggestionClick} />
           </div>
         ) : (
-          <ChatList
-            messages={currentMessages}
-            selectedChat={selectedChat}
-            isMobile={isMobile}
-            isStreaming={isStreaming}
-            onRegenerateMessage={handleRegenerateMessage}
-            loadingMessageId={loadingMessageId}
-          />
+          <ChatList />
         )}
       </div>
-      <ChatBottombar
-        selectedChat={selectedChat}
-        sendMessage={sendMessage}
-        isMobile={isMobile}
-        isStreaming={isStreaming}
-        inputMessage={inputMessage}
-        setInputMessage={setInputMessage}
-      />
+      <ChatBottombar isMobile={isMobile} />
     </div>
   );
 }
