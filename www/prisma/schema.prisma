@@ -30,6 +30,17 @@ model Topic {
   readTime           String?
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
+  relatedTopics      RelatedTopics[]   @relation("RelatedTopicsFrom")
+  relatedToTopics    RelatedTopics[]   @relation("RelatedTopicsTo")
+}
+
+model RelatedTopics {
+  fromTopic   Topic @relation("RelatedTopicsFrom", fields: [fromTopicId], references: [id])
+  fromTopicId Int
+  toTopic     Topic @relation("RelatedTopicsTo", fields: [toTopicId], references: [id])
+  toTopicId   Int
+
+  @@id([fromTopicId, toTopicId])
 }
 
 model TopicCategory {
