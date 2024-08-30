@@ -1,6 +1,7 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import React, { useState, useEffect, useRef } from "react";
-import { Button } from "../ui/button";
+"use client";
+import { cn } from "@/lib/utils";
+import Autoplay from "embla-carousel-autoplay";
+import React from "react";
 import {
   Carousel,
   CarouselContent,
@@ -8,34 +9,54 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "./TestCarousel";
-import { Topic, type TopicContent, type TopicProps } from "./Topic";
+import { Topic, type TopicContent } from "./Topic";
 
 export interface TopicCarouselProps {
-  items: TopicContent[];
-  cardsToShow?: number;
+  relatedTopics: {
+    toTopic: TopicContent;
+  }[];
 }
 
-export function TopicCarousel({ items, cardsToShow = 4 }: TopicCarouselProps) {
+export function RelatedTopicCarousel({ relatedTopics }: TopicCarouselProps) {
+  const plugin = React.useRef(
+    Autoplay({ delay: 3000, stopOnInteraction: true, playOnInit: true }),
+  );
+
+  const isMobile = window?.innerWidth < 768;
 
   return (
     <Carousel
-      opts={{
-        align: "start",
-        loop: true,
-      }}
-      className="w-full"
+      plugins={[plugin.current]}
+      className="size-full"
+      opts={{ align: "start", loop: true }}
     >
-      <CarouselContent className="-ml-2 md:-ml-4">
-        {items.map((item, index) => (
-          <CarouselItem key={index} className="pl-2 md:pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-            <div className="h-full">
-              <Topic item={item} />
+      <CarouselContent className="gap-3 ml-0.5">
+        {relatedTopics.length > 0 ? (
+          relatedTopics.map((item, index) => (
+            <CarouselItem
+              key={index}
+              className={cn(
+                "basis-1/1 md:basis-1/3 lg:basis-1/5 pl-0",
+                index === relatedTopics.length - 1 && "mr-4",
+              )}
+            >
+              <Topic item={item.toTopic} />
+            </CarouselItem>
+          ))
+        ) : (
+          <CarouselItem>
+            <div className="flex justify-center items-center size-full h-20">
+              <span className="text-foreground">No results found.</span>
             </div>
           </CarouselItem>
-        ))}
+        )}
       </CarouselContent>
-      <CarouselPrevious />
-      <CarouselNext />
+      {!isMobile && (
+        <>
+          <CarouselNext className="-right-0" />
+          <CarouselPrevious className="left-0" />
+        </>
+      )}
     </Carousel>
   );
 }
