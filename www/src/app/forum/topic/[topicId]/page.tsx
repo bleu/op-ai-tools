@@ -1,5 +1,5 @@
 "use server";
-import type { TopicContent } from "@/components/forum/Topic";
+import type { Category, TopicContent } from "@/components/forum/Topic";
 import prisma from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
 import { TopicPage } from "./(components)/topic-page";
@@ -16,6 +16,7 @@ export type TopicPageProps = {
     };
   }> & {
     relatedTopics: RelatedTopic[];
+    category: Category
   };
 };
 

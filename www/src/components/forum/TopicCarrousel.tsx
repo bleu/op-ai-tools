@@ -10,13 +10,17 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "./TestCarousel";
-import { Topic, type TopicContent } from "./Topic";
+import { Category, Topic, type TopicContent } from "./Topic";
 
 export interface TopicCarouselProps {
   relatedTopics: RelatedTopic[];
+  category: Category
 }
 
-export function RelatedTopicCarousel({ relatedTopics }: TopicCarouselProps) {
+export function RelatedTopicCarousel({
+  relatedTopics,
+  category,
+}: TopicCarouselProps) {
   const plugin = React.useRef(
     Autoplay({ delay: 3000, stopOnInteraction: true }),
   );
@@ -27,7 +31,7 @@ export function RelatedTopicCarousel({ relatedTopics }: TopicCarouselProps) {
     <Carousel
       plugins={[plugin.current]}
       className="size-full"
-      opts={{ align: "start", loop: true }}
+      opts={{ align: "start", loop: false }}
     >
       <CarouselContent className="gap-3 ml-0.5">
         {relatedTopics.map((item, index) => {
@@ -40,7 +44,7 @@ export function RelatedTopicCarousel({ relatedTopics }: TopicCarouselProps) {
                 index === relatedTopics.length - 1 && "mr-4",
               )}
             >
-              <Topic item={item.toTopic} />
+              <Topic item={item.toTopic} category={category} />
             </CarouselItem>
           );
         })}
