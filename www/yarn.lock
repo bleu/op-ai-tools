@@ -2089,16 +2089,6 @@ ellipsize@^0.5.1:
   resolved "https://registry.yarnpkg.com/ellipsize/-/ellipsize-0.5.1.tgz#2ac8bba69b2190d629cc5065a9c2bf28d99f237e"
   integrity sha512-0jEAyuIRU6U8MN0S5yUqIrkK/AQWkChh642N3zQuGV57s9bsUWYLc0jJOoDIUkZ2sbEL3ySq8xfq71BvG4q3hw==
 
-embla-carousel-auto-scroll@^8.2.0:
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/embla-carousel-auto-scroll/-/embla-carousel-auto-scroll-8.2.0.tgz#7b9c6b602482aefc2ad3e817e3f283c6be4e3c25"
-  integrity sha512-eeEsEXKJU4xmHXRE93MmZpDGsPnjwVvUxoBGbAs3PrUtoYGqCvxaVEHpv4+vvI3qph3eUVEB5dBhOjqJkpl75g==
-
-embla-carousel-autoplay@^8.2.0:
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/embla-carousel-autoplay/-/embla-carousel-autoplay-8.2.0.tgz#b0fee50cd1eae5e6f22a7ace753d823a6eb95e0d"
-  integrity sha512-+u5I5h27tnEl9D5IiY4n3Q5DrT2XuNggZ6P/785cETYZslEVGHPevbyzuryxGNi1taXfrgvwrbMnisfUyUmytw==
-
 embla-carousel-react@^8.2.0:
   version "8.2.0"
   resolved "https://registry.yarnpkg.com/embla-carousel-react/-/embla-carousel-react-8.2.0.tgz#4214ce960e2691575dff6cebf9c94ac573fdc569"

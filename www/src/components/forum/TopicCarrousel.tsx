@@ -1,7 +1,6 @@
 "use client";
 import type { RelatedTopic } from "@/app/forum/topic/[topicId]/page";
 import { cn } from "@/lib/utils";
-import Autoplay from "embla-carousel-autoplay";
 import React from "react";
 import {
   Carousel,
@@ -21,18 +20,10 @@ export function RelatedTopicCarousel({
   relatedTopics,
   category,
 }: TopicCarouselProps) {
-  const plugin = React.useRef(
-    Autoplay({ delay: 3000, stopOnInteraction: true }),
-  );
-
   const isMobile = window?.innerWidth < 768;
 
   return (
-    <Carousel
-      plugins={[plugin.current]}
-      className="size-full"
-      opts={{ align: "start", loop: false }}
-    >
+    <Carousel className="size-full" opts={{ align: "start", loop: false }}>
       <CarouselContent className="gap-3 ml-0.5">
         {relatedTopics.map((item, index) => {
           if (!item.toTopic.about) return;
