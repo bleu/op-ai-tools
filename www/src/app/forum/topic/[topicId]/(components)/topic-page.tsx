@@ -82,7 +82,7 @@ export function TopicPage({ topic }: TopicPageProps) {
 
       {topic.relatedTopics.length > 0 ? (
         <Section title="Related content">
-          <div className="max-w-sm sm:max-w-2xl md:max-w-[83rem] lg:max-w-[96rem]">
+          <div className="max-w-sm sm:max-w-2xl md:max-w-[85rem] lg:max-w-[96rem]">
             <RelatedTopicCarousel
               relatedTopics={topic.relatedTopics}
               category={topic.category}

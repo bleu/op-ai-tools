@@ -9,7 +9,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "./TestCarousel";
+} from "./Carousel";
 import { type Category, Topic } from "./Topic";
 
 export interface TopicCarouselProps {
