@@ -1,12 +1,77 @@
 "use client";
 
 import { Feedback } from "@/components/forum/Feedback";
+import type { TopicContent } from "@/components/forum/Topic";
+import { TopicCarousel } from "@/components/forum/TopicCarrousel";
 import { TopicHeader } from "@/components/forum/topic-header";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
 import type { TopicPageProps } from "../page";
 import { useUserAccessedTopicPosthogTracker } from "./useUserAccessedTopicPosthogTracker";
+
+const carouselItems: TopicContent[] = [
+  {
+    title: "Daily Digest - 9 Jul 24",
+    subtitle: "Retro Funding",
+    description:
+      "Content summarized in one paragraph. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna.",
+  },
+  {
+    title: "Weekly Report - 10 Jul 24",
+    subtitle: "Market Analysis",
+    description:
+      "Another summary of content. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+  },
+  {
+    title: "Monthly Overview - 11 Jul 24",
+    subtitle: "Performance Metrics",
+    description:
+      "Yet another content summary. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+  },
+  {
+    title: "Quarterly Update - 12 Jul 24",
+    subtitle: "Financial Results",
+    description:
+      "One more content summary. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+  },
+  {
+    title: "Quarterly Update - 12 Jul 24",
+    subtitle: "Financial Results",
+    description:
+      "One more content summary. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+  },
+  {
+    title: "Quarterly Update - 12 Jul 24",
+    subtitle: "Financial Results",
+    description:
+      "One more content summary. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+  },
+  {
+    title: "Quarterly Update - 12 Jul 24",
+    subtitle: "Financial Results",
+    description:
+      "One more content summary. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+  },
+  {
+    title: "Quarterly Update - 12 Jul 24",
+    subtitle: "Financial Results",
+    description:
+      "One more content summary. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+  },
+  {
+    title: "Quarterly Update - 12 Jul 24",
+    subtitle: "Financial Results",
+    description:
+      "One more content summary. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+  },
+  {
+    title: "Quarterly Update - 12 Jul 24",
+    subtitle: "Financial Results",
+    description:
+      "One more content summary. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+  },
+];
 
 const Section = ({ title, children }: PropsWithChildren<{ title: string }>) => (
   <div className="space-y-4">
@@ -81,6 +146,11 @@ export function TopicPage({ topic }: TopicPageProps) {
         >
           gov.optimism.io
         </Link>
+      </Section>
+      <Section title="Related Content">
+        <div className="w-full">
+          <TopicCarousel items={carouselItems}/>
+          </div>
       </Section>
     </div>
   );
