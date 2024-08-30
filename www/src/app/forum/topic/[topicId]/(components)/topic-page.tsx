@@ -20,8 +20,6 @@ const Section = ({ title, children }: PropsWithChildren<{ title: string }>) => (
 export function TopicPage({ topic }: TopicPageProps) {
   useUserAccessedTopicPosthogTracker(topic);
 
-  console.log("TopicPage", topic);
-
   return (
     <div className="p-1 md:p-4 space-y-8">
       <TopicHeader
@@ -40,11 +38,6 @@ export function TopicPage({ topic }: TopicPageProps) {
       </Section>
 
       <Separator orientation="horizontal" />
-
-      {/* <Section title="Proposal">
-        <p>{topic?.proposal}</p>
-      </Section>
-      */}
 
       {topic.firstPost && (
         <Section title="What's Being Discussed">
@@ -86,11 +79,14 @@ export function TopicPage({ topic }: TopicPageProps) {
           gov.optimism.io
         </Link>
       </Section>
-      <div>
-        <div className="max-w-sm sm:max-w-2xl md:max-w-[83rem]">
-          <RelatedTopicCarousel relatedTopics={topic.relatedTopics} />
-        </div>
-      </div>
+
+      {topic.relatedTopics.length > 0 ? (
+        <Section title="Related content">
+          <div className="max-w-sm sm:max-w-2xl md:max-w-[83rem] lg:max-w-[96rem]">
+            <RelatedTopicCarousel relatedTopics={topic.relatedTopics} />
+          </div>
+        </Section>
+      ) : null}
     </div>
   );
 }

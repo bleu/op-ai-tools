@@ -1,4 +1,5 @@
 "use client";
+import type { RelatedTopic } from "@/app/forum/topic/[topicId]/page";
 import { cn } from "@/lib/utils";
 import Autoplay from "embla-carousel-autoplay";
 import React from "react";
@@ -12,14 +13,12 @@ import {
 import { Topic, type TopicContent } from "./Topic";
 
 export interface TopicCarouselProps {
-  relatedTopics: {
-    toTopic: TopicContent;
-  }[];
+  relatedTopics: RelatedTopic[];
 }
 
 export function RelatedTopicCarousel({ relatedTopics }: TopicCarouselProps) {
   const plugin = React.useRef(
-    Autoplay({ delay: 3000, stopOnInteraction: true, playOnInit: true }),
+    Autoplay({ delay: 3000, stopOnInteraction: true }),
   );
 
   const isMobile = window?.innerWidth < 768;
@@ -31,8 +30,9 @@ export function RelatedTopicCarousel({ relatedTopics }: TopicCarouselProps) {
       opts={{ align: "start", loop: true }}
     >
       <CarouselContent className="gap-3 ml-0.5">
-        {relatedTopics.length > 0 ? (
-          relatedTopics.map((item, index) => (
+        {relatedTopics.map((item, index) => {
+          if (!item.toTopic.about) return;
+          return (
             <CarouselItem
               key={index}
               className={cn(
@@ -42,18 +42,12 @@ export function RelatedTopicCarousel({ relatedTopics }: TopicCarouselProps) {
             >
               <Topic item={item.toTopic} />
             </CarouselItem>
-          ))
-        ) : (
-          <CarouselItem>
-            <div className="flex justify-center items-center size-full h-20">
-              <span className="text-foreground">No results found.</span>
-            </div>
-          </CarouselItem>
-        )}
+          );
+        })}
       </CarouselContent>
       {!isMobile && (
         <>
-          <CarouselNext className="-right-0" />
+          <CarouselNext className="right-0" />
           <CarouselPrevious className="left-0" />
         </>
       )}
