@@ -10,11 +10,11 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "./TestCarousel";
-import { Category, Topic, type TopicContent } from "./Topic";
+import { type Category, Topic } from "./Topic";
 
 export interface TopicCarouselProps {
   relatedTopics: RelatedTopic[];
-  category: Category
+  category: Category;
 }
 
 export function RelatedTopicCarousel({

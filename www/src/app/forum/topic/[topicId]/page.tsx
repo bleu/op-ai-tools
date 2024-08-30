@@ -16,7 +16,7 @@ export type TopicPageProps = {
     };
   }> & {
     relatedTopics: RelatedTopic[];
-    category: Category
+    category: Category;
   };
 };
 
