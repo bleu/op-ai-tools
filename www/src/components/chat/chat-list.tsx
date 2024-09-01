@@ -1,4 +1,4 @@
-import { type Message, isStructuredMessage } from "@/app/data";
+import type { Data, Message } from "@/app/data";
 import { formatAnswerWithReferences } from "@/lib/chat-utils";
 import { cn } from "@/lib/utils";
 import { Clipboard, Pencil, ThumbsDown } from "lucide-react";
@@ -47,7 +47,7 @@ export const ChatList: React.FC = React.memo(() => {
   const currentChat = getCurrentChat();
   const currentMessages = useMemo(
     () => currentChat?.messages || [],
-    [currentChat]
+    [currentChat],
   );
 
   useEffect(() => {
@@ -69,7 +69,7 @@ export const ChatList: React.FC = React.memo(() => {
       });
       setFeedbackMessage(message);
     },
-    [posthog, currentMessages]
+    [posthog, currentMessages],
   );
 
   const handleFeedbackSubmit = useCallback(() => {
@@ -91,10 +91,8 @@ export const ChatList: React.FC = React.memo(() => {
   ]);
 
   const handleCopyMessage = useCallback(
-    (message: Message) => {
-      const textToCopy = isStructuredMessage(message)
-        ? message.message.answer
-        : message.message;
+    (data: Data) => {
+      const textToCopy = data.answer;
       navigator.clipboard.writeText(textToCopy).then(() => {
         toast({
           title: "Copied to clipboard",
@@ -102,22 +100,19 @@ export const ChatList: React.FC = React.memo(() => {
         });
       });
     },
-    [toast]
+    [toast],
   );
 
   const handleOnClickEditMessage = useCallback((message: Message) => {
-    setEditMessageContent(
-      isStructuredMessage(message) ? message.message.answer : message.message
-    );
+    setEditMessageContent(message.data.answer);
     setIsEditable(message.id);
   }, []);
 
-  const messageContent = useCallback((message: Message) => {
-    if (!isStructuredMessage(message)) return message.message;
-    if (isStructuredMessage(message) && !message.message.url_supporting.length) return message.message.answer;
+  const messageContent = useCallback((data: Data) => {
+    console.log("data", data);
+    if (data.url_supporting.length === 0) return data.answer;
 
-
-    const formattedMessage = formatAnswerWithReferences(message);
+    const formattedMessage = formatAnswerWithReferences(data);
     return formattedMessage.replace(/\n/g, "<br /s>");
   }, []);
 
@@ -127,29 +122,31 @@ export const ChatList: React.FC = React.memo(() => {
         console.error("No current chat selected");
         return;
       }
-      const messageToEdit = currentMessages.find((m) => m.id === messageId);
+      const messageToEdit = currentMessages.find(
+        (message) => message.id === messageId,
+      );
       if (messageToEdit) {
         const editedMessage: Message = {
           ...messageToEdit,
-          message: newContent,
+          data: { answer: newContent, url_supporting: [] },
         };
         sendMessage(editedMessage);
       }
     },
-    [selectedChatId, sendMessage, currentMessages]
+    [selectedChatId, sendMessage, currentMessages],
   );
 
   const handleOnSendEditMessage = useCallback(
-    (messageId: string) => {
+    (dataId: string) => {
       if (!selectedChatId) {
         console.error("No current chat selected");
         return;
       }
-      handleOnEditMessage(messageId, editMessageContent.trim());
+      handleOnEditMessage(dataId, editMessageContent.trim());
       setEditMessageContent("");
       setIsEditable("");
     },
-    [selectedChatId, editMessageContent, handleOnEditMessage]
+    [selectedChatId, editMessageContent, handleOnEditMessage],
   );
   return (
     <ScrollArea className="w-full overflow-y-auto overflow-x-hidden h-full flex flex-col absolute">
@@ -158,7 +155,7 @@ export const ChatList: React.FC = React.memo(() => {
           key={message.id}
           className={cn(
             "flex flex-col gap-2 p-4",
-            message.name === "Optimism GovGPT" ? "items-start" : "items-end"
+            message.name === "Optimism GovGPT" ? "items-start" : "items-end",
           )}
         >
           <div className="flex gap-3 items-start">
@@ -189,7 +186,7 @@ export const ChatList: React.FC = React.memo(() => {
             <div
               className={cn(
                 "p-3 rounded-md max-w-md overflow-hidden",
-                "bg-accent"
+                "bg-accent",
               )}
             >
               {loadingMessageId === message.id ? (
@@ -225,7 +222,7 @@ export const ChatList: React.FC = React.memo(() => {
                       </div>
                     </div>
                   ) : (
-                    <FormattedMessage content={messageContent(message)} />
+                    <FormattedMessage content={messageContent(message.data)} />
                   )}
                   {!isStreaming && message.name === "Optimism GovGPT" && (
                     <div className="mt-2 flex gap-3 ">
@@ -233,7 +230,7 @@ export const ChatList: React.FC = React.memo(() => {
                         variant="ghost"
                         className="px-0"
                         size="sm"
-                        onClick={() => handleCopyMessage(message)}
+                        onClick={() => handleCopyMessage(message.data)}
                       >
                         <Clipboard className="h-3.5 w-3.5" />
                       </Button>

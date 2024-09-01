@@ -34,7 +34,7 @@ export default function ChatBottombar({ isMobile }: ChatBottombarProps) {
     if (inputMessage.trim() && !isStreaming && currentChat) {
       const newMessage = generateMessageParams(
         currentChat.id,
-        inputMessage.trim(),
+        { answer: inputMessage.trim(), url_supporting: [] },
         "anonymous",
       );
 
