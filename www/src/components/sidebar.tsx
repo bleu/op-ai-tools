@@ -1,4 +1,4 @@
-import type { Message } from "@/app/data";
+import type { Data, Message } from "@/app/data";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Tooltip,

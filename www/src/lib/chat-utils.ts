@@ -1,4 +1,4 @@
-import { type Message, StructuredMessage, isStructuredMessage } from "@/app/data";
+import type { Data, Message } from "@/app/data";
 
 import { format, isValid } from "date-fns";
 
@@ -10,13 +10,11 @@ export interface ChatData {
 }
 
 export const getChatName = (messages: Message[]): string => {
-  const firstQuestion = messages.find((m) => m.name !== "Optimism GovGPT");
+  const firstQuestion = messages?.find((m) => m.name !== "Optimism GovGPT");
   if (firstQuestion) {
-    const messageContent = isStructuredMessage(firstQuestion)
-      ? firstQuestion.message.answer
-      : firstQuestion.message;
+    const messageContent = firstQuestion.data.answer;
     return (
-      messageContent.slice(0, 30) + (messageContent.length > 30 ? "..." : "")
+      messageContent?.slice(0, 30) + (messageContent?.length > 30 ? "..." : "")
     );
   }
   return "New Chat";
@@ -31,10 +29,13 @@ export const getValidTimestamp = (timestamp: number | undefined): number => {
 
 export const saveChatsToLocalStorage = (chats: ChatData[]): void => {
   const nonEmptyChats = chats.filter((chat) => chat.messages.length > 0);
-  const chatHistory = nonEmptyChats.reduce((acc, chat) => {
-    acc[`chat-${chat.id}`] = chat.messages;
-    return acc;
-  }, {} as Record<string, Message[]>);
+  const chatHistory = nonEmptyChats.reduce(
+    (acc, chat) => {
+      acc[`chat-${chat.id}`] = chat.messages;
+      return acc;
+    },
+    {} as Record<string, Message[]>,
+  );
   localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
 };
 
@@ -75,38 +76,25 @@ export function generateChatParams(prefix: string): ChatData {
 }
 export function generateMessageParams(
   chatId: string,
-  message: string | { answer: string; url_supporting: string[] },
-  name = "anonymous"
+  data: { answer: string; url_supporting: string[] },
+  name = "anonymous",
 ): Message {
   const now = Date.now();
 
-  if (typeof message === "string") {
-    return {
-      id: `${chatId}-message-${name}-${now}`,
-      name,
-      message,
-      timestamp: now,
-    };
-  }
   return {
     id: `${chatId}-message-${name}-${now}`,
     name,
-    message: {
-      answer: message.answer,
-      url_supporting: message.url_supporting,
-    },
+    data,
     timestamp: now,
   };
 }
 export function generateMessagesMemory(
-  messages: Message[]
+  messages: Message[],
 ): { name: string; message: string }[] {
   return messages.map((message) => {
     return {
       name: message.name === "Optimism GovGPT" ? "chat" : "user",
-      message: isStructuredMessage(message)
-        ? message.message.answer
-        : message.message,
+      message: message.data.answer,
     };
   });
 }
@@ -124,14 +112,12 @@ export const formatDate = (timestamp: number) => {
   return "Invalid date";
 };
 
-export const formatAnswerWithReferences = (message: StructuredMessage): string => {
-  const { answer, url_supporting } = message.message;
+export const formatAnswerWithReferences = (data: Data): string => {
+  const { answer, url_supporting } = data;
 
-  // Create clickable references
   const references = url_supporting
     .map((url, index) => `<a href="${url}" target="_blank">[${index + 1}]</a>`)
     .join(" ");
 
-  // Combine the answer with the references
   return `${answer.trim()}\n\nReferences: ${references}`;
 };
