@@ -1,4 +1,5 @@
-import React from "react";
+import type React from "react";
+import { useState } from "react";
 
 import type { Data, Message } from "@/app/data";
 import { FormattedMessage } from "@/components/ui/formatted-message";
@@ -20,7 +21,7 @@ export const MessageContent: React.FC<MessageContentProps> = ({
   isEditable,
   setIsEditable,
 }) => {
-  const [editMessageContent, setEditMessageContent] = React.useState(
+  const [editMessageContent, setEditMessageContent] = useState(
     message.data.answer,
   );
   const sendMessage = useChatStore.use.sendMessage();
