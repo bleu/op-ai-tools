@@ -1,6 +1,8 @@
 "use client";
 
 import { Feedback } from "@/components/forum/Feedback";
+import type { TopicContent } from "@/components/forum/Topic";
+import { RelatedTopicCarousel } from "@/components/forum/TopicCarrousel";
 import { TopicHeader } from "@/components/forum/topic-header";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
@@ -36,11 +38,6 @@ export function TopicPage({ topic }: TopicPageProps) {
       </Section>
 
       <Separator orientation="horizontal" />
-
-      {/* <Section title="Proposal">
-        <p>{topic?.proposal}</p>
-      </Section>
-      */}
 
       {topic.firstPost && (
         <Section title="What's Being Discussed">
@@ -82,6 +79,17 @@ export function TopicPage({ topic }: TopicPageProps) {
           gov.optimism.io
         </Link>
       </Section>
+
+      {topic.relatedTopics.length > 0 ? (
+        <Section title="Related content">
+          <div className="max-w-sm sm:max-w-2xl md:max-w-[85rem] lg:max-w-[96rem]">
+            <RelatedTopicCarousel
+              relatedTopics={topic.relatedTopics}
+              category={topic.category}
+            />
+          </div>
+        </Section>
+      ) : null}
     </div>
   );
 }

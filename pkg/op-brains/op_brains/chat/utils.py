@@ -18,7 +18,9 @@ def transform_memory_entries(entries: List[Dict[str, str]]) -> List[Tuple[str, s
     Returns:
         List[Tuple[str, str]]: A list of tuples, each containing the 'name' and 'message' values.
     """
-    return [(entry["name"], entry["message"]) for entry in entries]
+    return [
+        (entry["name"], entry["message"]) for entry in entries if "message" in entry
+    ]
 
 
 async def process_question(

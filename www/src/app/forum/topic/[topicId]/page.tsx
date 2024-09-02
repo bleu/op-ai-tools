@@ -1,15 +1,23 @@
 "use server";
+import type { Category, TopicContent } from "@/components/forum/Topic";
 import prisma from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
 import { TopicPage } from "./(components)/topic-page";
 import { useUserAccessedTopicPosthogTracker } from "./(components)/useUserAccessedTopicPosthogTracker";
+
+export type RelatedTopic = {
+  toTopic: TopicContent;
+};
 
 export type TopicPageProps = {
   topic: Prisma.TopicGetPayload<{
     include: {
       category: true;
     };
-  }>;
+  }> & {
+    relatedTopics: RelatedTopic[];
+    category: Category;
+  };
 };
 
 export default async function Page({ params }: { params: any }) {
@@ -25,6 +33,17 @@ export default async function Page({ params }: { params: any }) {
           id: true,
           name: true,
           externalId: true,
+        },
+      },
+      relatedTopics: {
+        select: {
+          toTopic: {
+            select: {
+              id: true,
+              title: true,
+              about: true,
+            },
+          },
         },
       },
     },

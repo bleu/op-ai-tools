@@ -68,6 +68,19 @@ class RawTopic(Model):
         table = "RawTopic"
 
 
+class RelatedTopics(Model):
+    from_topic = fields.ForeignKeyField(
+        "models.Topic", source_field="fromTopicId", related_name="related_topics_from"
+    )
+    to_topic = fields.ForeignKeyField(
+        "models.Topic", source_field="toTopicId", related_name="related_topics_to"
+    )
+
+    class Meta:
+        table = "RelatedTopics"
+        unique_together = (("from_topic", "to_topic"),)
+
+
 class Topic(Model):
     id = fields.IntField(pk=True)
     externalId = fields.CharField(max_length=255, unique=True)
@@ -105,6 +118,13 @@ class Topic(Model):
         null=True,
         source_field="snapshotProposalId",
         to_field="id",
+    )
+    relatedTopics = fields.ManyToManyField(
+        "models.Topic",
+        through="RelatedTopics",
+        forward_key="toTopicId",
+        backward_key="fromTopicId",
+        related_name="related_to_topics",
     )
 
     class Meta:
