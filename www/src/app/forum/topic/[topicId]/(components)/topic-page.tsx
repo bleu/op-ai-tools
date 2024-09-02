@@ -9,6 +9,7 @@ import Link from "next/link";
 import type { PropsWithChildren } from "react";
 import type { TopicPageProps } from "../page";
 import { useUserAccessedTopicPosthogTracker } from "./useUserAccessedTopicPosthogTracker";
+import Markdown from "react-markdown";
 
 const Section = ({ title, children }: PropsWithChildren<{ title: string }>) => (
   <div className="space-y-4">
@@ -47,7 +48,19 @@ export function TopicPage({ topic }: TopicPageProps) {
 
       {topic.overview && (
         <Section title="Overview">
-          <div className="whitespace-pre-line">{topic.overview}</div>
+          {/* <div className="whitespace-pre-line">{topic.overview}</div> */}
+          <Markdown
+            components={{
+              a: ({ node, ...props }) => (
+                <a
+                  {...props}
+                  className="text-blue-500 underline underline-offset-2"
+                />
+              ),
+            }}
+          >
+            {topic.overview}
+          </Markdown>
         </Section>
       )}
 
