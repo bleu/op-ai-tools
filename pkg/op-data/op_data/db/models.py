@@ -69,12 +69,17 @@ class RawTopic(Model):
 
 
 class RelatedTopics(Model):
-    from_topic = fields.ForeignKeyField('models.Topic', source_field='fromTopicId', related_name='related_topics_from')
-    to_topic = fields.ForeignKeyField('models.Topic', source_field='toTopicId', related_name='related_topics_to')
+    from_topic = fields.ForeignKeyField(
+        "models.Topic", source_field="fromTopicId", related_name="related_topics_from"
+    )
+    to_topic = fields.ForeignKeyField(
+        "models.Topic", source_field="toTopicId", related_name="related_topics_to"
+    )
 
     class Meta:
         table = "RelatedTopics"
         unique_together = (("from_topic", "to_topic"),)
+
 
 class Topic(Model):
     id = fields.IntField(pk=True)
@@ -115,11 +120,11 @@ class Topic(Model):
         to_field="id",
     )
     relatedTopics = fields.ManyToManyField(
-        'models.Topic', 
-        through='RelatedTopics', 
-        forward_key='toTopicId',
-        backward_key='fromTopicId',
-        related_name='related_to_topics'
+        "models.Topic",
+        through="RelatedTopics",
+        forward_key="toTopicId",
+        backward_key="fromTopicId",
+        related_name="related_to_topics",
     )
 
     class Meta:

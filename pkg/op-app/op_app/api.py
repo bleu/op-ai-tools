@@ -12,6 +12,7 @@ from op_core.config import Config
 from tortoise.contrib.quart import register_tortoise
 from quart_tasks import QuartTasks
 import asyncio
+from op_app.utils.model_predicted_answer import model_predicted_answer
 from op_data.cli import (
     sync_categories,
     sync_raw_topics,
@@ -78,14 +79,24 @@ def handle_exception(e):
 async def predict(question, memory):
     result = await process_question(question, memory)
 
+    answer = result["data"]["answer"] if result["data"] else ""
+
+    posthog_event = (
+        "MODEL_PREDICTED_ANSWER"
+        if model_predicted_answer(answer)
+        else "MODEL_FAILED_TO_PREDICT"
+    )
+
+    print(f"Posthog event: {posthog_event}")
+
     user_token = request.headers.get("x-user-id")
     posthog.capture(
         user_token,
-        "MODEL_PREDICTED_ANSWER",
+        posthog_event,
         {
             "endpoint": "predict",
             "question": question,
-            "answer": result.get("answer"),
+            "answer": result["data"]["answer"] if result["data"] else "",
             "error": result.get("error"),
         },
     )

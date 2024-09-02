@@ -44,6 +44,9 @@ export async function GET(req: NextRequest) {
           about: "",
         },
       },
+      {
+        visible: true,
+      },
     ],
   };
 
