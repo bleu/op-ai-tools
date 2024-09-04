@@ -22,27 +22,27 @@ export const MessageActions: React.FC<MessageActionsProps> = ({ message }) => {
   }
 
   return (
-    <div className="mt-2 flex gap-3">
+    <div className="flex gap-3">
+  <Button
+    variant="ghost"
+    className="px-0 transition-colors duration-200 hover:bg-gray-500 hover:text-gray-900"
+    size="sm"
+    onClick={() => handleCopyMessage(message.data.answer)}
+  >
+    <Clipboard className="h-3.5 w-3.5" />
+  </Button>
+  <FeedbackDialog
+    trigger={
       <Button
         variant="ghost"
-        className="px-0"
+        className="px-0 transition-colors duration-200 hover:bg-gray-500 hover:text-gray-900"
         size="sm"
-        onClick={() => handleCopyMessage(message.data.answer)}
+        onClick={() => handleNegativeReaction()}
       >
-        <Clipboard className="h-3.5 w-3.5" />
+        <ThumbsDown className="h-3.5 w-3.5" />
       </Button>
-      <FeedbackDialog
-        trigger={
-          <Button
-            variant="ghost"
-            className="px-0"
-            size="sm"
-            onClick={() => handleNegativeReaction()}
-          >
-            <ThumbsDown className="h-3.5 w-3.5" />
-          </Button>
-        }
-      />
-    </div>
+    }
+  />
+</div>
   );
 };
