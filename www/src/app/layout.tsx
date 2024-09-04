@@ -1,6 +1,7 @@
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
 import "./globals.css";
+import { Header } from "@/components/Header";
 import { CSPostHogProvider } from "@/components/posthog";
 import { Toaster } from "@/components/ui/toaster";
 import dynamic from "next/dynamic";
@@ -36,9 +37,9 @@ export default function RootLayout({
       </head>
       <CSPostHogProvider>
         <body className={GeistSans.className}>
+          <Header />
           <PostHogPageView />
           <Toaster />
-
           {children}
         </body>
       </CSPostHogProvider>

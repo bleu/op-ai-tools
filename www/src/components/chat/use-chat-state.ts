@@ -1,4 +1,4 @@
-import type { Data, Message } from "@/app/data";
+import type { Message } from "@/app/data";
 import type { StoreApi, UseBoundStore } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
