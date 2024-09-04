@@ -9,9 +9,9 @@ import aiohttp
 import time
 
 chat_sources = [
-    [
-        FragmentsProcessingStrategy,
-    ],
+    # [
+    #     FragmentsProcessingStrategy,
+    # ],
     [
         SummaryProcessingStrategy,
     ],
@@ -27,7 +27,7 @@ class DataExporter:
     CACHE_TTL = 60 * 60 * 24  # day in seconds
 
     @classmethod
-    async def get_dataframe(cls):
+    async def get_dataframe(cls, only_not_embedded=False):
         async with cls._cache_lock:
             current_time = time.time()
             if (
@@ -37,7 +37,7 @@ class DataExporter:
                 context_df = []
                 for priority_class in chat_sources:
                     dfs_class = await asyncio.gather(
-                        *[source.dataframe_process() for source in priority_class]
+                        *[source.dataframe_process(only_not_embedded=only_not_embedded) for source in priority_class]
                     )
                     dfs_class = pd.concat(dfs_class)
                     dfs_class = dfs_class.sort_values(by="last_date", ascending=False)

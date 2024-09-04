@@ -61,11 +61,21 @@ class RawTopic(Model):
     rawData = fields.JSONField()
     lastUpdatedAt = NaiveDatetimeField()
     lastSummarizedAt = NaiveDatetimeField()
+    lastEmbeddedAt = NaiveDatetimeField()
 
     topics: fields.ReverseRelation["Topic"]
 
     class Meta:
         table = "RawTopic"
+
+class Embedding(Model):
+    id = fields.IntField(pk=True)
+    compressedData = fields.BinaryField(required=True)
+    createdAt = NaiveDatetimeField(auto_now_add=True)
+    updatedAt = NaiveDatetimeField(auto_now=True)
+
+    class Meta:
+        table = "Embeddings"
 
 
 class RelatedTopics(Model):
