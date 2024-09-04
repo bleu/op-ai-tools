@@ -14,13 +14,11 @@ import { MessageActions } from "./message-actions";
 export interface MessageContentProps {
   message: Message;
   isEditable: boolean;
-  isHovered: boolean;
   setIsEditable: (isEditable: boolean) => void;
 }
 export const MessageContent: React.FC<MessageContentProps> = ({
   message,
   isEditable,
-  isHovered,
   setIsEditable,
 }) => {
   const [editMessageContent, setEditMessageContent] = useState(
@@ -62,7 +60,7 @@ export const MessageContent: React.FC<MessageContentProps> = ({
   return (
     <div className={cn("p-3 rounded-md max-w-md overflow-hidden", "bg-accent")}>
       <FormattedMessage content={messageContent(message.data)} />
-      {isHovered && <MessageActions message={message} />}
+      <MessageActions message={message} />
     </div>
   );
 };
