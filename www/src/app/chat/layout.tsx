@@ -15,7 +15,7 @@ export default function ChatLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex">
+    <div className="flex flex-1">
       <aside className="w-64 bg-chat-primary p-5">
         <div className="flex items-center justify-between">
           <h2 className="font-bold text-lg">Chats (5)</h2>
@@ -33,7 +33,7 @@ export default function ChatLayout({
           ))}
         </div>
       </aside>
-      <main className="">{children}</main>
+      <main className="flex flex-1 flex-col-reverse">{children}</main>
     </div>
   );
 }
