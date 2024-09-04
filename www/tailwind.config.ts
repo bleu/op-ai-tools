@@ -20,6 +20,10 @@ const config = {
     extend: {
       colors: {
         optimism: "#FF0420",
+        chat: {
+          primary: '#F6F6F6',
+          secondary: '#787878'
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

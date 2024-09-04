@@ -304,10 +304,7 @@ function ForumInfiniteScrollTable({
                       updatedAt={row.original.updatedAt}
                       status={row.original.status}
                     />
-                    <Separator
-                      orientation="horizontal"
-                      className="max-w-7xl mt-1"
-                    />
+                    <Separator orientation="horizontal" className=" mt-1" />
                   </div>
                 </td>
               </tr>
