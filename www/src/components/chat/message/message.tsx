@@ -15,6 +15,7 @@ export interface MessageProps {
 
 export const Message: React.FC<MessageProps> = ({ message }) => {
   const [isEditable, setIsEditable] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleEditClick = () => {
     setIsEditable(true);
@@ -34,6 +35,8 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
           "flex gap-3 items-start",
           isAnswer ? "flex-row" : "flex-row-reverse",
         )}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
         <MessageAvatar name={message.name} />
         <div className="flex flex-col">
@@ -41,9 +44,10 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
             message={message}
             isEditable={isEditable}
             setIsEditable={setIsEditable}
+            isHovered={isHovered}
           />
         </div>
-        {!isAnswer && (
+        {!isAnswer && isHovered && (
           <Button
             variant="ghost"
             className="px-0 mt-1"
