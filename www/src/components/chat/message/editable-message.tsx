@@ -5,7 +5,7 @@ import { Textarea } from "../../ui/textarea";
 
 export interface EditableMessageProps {
   editMessageContent: string;
-  setEditMessageContent: (content: string) => void;
+  setEditMessageContent: (content: string | ((prevMessage: string) => string)) => void;
   handleOnSendEditMessage: () => void;
   setIsEditable: (isEditable: boolean) => void;
 }
@@ -15,11 +15,26 @@ export const EditableMessage: React.FC<EditableMessageProps> = ({
   setEditMessageContent,
   handleOnSendEditMessage,
   setIsEditable,
-}) => (
+}) => {
+
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      handleOnSendEditMessage();
+    }
+
+    if (event.key === "Enter" && event.shiftKey) {
+      event.preventDefault();
+      setEditMessageContent((prev) => `${prev}\n`);
+    }
+  };
+  
+  return(
   <div>
     <Textarea
       value={editMessageContent}
       onChange={(e) => setEditMessageContent(e.target.value)}
+      onKeyDown={handleKeyPress}
       className="min-w-96 "
     />
     <div className="flex justify-end space-x-2 mt-2">
@@ -31,4 +46,4 @@ export const EditableMessage: React.FC<EditableMessageProps> = ({
       </Button>
     </div>
   </div>
-);
+)};
