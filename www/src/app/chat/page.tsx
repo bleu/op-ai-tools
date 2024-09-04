@@ -1,41 +1,53 @@
 import { MessageActions } from "@/components/chat/message/message-actions";
 import { MessageAvatar } from "@/components/chat/message/message-avatar";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { CopyCheck, ThumbsDown } from "lucide-react";
 import React from "react";
 
 export default function Chat() {
   return (
-    <div className="px-32">
-      <div className="flex flex-row gap-3 justify-end mb-8">
-        <div
-          style={{ maxWidth: "66%" }}
-          className="gap-5 bg-chat-primary rounded-lg"
-        >
-          <p className="p-4">
-            Yes, the length of the challenge period can be changed. Currently,
-            it is set to keoawkeowak days on the OP Mainnet for a balance
-            between security and usab
-          </p>
+    <ScrollArea className=" flex-col-reverse">
+      <div className="px-24 ">
+         
+        <div className="flex flex-row gap-3 justify-end mb-8">
+          <div
+            style={{ maxWidth: "66%" }}
+            className="gap-5 bg-chat-primary rounded-lg"
+          >
+            <p className="p-4">
+              Yes, the length of the challenge period can be changed. Currently,
+              it is set to keoawkeowak days on the OP Mainnet for a balance
+              between security and usab
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-row gap-3">
+          <MessageAvatar name="Optimism GovGPT" />
+          <div className="gap-5">
+            <p className="mb-4">
+              Yes, the length of the challenge period can be changed. Currently,
+              it is set to seven days on the OP Mainnet for a balance between
+              security and usab
+            </p>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="hover:bg-chat-primary"
+            >
+              <CopyCheck />
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="hover:bg-chat-primary"
+            >
+              <ThumbsDown />
+            </Button>
+          </div>
         </div>
       </div>
-      <div className="flex flex-row gap-3">
-        <MessageAvatar name="ronaldo" />
-        <div className="gap-5">
-          <p className="mb-4">
-            Yes, the length of the challenge period can be changed. Currently,
-            it is set to seven days on the OP Mainnet for a balance between
-            security and usab
-          </p>
-          <Button size="icon" variant="ghost" className="hover:bg-chat-primary">
-            <CopyCheck />
-          </Button>
-          <Button size="icon" variant="ghost" className="hover:bg-chat-primary">
-            <ThumbsDown />
-          </Button>
-        </div>
-      </div>
-    </div>
+    </ScrollArea>
   );
 
   //   <div
