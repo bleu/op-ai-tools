@@ -1,7 +1,10 @@
 import React, { useEffect, useRef } from "react";
 
+import { CopyCheck, ThumbsDown } from "lucide-react";
+import { Button } from "../ui/button";
 import { ScrollArea } from "../ui/scroll-area";
 import { Message } from "./message/message";
+import { MessageAvatar } from "./message/message-avatar";
 import { getCurrentChat } from "./use-chat-state";
 
 export const ChatList: React.FC = React.memo(() => {
@@ -21,11 +24,11 @@ export const ChatList: React.FC = React.memo(() => {
   }, [currentMessages]);
 
   return (
-    <ScrollArea className="w-full overflow-y-auto overflow-x-hidden h-full flex flex-col absolute">
+    <div className="flex-col-reverse overflow-scroll px-24">
       {currentMessages.map((message) => (
         <Message key={message.id} message={message} />
       ))}
       <div ref={messagesEndRef} />
-    </ScrollArea>
+    </div>
   );
 });

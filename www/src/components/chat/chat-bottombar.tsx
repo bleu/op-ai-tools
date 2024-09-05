@@ -60,7 +60,7 @@ export default function ChatBottombar({ isMobile }: ChatBottombarProps) {
   };
 
   return (
-    <div className="p-2 flex justify-between w-full items-center gap-2">
+    <div className="py-2 flex justify-between w-full items-center gap-2 my-6">
       <div className="w-full relative">
         <Textarea
           autoComplete="off"
@@ -70,7 +70,7 @@ export default function ChatBottombar({ isMobile }: ChatBottombarProps) {
           onChange={handleInputChange}
           name="message"
           placeholder="Message GovGPT"
-          className="w-full border rounded-full flex items-center h-9 resize-none overflow-hidden bg-background"
+          className="w-full border rounded-full flex items-center h-12 resize-none overflow-hidden bg-background py-3"
           disabled={isStreaming}
         />
       </div>
