@@ -8,10 +8,5 @@ interface FormattedMessageProps {
 export const FormattedMessage: React.FC<FormattedMessageProps> = ({
   content,
 }) => {
-  return (
-    <div
-      className="prose prose-sm"
-      dangerouslySetInnerHTML={{ __html: content }}
-    />
-  );
+  return <div dangerouslySetInnerHTML={{ __html: content }} />;
 };

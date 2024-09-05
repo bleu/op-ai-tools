@@ -31,12 +31,12 @@ export const EditableMessage: React.FC<EditableMessageProps> = ({
   };
 
   return (
-    <div>
+    <div className="flex-col flex-1">
       <Textarea
         value={editMessageContent}
         onChange={(e) => setEditMessageContent(e.target.value)}
         onKeyDown={handleKeyPress}
-        className="min-w-96 "
+        className="min-w-96 pb-72"
       />
       <div className="flex justify-end space-x-2 mt-2">
         <Button

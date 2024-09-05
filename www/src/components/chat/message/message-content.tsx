@@ -58,7 +58,10 @@ export const MessageContent: React.FC<MessageContentProps> = ({
   }
 
   return (
-    <div className={cn("p-3 rounded-md max-w-md overflow-hidden", "bg-accent")}>
+    <div
+      className={message.name !== "Optimism GovGPT" ? "bg-chat-primary rounded-lg p-4 my-4 max-w-1/2": ''}
+      style={{ maxWidth: "66%" }}
+    >
       <FormattedMessage content={messageContent(message.data)} />
       <MessageActions message={message} />
     </div>
