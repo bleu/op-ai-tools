@@ -17,7 +17,7 @@ import datetime as dt
 
 class IncrementalIndexerService:
     def __init__(self):
-        # self.embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
+        # self.embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)    ### todo: make it work for OpenAIEmbeddings
         self.embeddings = HuggingFaceEmbeddings(model_name='all-MiniLM-L6-v2')
         self.vector_stores = {}
 
@@ -86,9 +86,9 @@ class IncrementalIndexerService:
         # Save the compressed data
         await self.save_compressed_folder(compressed_data)
 
-    async def update_index(self, db_name, contexts):
+    async def update_index(self, db_name, contexts):    ### todo: replace this code with notebook results
         if db_name in self.vector_stores:
-            # Add new documents to existing index
+            # Add new documents to existing index 
             self.vector_stores[db_name].add_documents(contexts)
         else:
             # Create new index if it doesn't exist
