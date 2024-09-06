@@ -2,14 +2,21 @@
 
 import { useChatStore } from "@/components/chat/use-chat-state";
 import { cn } from "@/lib/utils";
-import { ChatBubbleIcon, FilePlusIcon, TrashIcon } from "@radix-ui/react-icons";
+import { FilePlusIcon, TrashIcon } from "@radix-ui/react-icons";
 import type React from "react";
-import { useCallback } from "react";
 import { Button } from "../ui/button";
 
 export default function ChatSidebar() {
   const { chats, selectedChatId, setSelectedChatId, addChat, removeChat } =
     useChatStore();
+
+    const handleRemoveChat = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, id: string) => {
+      e.stopPropagation()
+      removeChat(id)
+      if (Object.values(chats).length === 1) {
+        addChat()
+      }
+    }
 
   return (
     <aside className="w-64 bg-chat-primary flex flex-col h-full">
@@ -42,10 +49,7 @@ export default function ChatSidebar() {
                   className="p-1 ml-1 hover:bg-optimism/15"
                   size="sm"
                   variant="link"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    removeChat(chat.id)}
-                  }
+                  onClick={(e) => handleRemoveChat(e, chat.id)}
                 >
                   <TrashIcon
                     className={cn(
