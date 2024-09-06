@@ -17,7 +17,7 @@ export default function ChatSidebar() {
         <h2 className="font-bold text-lg">
           Chats ({Object.values(chats).length})
         </h2>
-        <Button variant="link" onClick={addChat}>
+        <Button className="p-2 hover:bg-optimism/15" variant="link" onClick={addChat} >
           <FilePlusIcon color="#FF0420" className="w-6 h-6" />
         </Button>
       </div>
@@ -39,10 +39,13 @@ export default function ChatSidebar() {
                   {chat.messages[0]?.data?.answer || "New chat"}
                 </span>
                 <Button
-                  className="p-0 ml-1"
+                  className="p-1 ml-1 hover:bg-optimism/15"
                   size="sm"
                   variant="link"
-                  onClick={() => removeChat(chat.id)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    removeChat(chat.id)}
+                  }
                 >
                   <TrashIcon
                     className={cn(
