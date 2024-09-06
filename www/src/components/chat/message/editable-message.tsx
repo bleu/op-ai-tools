@@ -46,7 +46,7 @@ export const EditableMessage: React.FC<EditableMessageProps> = ({
         >
           Cancel
         </Button>
-        <Button size="sm" onClick={handleOnSendEditMessage}>
+        <Button size="sm" onClick={handleOnSendEditMessage} disabled={!editMessageContent}>
           Send
         </Button>
       </div>
