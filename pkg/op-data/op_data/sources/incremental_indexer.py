@@ -13,6 +13,8 @@ import asyncio
 from op_brains.documents import DataExporter
 from langchain.docstore.in_memory import InMemoryDocstore
 import datetime as dt
+from op_brains.setup import reorder_file, generate_indexes_from_fragment
+from op_brains.chat import model_utils
 
 
 class IncrementalIndexerService:
@@ -20,6 +22,8 @@ class IncrementalIndexerService:
         # self.embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
         self.embeddings = HuggingFaceEmbeddings(model_name='all-MiniLM-L6-v2')
         self.vector_stores = {}
+        self.questions_index = {} # load from the db
+        self.keywords_index = {} # load from the db
 
     async def get_updated_documents(self):
         return await DataExporter.get_langchain_documents()
@@ -86,14 +90,6 @@ class IncrementalIndexerService:
         # Save the compressed data
         await self.save_compressed_folder(compressed_data)
 
-    async def update_index(self, db_name, contexts):
-        if db_name in self.vector_stores:
-            # Add new documents to existing index
-            self.vector_stores[db_name].add_documents(contexts)
-        else:
-            # Create new index if it doesn't exist
-            self.vector_stores[db_name] = FAISS.from_documents(contexts, self.embeddings)
-
     async def save_raw_topics_as_embedded(self, data):
         urls = []
         for db_name, contexts in data.items():
@@ -107,16 +103,45 @@ class IncrementalIndexerService:
         await asyncio.sleep(1)
         return urls
     
-    async def acquire_and_save(self):
+    # what is this?
+    async def parse_index(self, contexts, llm):
+        # todo: implement this
+        q_index, kw_index = generate_indexes_from_fragment(contexts, llm)
+
+        for q, urls in q_index.items():
+            if q not in self.questions_index:
+                self.questions_index[q] = []
+            self.questions_index[q].extend(urls)
+
+        for k, urls in kw_index.items():
+            if k not in self.keywords_index:
+                self.keywords_index[k] = []
+            self.keywords_index[k].extend(urls)
+
+    async def update_index(self, db_name, contexts):
+        if db_name in self.vector_stores:
+            # Skip updating documentation index as it's hardcoded
+            if db_name == "documentation":
+                return
+
+            # Add new documents to existing index
+            self.vector_stores[db_name].add_documents(contexts)
+        else:
+            # Create new index if it doesn't exist
+            self.vector_stores[db_name] = FAISS.from_documents(contexts, self.embeddings)
+
+    async def acquire_and_save(self, model = "gpt-4o-mini"):
+        # llm = model_utils.access_APIs.get_llm(model)
         self.vector_stores = await IncrementalIndexerService.load_all_indexes(self.embeddings)
 
         data = await self.get_updated_documents()
         
         for db_name, contexts in data.items():
             await self.update_index(db_name, contexts)
-        
+
+            # self.parse_index(contexts, llm)
+
         # Save all indexes after update
         await self.save_all_indexes()
 
-        urls = await self.save_raw_topics_as_embedded(data)
-        
+        # urls = await self.save_raw_topics_as_embedded(data)
