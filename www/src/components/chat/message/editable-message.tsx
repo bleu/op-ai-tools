@@ -2,6 +2,7 @@ import type React from "react";
 
 import { Button } from "../../ui/button";
 import { Textarea } from "../../ui/textarea";
+import { useEffect, useRef } from "react";
 
 export interface EditableMessageProps {
   editMessageContent: string;
@@ -18,6 +19,8 @@ export const EditableMessage: React.FC<EditableMessageProps> = ({
   handleOnSendEditMessage,
   setIsEditable,
 }) => {
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
   const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -30,11 +33,18 @@ export const EditableMessage: React.FC<EditableMessageProps> = ({
     }
   };
 
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.select()
+    }
+  }, []);
+  
   return (
     <div className="flex-col flex-1">
       <Textarea
         value={editMessageContent}
         onChange={(e) => setEditMessageContent(e.target.value)}
+        ref={inputRef}
         onKeyDown={handleKeyPress}
         className="min-w-96 pb-72"
       />
