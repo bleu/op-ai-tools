@@ -28,7 +28,7 @@ export default function ChatSidebar() {
           <FilePlusIcon color="#FF0420" className="w-6 h-6" />
         </Button>
       </div>
-      <div className="h-screen overflow-scroll p-">
+      <div className="h-screen overflow-y-auto">
         <div className="space-y-2 p-5 w-full flex-col">
           {Object.values(chats).map((chat) => (
             <>
