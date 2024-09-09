@@ -20,6 +20,7 @@ quart-cors = "^0.7.0"
 quart-rate-limiter = "^0.10.0"
 quart-tasks = "^0.2.2"
 aiofiles = "^24.1.0"
+sentence-transformers = "^3.0.1"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.5.5"

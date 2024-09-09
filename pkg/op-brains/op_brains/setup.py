@@ -12,8 +12,10 @@ import importlib.resources
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
 from langchain_voyageai import VoyageAIRerank
+import datetime as dt
+from op_data.db.models import RawTopic, Embedding
 
-reranker_voyager = VoyageAIRerank(model="rerank-1")
+# reranker_voyager = VoyageAIRerank(model="rerank-1")
 
 
 prompt_question_generation = """
@@ -134,7 +136,8 @@ def generate_indexes_from_fragment(list_contexts: Iterable, llm: Any) -> dict:
 
 
 async def reorder_index(index_dict):
-    all_contexts_df = await DataExporter.get_dataframe()
+    # not_embedded_contexts_df = await DataExporter.get_dataframe(only_not_embedded=True)
+    all_contexts_df =  await DataExporter.get_dataframe(only_not_embedded=False)
 
     output_dict = {}
     for key, urls in index_dict.items():
@@ -205,6 +208,6 @@ async def main(model: str):
     await reorder_file(op_artifacts_pkg.joinpath("index_questions.json"))
     await reorder_file(op_artifacts_pkg.joinpath("index_keywords.json"))
 
-
-if __name__ == "__main__":
-    main("gpt-4o-mini")
+    # await RawTopic.filter(url__in=urls).update(
+    #     lastEmbeddedAt=dt.datetime.now(dt.UTC)
+    # )

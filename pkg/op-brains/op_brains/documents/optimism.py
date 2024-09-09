@@ -83,11 +83,16 @@ class FragmentsProcessingStrategy:
 
 class ForumPostsProcessingStrategy:
     @staticmethod
-    async def retrieve(only_not_summarized: bool = False) -> Tuple[Dict, Dict]:
+    async def retrieve(only_not_summarized: bool = False, only_not_embedded: bool = False) -> Tuple[Dict, Dict]:
         if only_not_summarized:
             raw_topics = await RawTopic.filter(
                 Q(lastSummarizedAt__lt=F("lastUpdatedAt"))
                 | Q(lastSummarizedAt__isnull=True)
+            ).values("rawData", "url", "type", "externalId")
+        elif only_not_embedded:
+            raw_topics = await RawTopic.filter(
+                Q(lastEmbeddedAt__lt=F("lastUpdatedAt"))
+                | Q(lastEmbeddedAt__isnull=True)
             ).values("rawData", "url", "type", "externalId")
         else:
             raw_topics = await RawTopic.all().values(
@@ -234,9 +239,10 @@ trust_level (0-4): {TRUST_LEVEL}
     """
 
     @staticmethod
-    async def return_threads(only_not_summarized: bool = False) -> List:
+    async def return_threads(only_not_summarized: bool = False, only_not_embedded: bool = False) -> List:
         posts, threads_info = await ForumPostsProcessingStrategy.retrieve(
-            only_not_summarized=only_not_summarized
+            only_not_summarized=only_not_summarized,
+            only_not_embedded=only_not_embedded,
         )
 
         if not threads_info:
@@ -338,7 +344,7 @@ class SummaryProcessingStrategy:
     """
 
     @staticmethod
-    async def retrieve() -> List[dict]:
+    async def retrieve(only_not_embedded: bool = True) -> List[dict]:
         out_db = await Topic.all().values(
             "url", "tldr", "about", "overview", "reaction"
         )
@@ -354,7 +360,9 @@ class SummaryProcessingStrategy:
             item = {"content": str_summary, "url": o["url"], "classification": ""}
             ret.append(item)
 
-        threads = await ForumPostsProcessingStrategy.return_threads()
+        threads = await ForumPostsProcessingStrategy.return_threads(
+            only_not_embedded=only_not_embedded
+        )
 
         for entry in ret:
             url = entry["url"]
@@ -373,8 +381,9 @@ class SummaryProcessingStrategy:
     @staticmethod
     async def langchain_process(
         divide: str | None = "category_name",
+        only_not_embedded: bool = True,
     ) -> Dict[str, List[Document]]:
-        data = await SummaryProcessingStrategy.retrieve()
+        data = await SummaryProcessingStrategy.retrieve(only_not_embedded=only_not_embedded)
 
         if isinstance(divide, str):
             classes = set([entry["metadata"][divide] for entry in data])
