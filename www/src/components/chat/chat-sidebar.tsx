@@ -39,19 +39,23 @@ export default function ChatSidebar() {
         <div className="space-y-2 p-5 w-full flex-col">
           {Object.values(chats).map((chat) => (
             <>
-              <button
-                type="button"
+              <div
                 className={cn(
-                  "flex group items-center justify-between  px-2 py-1 w-full rounded-lg font-medium text-chat-secondary hover:text-optimism  text-sm text-left",
+                  "flex group items-center justify-between px-2 py-1 w-full rounded-lg font-medium text-chat-secondary hover:text-optimism text-sm",
                   selectedChatId === chat.id &&
                     "text-optimism bg-optimism/15 hover:bg-optimism/15",
                 )}
                 key={chat.id}
-                onClick={() => setSelectedChatId(chat.id)}
               >
-                <span className="overflow-hidden line-clamp-1">
-                  {chat.messages[0]?.data?.answer || "New chat"}
-                </span>
+                <button
+                  type="button"
+                  className="flex-grow text-left overflow-hidden"
+                  onClick={() => setSelectedChatId(chat.id)}
+                >
+                  <span className="overflow-hidden line-clamp-1">
+                    {chat.messages[0]?.data?.answer || "New chat"}
+                  </span>
+                </button>
                 <Button
                   className="p-1 ml-1 hover:bg-optimism/15"
                   size="sm"
@@ -65,7 +69,7 @@ export default function ChatSidebar() {
                     )}
                   />
                 </Button>
-              </button>
+              </div>
             </>
           ))}
         </div>
