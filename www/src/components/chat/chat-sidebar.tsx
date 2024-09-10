@@ -23,7 +23,7 @@ export default function ChatSidebar() {
 
   return (
     <aside className="w-64 bg-chat-primary flex flex-col h-full">
-      <div className="flex items-center justify-between  p-5">
+      <div className="flex items-center justify-between p-5 mr-4 md:mr-0">
         <h2 className="font-bold text-lg">
           Chats ({Object.values(chats).length})
         </h2>
