@@ -26,7 +26,11 @@ export const ChatList: React.FC = React.memo(() => {
   }, [currentMessages]);
 
   if (currentMessages.length === 0) {
-    return <ChatEmptyState onSuggestionClick={handleSuggestionClick} />;
+    return (
+      <div className="flex-1">
+        <ChatEmptyState onSuggestionClick={handleSuggestionClick} />
+      </div>
+    );
   }
   return (
     <div className="flex-col-reverse overflow-y-auto px-6 md:px-8 pb-3 md:pb-6">
