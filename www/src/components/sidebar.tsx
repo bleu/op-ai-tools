@@ -9,9 +9,9 @@ import {
 import { getChatName } from "@/lib/chat-utils";
 import { formatDate } from "@/lib/chat-utils";
 import { cn } from "@/lib/utils";
+import { useChatStore } from "@/states/use-chat-state";
 import { MoreHorizontal, SquarePen, Trash } from "lucide-react";
 import Link from "next/link";
-import { useChatStore } from "./chat/use-chat-state";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { ScrollArea } from "./ui/scroll-area";
 

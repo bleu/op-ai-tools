@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from "react";
 
-import { Message } from "./message/message";
-import { getCurrentChat, useChatStore } from "./use-chat-state";
+import { getCurrentChat, useChatStore } from "@/states/use-chat-state";
 import { ChatEmptyState } from "./chat-empty-state";
+import { Message } from "./message/message";
 
 export const ChatList: React.FC = React.memo(() => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -26,14 +26,10 @@ export const ChatList: React.FC = React.memo(() => {
   }, [currentMessages]);
 
   if (currentMessages.length === 0) {
-    return (
-      <ChatEmptyState
-       onSuggestionClick={handleSuggestionClick}
-      />
-    );
-  }  
+    return <ChatEmptyState onSuggestionClick={handleSuggestionClick} />;
+  }
   return (
-    <div className="flex-col-reverse overflow-y-auto px-24">
+    <div className="flex-col-reverse overflow-y-auto px-6 md:px-8 pb-3 md:pb-6">
       {currentMessages.map((message) => (
         <Message key={message.id} message={message} />
       ))}
