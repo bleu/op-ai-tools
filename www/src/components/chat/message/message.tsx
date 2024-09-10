@@ -6,6 +6,7 @@ import { CopyCheck, Pencil, ThumbsDown } from "lucide-react";
 import type { Message as MessageType } from "@/app/data";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import useMobileStore from "@/states/use-mobile-state";
 import { MessageAvatar } from "./message-avatar";
 import { MessageContent } from "./message-content";
 
@@ -16,6 +17,7 @@ export interface MessageProps {
 export const Message: React.FC<MessageProps> = ({ message }) => {
   const [isEditable, setIsEditable] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const { isMobile } = useMobileStore();
 
   const handleEditClick = () => {
     setIsEditable(true);
@@ -34,7 +36,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
     >
       {isAnswer && <MessageAvatar name={message.name} />}
 
-      {!isAnswer && isHovered && !isEditable && (
+      {!isAnswer && (isHovered || isMobile) && !isEditable && (
         <Button
           variant="ghost"
           className="p-2 mt-4"
