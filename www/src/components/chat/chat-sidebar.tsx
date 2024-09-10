@@ -5,6 +5,8 @@ import { useChatStore } from "@/states/use-chat-state";
 import { FilePlusIcon, TrashIcon } from "@radix-ui/react-icons";
 import type React from "react";
 import { Button } from "../ui/button";
+import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 
 export default function ChatSidebar() {
   const { chats, selectedChatId, setSelectedChatId, addChat, removeChat } =
@@ -35,8 +37,8 @@ export default function ChatSidebar() {
           <FilePlusIcon color="#FF0420" className="w-6 h-6" />
         </Button>
       </div>
-      <div className="h-screen overflow-y-auto">
-        <div className="space-y-2 p-5 w-full flex-col">
+      <div className="h-screen overflow-y-auto px-5">
+        <div className="space-y-3 w-full flex-col">
           {Object.values(chats).map((chat) => (
             <>
               <div
@@ -73,6 +75,24 @@ export default function ChatSidebar() {
             </>
           ))}
         </div>
+      </div>
+      <hr className="border-t border-gray-200 my-4" />
+      <div className="px-5">
+        <h2
+          className="mb-2 font-semibold text-lg md:text-xl"
+        >
+          Forum
+        </h2>
+        <Link
+          href="/forum"
+          target="_blank"
+          className={cn(
+            "flex items-center gap-3 rounded-lg py-2 transition-all hover:bg-gray-100 text-gray-700 text-sm mb-12",
+          )}
+        >
+          Latest topics
+          <ExternalLink className="h-5 w-5 md:h-4 md:w-4" />
+        </Link>
       </div>
     </aside>
   );
