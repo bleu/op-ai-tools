@@ -14,8 +14,8 @@ export function ChatHeader() {
       <div className="md:hidden flex-1">
         <ChatMobileSidebar />
       </div>
-      <div className="flex-1">
-        <div className="flex gap-x-1">
+      <div>
+        <div className="flex flex-1 gap-x-1">
           <Image
             src="/optimism.svg"
             alt="logo"

@@ -3,10 +3,10 @@
 import { cn } from "@/lib/utils";
 import { useChatStore } from "@/states/use-chat-state";
 import { FilePlusIcon, TrashIcon } from "@radix-ui/react-icons";
+import { ExternalLink } from "lucide-react";
+import Link from "next/link";
 import type React from "react";
 import { Button } from "../ui/button";
-import Link from "next/link";
-import { ExternalLink } from "lucide-react";
 
 export default function ChatSidebar() {
   const { chats, selectedChatId, setSelectedChatId, addChat, removeChat } =
@@ -78,11 +78,7 @@ export default function ChatSidebar() {
       </div>
       <hr className="border-t border-gray-200 my-4" />
       <div className="px-5">
-        <h2
-          className="mb-2 font-semibold text-lg md:text-xl"
-        >
-          Forum
-        </h2>
+        <h2 className="mb-2 font-semibold text-lg md:text-xl">Forum</h2>
         <Link
           href="/forum"
           target="_blank"
