@@ -44,7 +44,6 @@ export default function RootLayout({
       </head>
       <CSPostHogProvider>
         <body className="flex flex-col min-h-screen text-primary">
-          <Header />
           <div className="flex flex-1">
             <PostHogPageView />
             <Toaster />
