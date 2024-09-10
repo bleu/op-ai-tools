@@ -15,7 +15,7 @@ export default function ChatLayout({
   return (
     <div className="flex-1">
       <ChatHeader />
-      <div className="flex max-h-[calc(100dvh-4rem)] w-full overflow-hidden">
+      <div className="flex max-h-[calc(100dvh-4rem)] w-full overflow-hidden h-full">
         {!isMobile && <ChatSidebar />}
         <main className="flex flex-1">{children}</main>
       </div>
