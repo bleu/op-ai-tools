@@ -5,8 +5,8 @@ import type { Message } from "@/app/data";
 import { Button } from "@/components/ui/button";
 import { useCopyMessage } from "@/components/ui/hooks/use-copy-message";
 import { useFeedback } from "@/components/ui/hooks/use-feedback";
+import { useChatStore } from "@/states/use-chat-state";
 
-import { useChatStore } from "../use-chat-state";
 
 export interface MessageActionsProps {
   message: Message;
