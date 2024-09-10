@@ -1,8 +1,8 @@
 import type React from "react";
 
+import { useEffect, useRef } from "react";
 import { Button } from "../../ui/button";
 import { Textarea } from "../../ui/textarea";
-import { useEffect, useRef } from "react";
 
 export interface EditableMessageProps {
   editMessageContent: string;
@@ -35,18 +35,18 @@ export const EditableMessage: React.FC<EditableMessageProps> = ({
 
   useEffect(() => {
     if (inputRef.current) {
-      inputRef.current.select()
+      inputRef.current.select();
     }
   }, []);
-  
+
   return (
     <div className="flex-col flex-1">
       <Textarea
         value={editMessageContent}
         onChange={(e) => setEditMessageContent(e.target.value)}
         ref={inputRef}
+        rows={10}
         onKeyDown={handleKeyPress}
-        className="min-w-96 pb-72"
       />
       <div className="flex justify-end space-x-2 mt-2">
         <Button
@@ -56,7 +56,11 @@ export const EditableMessage: React.FC<EditableMessageProps> = ({
         >
           Cancel
         </Button>
-        <Button size="sm" onClick={handleOnSendEditMessage} disabled={!editMessageContent}>
+        <Button
+          size="sm"
+          onClick={handleOnSendEditMessage}
+          disabled={!editMessageContent}
+        >
           Send
         </Button>
       </div>
