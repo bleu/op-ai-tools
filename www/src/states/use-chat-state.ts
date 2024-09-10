@@ -85,6 +85,9 @@ const useChatStoreBase = create<ChatStore>()(
       removeChat: (id) =>
         set((state) => {
           delete state.chats[id];
+          if (state.selectedChatId === id) {
+            state.selectedChatId = Object.keys(state.chats)[0] || null;
+          }
         }),
 
       addMessage: (chatId, message) =>
