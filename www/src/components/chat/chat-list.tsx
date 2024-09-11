@@ -29,9 +29,8 @@ export const ChatList: React.FC = React.memo(() => {
   }, [currentMessages]);
 
   useEffect(() => {
-    if (currentChat === null) {
-      addChat();
-    }
+    if (currentChat) return;
+    addChat();
   }, [addChat, currentChat]);
 
   if (currentChat === null) {

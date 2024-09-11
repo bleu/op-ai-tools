@@ -62,7 +62,7 @@ const createAssistantMessage = (chatId: string): Message => {
   );
 };
 
-// Migrate function, should be removed in the future
+// TODO: remove later https://linear.app/bleu-builders/issue/OP-258/remove-migration-function-from-chat-state-store
 function migrateState(persistedState: any): ChatStoreState {
   if (persistedState.version === 1) {
     return persistedState as ChatStoreState;
@@ -122,9 +122,8 @@ const useChatStoreBase = create<ChatStore>()(
       removeChat: (id) =>
         set((state) => {
           delete state.chats[id];
-          if (state.selectedChatId === id) {
-            state.selectedChatId = Object.keys(state.chats)[0] || null;
-          }
+          if (state.selectedChatId === id)
+            state.selectedChatId = Object.keys(state.chats)[0];
         }),
 
       addMessage: (chatId, message) =>
