@@ -62,6 +62,43 @@ const createAssistantMessage = (chatId: string): Message => {
   );
 };
 
+// Migrate function, should be removed in the future
+function migrateState(persistedState: any): ChatStoreState {
+  if (persistedState.version === 1) {
+    return persistedState as ChatStoreState;
+  }
+
+  const migratedChats = Object.fromEntries(
+    Object.entries(persistedState.chats || {}).map(
+      ([id, chat]: [string, any]) => [
+        id,
+        {
+          ...chat,
+          messages: chat.messages.map((message: any) => ({
+            ...message,
+            data: {
+              answer:
+                message.name === "Optimism GovGPT"
+                  ? message.message.answer
+                  : message.message,
+              url_supporting:
+                message.name === "Optimism GovGPT"
+                  ? message.message.url_supporting
+                  : [],
+            },
+          })),
+        },
+      ],
+    ),
+  );
+
+  return {
+    ...persistedState,
+    chats: migratedChats,
+    version: 1,
+  };
+}
+
 const useChatStoreBase = create<ChatStore>()(
   persist(
     immer((set, get) => ({
@@ -187,6 +224,13 @@ const useChatStoreBase = create<ChatStore>()(
     {
       name: "chat-storage",
       getStorage: () => localStorage,
+      migrate: (persistedState: any, version: number) => {
+        if (version === 0) {
+          return migrateState(persistedState);
+        }
+        return persistedState as ChatStoreState;
+      },
+      version: 1,
     },
   ),
 );
