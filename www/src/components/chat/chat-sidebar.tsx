@@ -18,9 +18,6 @@ export default function ChatSidebar() {
   ) => {
     e.stopPropagation();
     removeChat(id);
-    if (Object.values(chats).length === 1) {
-      addChat();
-    }
   };
 
   return (
