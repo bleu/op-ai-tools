@@ -25,7 +25,7 @@ export default function ChatSidebar() {
 
   return (
     <aside className="w-64 bg-chat-primary flex flex-col h-full">
-      <div className="flex items-center justify-between p-5 mr-4 md:mr-0">
+      <div className="flex items-center justify-between p-4 mt-6 md:mt-0">
         <h2 className="font-bold text-lg">
           Chats ({Object.values(chats).length})
         </h2>
@@ -37,7 +37,7 @@ export default function ChatSidebar() {
           <FilePlusIcon color="#FF0420" className="w-6 h-6" />
         </Button>
       </div>
-      <div className="h-screen overflow-y-auto px-5">
+      <div className="h-screen overflow-y-auto px-4">
         <div className="space-y-3 w-full flex-col">
           {Object.values(chats).map((chat) => (
             <>
@@ -76,9 +76,9 @@ export default function ChatSidebar() {
           ))}
         </div>
       </div>
-      <hr className="border-t border-gray-200 my-4" />
-      <div className="px-5">
-        <h2 className="mb-2 font-semibold text-lg md:text-xl">Forum</h2>
+      <hr className="border-t border-gray-200 my-4 mx-4" />
+      <div className="px-4">
+        <h2 className="mb-2 font-semibold">Catch up on OP Governance</h2>
         <Link
           href="/forum"
           target="_blank"
@@ -86,7 +86,7 @@ export default function ChatSidebar() {
             "flex items-center gap-3 rounded-lg py-2 transition-all hover:bg-gray-100 text-gray-700 text-sm mb-12",
           )}
         >
-          Latest topics
+          Explore GovSummarizer
           <ExternalLink className="h-5 w-5 md:h-4 md:w-4" />
         </Link>
       </div>
