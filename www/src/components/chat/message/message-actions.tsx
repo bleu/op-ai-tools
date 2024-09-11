@@ -5,8 +5,8 @@ import type { Message } from "@/app/data";
 import { Button } from "@/components/ui/button";
 import { useCopyMessage } from "@/components/ui/hooks/use-copy-message";
 import { useFeedback } from "@/components/ui/hooks/use-feedback";
+import { useChatStore } from "@/states/use-chat-state";
 
-import { useChatStore } from "../use-chat-state";
 
 export interface MessageActionsProps {
   message: Message;
@@ -22,10 +22,10 @@ export const MessageActions: React.FC<MessageActionsProps> = ({ message }) => {
   }
 
   return (
-    <div className="mt-2 flex gap-3">
+    <div className="flex">
       <Button
         variant="ghost"
-        className="px-0"
+        className="p-2 transition-colors duration-200 hover:bg-chat-primary"
         size="sm"
         onClick={() => handleCopyMessage(message.data.answer)}
       >
@@ -35,11 +35,11 @@ export const MessageActions: React.FC<MessageActionsProps> = ({ message }) => {
         trigger={
           <Button
             variant="ghost"
-            className="px-0"
+            className="transition-colors duration-200 hover:bg-chat-primary"
             size="sm"
             onClick={() => handleNegativeReaction()}
           >
-            <ThumbsDown className="h-3.5 w-3.5" />
+            <ThumbsDown className="h-3.5 w-3.5 " />
           </Button>
         }
       />

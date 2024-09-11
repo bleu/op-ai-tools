@@ -27,6 +27,7 @@ import {
 import { SnapshotProposal } from "./table-row";
 
 import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import type { DateRange } from "react-day-picker";
 
 const FETCH_SIZE = 10;
@@ -242,7 +243,11 @@ function ForumInfiniteScrollTable({
   }, [category, dates]);
 
   if (isLoading) {
-    return <>Loading...</>;
+    return (
+      <div className="flex flex-1 justify-center items-center">
+        <LoadingIndicator />
+      </div>
+    );
   }
 
   return (
@@ -304,10 +309,7 @@ function ForumInfiniteScrollTable({
                       updatedAt={row.original.updatedAt}
                       status={row.original.status}
                     />
-                    <Separator
-                      orientation="horizontal"
-                      className="max-w-7xl mt-1"
-                    />
+                    <Separator orientation="horizontal" className=" mt-1" />
                   </div>
                 </td>
               </tr>

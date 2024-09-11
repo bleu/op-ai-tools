@@ -1,5 +1,7 @@
-import { InfoCircledIcon } from "@radix-ui/react-icons";
+import Image from "next/image";
 import type React from "react";
+
+import useMobileStore from "@/states/use-mobile-state";
 import { Button } from "../ui/button";
 import { suggestions } from "./chat-suggestions";
 
@@ -11,9 +13,15 @@ export function ChatEmptyState({
   return (
     <div className="flex flex-col items-center justify-center h-full p-4">
       <div className="mb-8">
-        <InfoCircledIcon className="w-12 h-12" />
+        <Image
+          src="/op-logo.svg"
+          alt="Optimism logo"
+          width={75}
+          height={75}
+          className="w-[75px] md:w-[100px]"
+        />
       </div>
-      <h2 className="text-xl md:text-2xl font-bold mb-4 text-center">
+      <h2 className="text-lg md:text-2xl font-bold mb-4 text-center text-chat-secondary">
         How can I help you today?
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl">

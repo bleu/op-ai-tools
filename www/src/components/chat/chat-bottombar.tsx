@@ -1,18 +1,14 @@
 import { generateMessageParams } from "@/lib/chat-utils";
 import { cn } from "@/lib/utils";
+import { getCurrentChat, useChatStore } from "@/states/use-chat-state";
 import { SendHorizontal } from "lucide-react";
 import Link from "next/link";
 import type React from "react";
 import { useEffect, useRef } from "react";
 import { buttonVariants } from "../ui/button";
 import { Textarea } from "../ui/textarea";
-import { getCurrentChat, useChatStore } from "./use-chat-state";
 
-interface ChatBottombarProps {
-  isMobile: boolean;
-}
-
-export default function ChatBottombar({ isMobile }: ChatBottombarProps) {
+export default function ChatBottombar() {
   const inputMessage = useChatStore.use.inputMessage();
   const setInputMessage = useChatStore.use.setInputMessage();
   const isStreaming = useChatStore.use.isStreaming();
@@ -60,8 +56,8 @@ export default function ChatBottombar({ isMobile }: ChatBottombarProps) {
   };
 
   return (
-    <div className="p-2 flex justify-between w-full items-center gap-2">
-      <div className="w-full relative">
+    <div className="pb-2 flex justify-between w-full items-center gap-2 mb-6">
+      <div className="w-full relative flex items-center">
         <Textarea
           autoComplete="off"
           value={inputMessage}
@@ -70,24 +66,24 @@ export default function ChatBottombar({ isMobile }: ChatBottombarProps) {
           onChange={handleInputChange}
           name="message"
           placeholder="Message GovGPT"
-          className="w-full border rounded-full flex items-center h-9 resize-none overflow-hidden bg-background"
+          className="w-full border rounded-full flex items-center h-12 resize-none overflow-hidden bg-background py-3 pr-10"
           disabled={isStreaming}
         />
+        <Link
+          href="#"
+          className={cn(
+            buttonVariants({ variant: "ghost", size: "icon" }),
+            "absolute right-2 top-1/2 transform -translate-y-1/2",
+            "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white shrink-0",
+            {
+              "opacity-40": !inputMessage.trim() || isStreaming,
+            },
+          )}
+          onClick={handleSend}
+        >
+          <SendHorizontal size={20} className="text-muted-foreground" />
+        </Link>
       </div>
-      <Link
-        href="#"
-        className={cn(
-          buttonVariants({ variant: "ghost", size: "icon" }),
-          "h-9 w-9",
-          "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white shrink-0",
-          {
-            "opacity-40": !inputMessage.trim() || isStreaming,
-          },
-        )}
-        onClick={handleSend}
-      >
-        <SendHorizontal size={20} className="text-muted-foreground" />
-      </Link>
     </div>
   );
 }

@@ -7,7 +7,7 @@ import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { formatAnswerWithReferences } from "@/lib/chat-utils";
 import { cn } from "@/lib/utils";
 
-import { useChatStore } from "../use-chat-state";
+import { useChatStore } from "@/states/use-chat-state";
 import { EditableMessage } from "./editable-message";
 import { MessageActions } from "./message-actions";
 
@@ -58,7 +58,13 @@ export const MessageContent: React.FC<MessageContentProps> = ({
   }
 
   return (
-    <div className={cn("p-3 rounded-md max-w-md overflow-hidden", "bg-accent")}>
+    <div
+      className={cn(
+        "md:max-w-[70%]",
+        message.name !== "Optimism GovGPT" &&
+          "bg-chat-primary rounded-lg p-4 my-4 max-w-[70%]",
+      )}
+    >
       <FormattedMessage content={messageContent(message.data)} />
       <MessageActions message={message} />
     </div>

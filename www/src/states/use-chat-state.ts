@@ -1,8 +1,8 @@
-import type { Data, Message } from "@/app/data";
+import type { Message } from "@/app/data";
 import type { StoreApi, UseBoundStore } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-import { sendMessage as sendMessageApi } from "./send-message";
+import { sendMessage as sendMessageApi } from "../components/chat/send-message";
 
 import {
   type ChatData,
@@ -62,6 +62,43 @@ const createAssistantMessage = (chatId: string): Message => {
   );
 };
 
+// TODO: remove later https://linear.app/bleu-builders/issue/OP-258/remove-migration-function-from-chat-state-store
+function migrateState(persistedState: any): ChatStoreState {
+  if (persistedState.version === 1) {
+    return persistedState as ChatStoreState;
+  }
+
+  const migratedChats = Object.fromEntries(
+    Object.entries(persistedState.chats || {}).map(
+      ([id, chat]: [string, any]) => [
+        id,
+        {
+          ...chat,
+          messages: chat.messages.map((message: any) => ({
+            ...message,
+            data: {
+              answer:
+                message.name === "Optimism GovGPT"
+                  ? message.message.answer
+                  : message.message,
+              url_supporting:
+                message.name === "Optimism GovGPT"
+                  ? message.message.url_supporting
+                  : [],
+            },
+          })),
+        },
+      ],
+    ),
+  );
+
+  return {
+    ...persistedState,
+    chats: migratedChats,
+    version: 1,
+  };
+}
+
 const useChatStoreBase = create<ChatStore>()(
   persist(
     immer((set, get) => ({
@@ -85,7 +122,8 @@ const useChatStoreBase = create<ChatStore>()(
       removeChat: (id) =>
         set((state) => {
           delete state.chats[id];
-          state.selectedChatId = Object.keys(state.chats)[0] || null;
+          if (state.selectedChatId === id)
+            state.selectedChatId = Object.keys(state.chats)[0];
         }),
 
       addMessage: (chatId, message) =>
@@ -185,6 +223,13 @@ const useChatStoreBase = create<ChatStore>()(
     {
       name: "chat-storage",
       getStorage: () => localStorage,
+      migrate: (persistedState: any, version: number) => {
+        if (version === 0) {
+          return migrateState(persistedState);
+        }
+        return persistedState as ChatStoreState;
+      },
+      version: 1,
     },
   ),
 );

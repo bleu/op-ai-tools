@@ -170,14 +170,7 @@ function NavContent({ isMobile, setSheetOpen = () => {} }: NavContentProps) {
       ))}
       <hr className="border-t border-gray-200 my-4" />
       <div>
-        <h2
-          className={cn(
-            "mb-2 px-3 font-semibold",
-            isMobile ? "text-xl" : "text-lg",
-          )}
-        >
-          Have any questions?
-        </h2>
+        <h2 className="mb-2 px-3 font-semibold">Have any questions?</h2>
         <Link
           href="/"
           target="_blank"

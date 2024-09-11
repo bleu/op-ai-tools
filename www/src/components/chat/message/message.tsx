@@ -1,11 +1,12 @@
 import type React from "react";
 import { useState } from "react";
 
-import { Pencil } from "lucide-react";
+import { CopyCheck, Pencil, ThumbsDown } from "lucide-react";
 
 import type { Message as MessageType } from "@/app/data";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import useMobileStore from "@/states/use-mobile-state";
 import { MessageAvatar } from "./message-avatar";
 import { MessageContent } from "./message-content";
 
@@ -15,6 +16,8 @@ export interface MessageProps {
 
 export const Message: React.FC<MessageProps> = ({ message }) => {
   const [isEditable, setIsEditable] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const { isMobile } = useMobileStore();
 
   const handleEditClick = () => {
     setIsEditable(true);
@@ -25,35 +28,29 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
   return (
     <div
       className={cn(
-        "flex flex-col gap-2 p-4",
-        isAnswer ? "items-start" : "items-end",
+        "flex flex-row gap-2 mt-8",
+        isAnswer ? "justify-start" : "justify-end",
       )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <div
-        className={cn(
-          "flex gap-3 items-start",
-          isAnswer ? "flex-row" : "flex-row-reverse",
-        )}
-      >
-        <MessageAvatar name={message.name} />
-        <div className="flex flex-col">
-          <MessageContent
-            message={message}
-            isEditable={isEditable}
-            setIsEditable={setIsEditable}
-          />
-        </div>
-        {!isAnswer && (
-          <Button
-            variant="ghost"
-            className="px-0 mt-1"
-            size="sm"
-            onClick={handleEditClick}
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </Button>
-        )}
-      </div>
+      {isAnswer && <MessageAvatar name={message.name} />}
+
+      {!isAnswer && (isHovered || isMobile) && !isEditable && (
+        <Button
+          variant="ghost"
+          className="p-2 mt-4"
+          size="sm"
+          onClick={handleEditClick}
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </Button>
+      )}
+      <MessageContent
+        isEditable={isEditable}
+        message={message}
+        setIsEditable={setIsEditable}
+      />
     </div>
   );
 };
