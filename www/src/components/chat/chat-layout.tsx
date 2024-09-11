@@ -6,8 +6,8 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { cn } from "@/lib/utils";
+import { useChatStore } from "@/states/use-chat-state";
 import React, { useEffect, useState, useCallback } from "react";
-import { useChatStore } from "../../states/use-chat-state";
 import { Sidebar } from "../sidebar";
 import { Chat } from "./chat";
 
