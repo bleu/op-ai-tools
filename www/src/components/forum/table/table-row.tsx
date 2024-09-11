@@ -31,7 +31,7 @@ export const SnapshotProposal = ({
 }: Topic) => {
   return (
     <Link href={`/forum/topic/${id}`}>
-      <div className="p-1 md:p-4 max-w-7xl mx-auto rounded-md hover:bg-gray-100">
+      <div className="p-1 md:p-4 rounded-md hover:bg-gray-100">
         <TopicHeader
           id={id}
           title={title}

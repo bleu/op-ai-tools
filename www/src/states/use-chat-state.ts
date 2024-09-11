@@ -1,12 +1,8 @@
-import {
-  type Message,
-  type StructuredMessage,
-  isStructuredMessage,
-} from "@/app/data";
+import type { Message } from "@/app/data";
 import type { StoreApi, UseBoundStore } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-import { sendMessage as sendMessageApi } from "./send-message";
+import { sendMessage as sendMessageApi } from "../components/chat/send-message";
 
 import {
   type ChatData,
@@ -35,7 +31,7 @@ interface ChatStoreActions {
   setIsTyping: (isTyping: boolean) => void;
   setLoadingMessageId: (id: string | null) => void;
   setInputMessage: (
-    message: string | ((prevMessage: string) => string)
+    message: string | ((prevMessage: string) => string),
   ) => void;
   sendMessage: (newMessage: Message) => Promise<void>;
 }
@@ -47,7 +43,7 @@ type WithSelectors<S> = S extends { getState: () => infer T }
   : never;
 
 const createSelectors = <S extends UseBoundStore<StoreApi<object>>>(
-  _store: S
+  _store: S,
 ) => {
   const store = _store as WithSelectors<typeof _store>;
   store.use = {};
@@ -59,24 +55,49 @@ const createSelectors = <S extends UseBoundStore<StoreApi<object>>>(
 };
 
 const createAssistantMessage = (chatId: string): Message => {
-  return generateMessageParams(chatId, "", "Optimism GovGPT");
+  return generateMessageParams(
+    chatId,
+    { answer: "", url_supporting: [] },
+    "Optimism GovGPT",
+  );
 };
 
-const processApiResponse = (response: any): StructuredMessage["message"] => {
-  if (
-    typeof response.data === "object" &&
-    "answer" in response.data &&
-    "url_supporting" in response.data
-  ) {
-    return response.data;
+// TODO: remove later https://linear.app/bleu-builders/issue/OP-258/remove-migration-function-from-chat-state-store
+function migrateState(persistedState: any): ChatStoreState {
+  if (persistedState.version === 1) {
+    return persistedState as ChatStoreState;
   }
+
+  const migratedChats = Object.fromEntries(
+    Object.entries(persistedState.chats || {}).map(
+      ([id, chat]: [string, any]) => [
+        id,
+        {
+          ...chat,
+          messages: chat.messages.map((message: any) => ({
+            ...message,
+            data: {
+              answer:
+                message.name === "Optimism GovGPT"
+                  ? message.message.answer
+                  : message.message,
+              url_supporting:
+                message.name === "Optimism GovGPT"
+                  ? message.message.url_supporting
+                  : [],
+            },
+          })),
+        },
+      ],
+    ),
+  );
+
   return {
-    answer: Array.isArray(response.data)
-      ? response.data.join("\n")
-      : response.data,
-    url_supporting: [],
+    ...persistedState,
+    chats: migratedChats,
+    version: 1,
   };
-};
+}
 
 const useChatStoreBase = create<ChatStore>()(
   persist(
@@ -101,7 +122,8 @@ const useChatStoreBase = create<ChatStore>()(
       removeChat: (id) =>
         set((state) => {
           delete state.chats[id];
-          state.selectedChatId = Object.keys(state.chats)[0] || null;
+          if (state.selectedChatId === id)
+            state.selectedChatId = Object.keys(state.chats)[0];
         }),
 
       addMessage: (chatId, message) =>
@@ -130,7 +152,7 @@ const useChatStoreBase = create<ChatStore>()(
         if (!chatId) return;
 
         const isEditing = state.chats[chatId].messages.some(
-          (m) => m.id === newMessage.id
+          (message) => message.id === newMessage.id,
         );
 
         set((state) => {
@@ -138,13 +160,13 @@ const useChatStoreBase = create<ChatStore>()(
           state.isTyping = true;
           if (isEditing) {
             const messageIndex = state.chats[chatId].messages.findIndex(
-              (m) => m.id === newMessage.id
+              (m) => m.id === newMessage.id,
             );
             if (messageIndex !== -1) {
               state.chats[chatId].messages[messageIndex] = newMessage;
               state.chats[chatId].messages = state.chats[chatId].messages.slice(
                 0,
-                messageIndex + 1
+                messageIndex + 1,
               );
             }
           } else {
@@ -161,12 +183,9 @@ const useChatStoreBase = create<ChatStore>()(
           });
 
           const response = await sendMessageApi(
-            isStructuredMessage(newMessage)
-              ? newMessage.message.answer
-              : newMessage.message,
-            generateMessagesMemory(get().chats[chatId].messages)
+            newMessage.data.answer,
+            generateMessagesMemory(state.chats[chatId].messages),
           );
-          const content = processApiResponse(response);
 
           set((state) => {
             const lastMessage =
@@ -174,10 +193,10 @@ const useChatStoreBase = create<ChatStore>()(
                 state.chats[chatId].messages.length - 1
               ];
             if (lastMessage.id === assistantMessage.id) {
-              lastMessage.message = content;
+              lastMessage.data = response.data;
             }
             state.chats[chatId].name = getChatName(
-              state.chats[chatId].messages
+              state.chats[chatId].messages,
             );
           });
         } catch (error) {
@@ -188,7 +207,7 @@ const useChatStoreBase = create<ChatStore>()(
                 state.chats[chatId].messages.length - 1
               ];
             if (lastMessage.id === state.loadingMessageId) {
-              lastMessage.message =
+              lastMessage.data.answer =
                 "Sorry, an error occurred while processing your request.";
             }
           });
@@ -204,8 +223,15 @@ const useChatStoreBase = create<ChatStore>()(
     {
       name: "chat-storage",
       getStorage: () => localStorage,
-    }
-  )
+      migrate: (persistedState: any, version: number) => {
+        if (version === 0) {
+          return migrateState(persistedState);
+        }
+        return persistedState as ChatStoreState;
+      },
+      version: 1,
+    },
+  ),
 );
 
 export const useChatStore = createSelectors(useChatStoreBase);

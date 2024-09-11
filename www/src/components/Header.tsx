@@ -1,9 +1,8 @@
-import { Search } from "lucide-react";
+"use client";
 
-import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import Link from "next/link";
-import { MobileSidebar } from "./Sidebar";
+import { MobileSidebar } from "./forum/Sidebar";
 
 export function Header() {
   return (
@@ -23,17 +22,8 @@ export function Header() {
             height={100}
             className="w-[100px] md:w-[150px]"
           />
-          <span className="text-xs md:text-sm font-light">GovSummarizer</span>
+          <span className="text-xs md:text-sm font-medium">GovSummarizer</span>
         </Link>
-        {/* <form className="w-1/2 hidden md:block">
-          <div className="relative">
-            <Search className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              className="w-full appearance-none bg-background pr-8 shadow-none rounded-2xl focus-visible:ring-"
-            />
-          </div>
-        </form> */}
       </div>
     </header>
   );

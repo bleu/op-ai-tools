@@ -1,9 +1,9 @@
+import { getCurrentChat, useChatStore } from "@/states/use-chat-state";
 import React from "react";
 import ChatBottombar from "./chat-bottombar";
 import { ChatEmptyState } from "./chat-empty-state";
 import { ChatList } from "./chat-list";
 import ChatTopbar from "./chat-topbar";
-import { getCurrentChat, useChatStore } from "./use-chat-state";
 
 interface ChatProps {
   isMobile: boolean;
@@ -35,7 +35,7 @@ export function Chat({ isMobile, onToggleSidebar }: ChatProps) {
           <ChatList />
         )}
       </div>
-      <ChatBottombar isMobile={isMobile} />
+      <ChatBottombar />
     </div>
   );
 }
