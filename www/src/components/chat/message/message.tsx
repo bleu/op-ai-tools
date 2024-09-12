@@ -28,7 +28,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
   return (
     <div
       className={cn(
-        "flex flex-row gap-2 mt-8",
+        "flex flex-row gap-2 md:gap-4 mt-8",
         isAnswer ? "justify-start" : "justify-end",
       )}
       onMouseEnter={() => setIsHovered(true)}

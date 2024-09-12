@@ -53,7 +53,7 @@ export const ChatList: React.FC = React.memo(() => {
   }
 
   return (
-    <div className="flex-col-reverse overflow-y-auto px-6 md:px-8 pb-3 md:pb-6">
+    <div className="flex-col-reverse overflow-y-auto px-4 pb-3 md:pb-6">
       {currentMessages.map((message) => (
         <Message key={message.id} message={message} />
       ))}
