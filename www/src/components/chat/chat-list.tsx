@@ -57,7 +57,7 @@ export const ChatList: React.FC = React.memo(() => {
       {currentMessages.map((message) => (
         <Message key={message.id} message={message} />
       ))}
-      <div ref={messagesEndRef} />
+      <div className="-scroll-mt-6 invisible" ref={messagesEndRef} />
     </div>
   );
 });
