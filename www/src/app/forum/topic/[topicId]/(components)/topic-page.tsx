@@ -7,9 +7,9 @@ import { TopicHeader } from "@/components/forum/topic-header";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
+import Markdown from "react-markdown";
 import type { TopicPageProps } from "../page";
 import { useUserAccessedTopicPosthogTracker } from "./useUserAccessedTopicPosthogTracker";
-import Markdown from "react-markdown";
 
 const Section = ({ title, children }: PropsWithChildren<{ title: string }>) => (
   <div className="space-y-4">
