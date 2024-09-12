@@ -84,11 +84,10 @@ In summary, Optimism is an Ethereum Layer 2 focused on scalability through optim
     const response = {
       data: {
         answer:
-          "Optimism works as a Layer 2 scaling solution for Ethereum, utilizing a technology called optimistic rollups. This allows transactions to be processed off-chain, which significantly increases transaction speed and reduces costs while still ensuring security by periodically submitting batches of transactions to the Ethereum mainnet. The governance of Optimism is community-driven, enabling users to participate in decision-making processes regarding the protocol's development and funding. Additionally, the Retro Funding program rewards contributions to the Optimism ecosystem, focusing on community-driven projects and initiatives.",
+          "The OP token distribution is structured to support various initiatives within the Optimism ecosystem. Key allocations include:\n\n- **19%** for airdrops\n- **20%** for retroactive public goods funding (retroPGF)\n- **25%** for ecosystem funding\n- **17%** for investors\n- **19%** for core contributors\n\nAdditionally, specific proposals, such as one from Beefy Finance, have requested OP tokens for liquidity incentives, with detailed allocations: **35%** for farm incentives, **50%** for boosting native farms, and **15%** for developer incentives. Changes to these allocations require approval from the Collective governance, ensuring community involvement in the decision-making process.",
         url_supporting: [
-          "https://gov.optimism.io/t/bi-weekly-op-mainnet-onchain-analysis-second-half-of-august/6769",
-          "https://gov.optimism.io/t/welcome-to-the-optimism-collective-discourse/7",
-          "https://gov.optimism.io/t/governance-fund-observations/3257",
+          "https://gov.optimism.io/t/clarification-on-op-token-supply/5589",
+          "https://gov.optimism.io/t/ready-gf-phase-1-proposal-beefy/2967",
         ],
       },
       error: null,

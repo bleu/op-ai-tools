@@ -7,7 +7,6 @@ import { useCopyMessage } from "@/components/ui/hooks/use-copy-message";
 import { useFeedback } from "@/components/ui/hooks/use-feedback";
 import { useChatStore } from "@/states/use-chat-state";
 
-
 export interface MessageActionsProps {
   message: Message;
 }

@@ -14,7 +14,7 @@ export default function ChatLayout({
       <ChatHeader />
       <div className="flex max-h-[calc(100dvh-4rem)] w-full overflow-hidden h-full">
         <div className="hidden md:flex">
-        <ChatSidebar />
+          <ChatSidebar />
         </div>
 
         <main className="flex flex-1">{children}</main>
