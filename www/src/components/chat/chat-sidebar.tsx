@@ -51,7 +51,7 @@ export default function ChatSidebar() {
                   className="flex-grow text-left overflow-hidden"
                   onClick={() => setSelectedChatId(chat.id)}
                 >
-                  <span className="overflow-hidden line-clamp-1">
+                  <span className="text-ellipsis line-clamp-1">
                     {chat.messages[0]?.data?.answer || "New chat"}
                   </span>
                 </button>
