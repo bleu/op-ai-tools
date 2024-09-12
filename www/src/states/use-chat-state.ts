@@ -11,6 +11,7 @@ import {
   generateMessagesMemory,
   getChatName,
 } from "@/lib/chat-utils";
+import { createRef } from "react";
 import { create } from "zustand";
 
 interface ChatStoreState {
@@ -108,7 +109,7 @@ const useChatStoreBase = create<ChatStore>()(
       isTyping: false,
       loadingMessageId: null,
       inputMessage: "",
-
+      inputMessageRef: null,
       setSelectedChatId: (chatId) => set({ selectedChatId: chatId }),
 
       addChat: () => {

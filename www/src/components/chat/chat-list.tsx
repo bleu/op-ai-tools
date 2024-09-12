@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 
+import { useChatInputRefStore } from "@/states/use-chat-input";
 import { getCurrentChat, useChatStore } from "@/states/use-chat-state";
 import { LoadingIndicator } from "../ui/loading-indicator";
 import { ChatEmptyState } from "./chat-empty-state";
@@ -10,11 +11,13 @@ export const ChatList: React.FC = React.memo(() => {
   const currentChat = getCurrentChat();
   const currentMessages = currentChat?.messages || [];
   const setInputMessage = useChatStore.use.setInputMessage();
+  const inputMessageRef = useChatInputRefStore((store) => store.internalRef);
 
   const { addChat } = useChatStore();
 
   const handleSuggestionClick = (suggestion: string) => {
     setInputMessage(suggestion);
+    inputMessageRef.current?.focus();
   };
 
   useEffect(() => {

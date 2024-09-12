@@ -1,5 +1,6 @@
 import { generateMessageParams } from "@/lib/chat-utils";
 import { cn } from "@/lib/utils";
+import { useChatInputRefStore } from "@/states/use-chat-input";
 import { getCurrentChat, useChatStore } from "@/states/use-chat-state";
 import { SendHorizontal } from "lucide-react";
 import Link from "next/link";
@@ -14,11 +15,11 @@ export default function ChatBottombar() {
   const isStreaming = useChatStore.use.isStreaming();
   const sendMessage = useChatStore.use.sendMessage();
   const currentChat = getCurrentChat();
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const inputMessageRef = useChatInputRefStore((store) => store.internalRef);
 
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
+    if (inputMessageRef?.current) {
+      inputMessageRef?.current.focus();
     }
   }, []);
 
@@ -37,8 +38,8 @@ export default function ChatBottombar() {
       sendMessage(newMessage);
       setInputMessage("");
 
-      if (inputRef.current) {
-        inputRef.current.focus();
+      if (inputMessageRef?.current) {
+        inputMessageRef?.current.focus();
       }
     }
   };
@@ -61,7 +62,7 @@ export default function ChatBottombar() {
         <Textarea
           autoComplete="off"
           value={inputMessage}
-          ref={inputRef}
+          ref={inputMessageRef}
           onKeyDown={handleKeyPress}
           onChange={handleInputChange}
           name="message"
