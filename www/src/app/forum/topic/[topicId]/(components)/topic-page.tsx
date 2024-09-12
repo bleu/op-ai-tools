@@ -59,7 +59,7 @@ export function TopicPage({ topic }: TopicPageProps) {
               ),
             }}
           >
-            {topic.overviewMarkdown}
+            {topic.overview}
           </Markdown>
         </Section>
       )}
