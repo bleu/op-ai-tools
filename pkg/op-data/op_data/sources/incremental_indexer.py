@@ -29,20 +29,19 @@ class IncrementalIndexerService:
     async def get_updated_documents(self):
         return await DataExporter.get_langchain_documents(only_not_embedded=True)
 
-    async def save_compressed_embeddings_folder(self, compressed_data):
-        await Embedding.create(compressedData=compressed_data)
-
-    async def save_embedding_index(self, index, index_type, updated_keys):
+    async def save_embedding_index(self, index, index_type):
         index_questions = list(index.keys())
         index_embed = np.array(self.embeddings.embed_documents(index_questions))
         buffer = io.BytesIO()
         np.savez_compressed(buffer, index_embed=index_embed)
         embed_bytes = buffer.getvalue()
 
-        reorded_index = await reorder_index(index, updated_keys)
+        reorded_index = await reorder_index(index)
 
         await EmbeddingIndex.create(
-            data=reorded_index, embedData=embed_bytes, indexType=index_type
+            data=reorded_index,
+            embedData=embed_bytes,
+            indexType=index_type
         )
 
     @classmethod
@@ -68,7 +67,17 @@ class IncrementalIndexerService:
             return questions_index.data
         except DoesNotExist:
             return {}
-
+    
+    @classmethod
+    async def get_compressed_embeddings(cls):
+        try:
+            last_embedding = await Embedding.all().order_by("-createdAt").first()
+            if last_embedding is None:
+                return None
+            return last_embedding.compressedData
+        except DoesNotExist:
+            return None
+    
     @classmethod
     async def load_all_indexes(cls, embeddings):
         compressed_data = await cls.get_compressed_embeddings()
@@ -81,42 +90,27 @@ class IncrementalIndexerService:
 
         indexes = {}
         for db_name, index_data in folder_content.items():
-            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-                temp_file.write(index_data.encode("latin-1"))
-                temp_file.flush()
-
-                # Read the index from the temporary file
-                index = faiss.read_index(temp_file.name)
-                # indexes[db_name] = FAISS.load_local(temp_file.name, embeddings, allow_dangerous_deserialization=True)
-
-            os.unlink(temp_file.name)
-
-            # Create the FAISS object
-            docstore = InMemoryDocstore({})
-            indexes[db_name] = FAISS(embeddings, index, docstore, {})
-            # indexes[db_name] = FAISS(embeddings.embed_query, index, None, {})
+            serialized_index = index_data.encode("latin-1")
+            
+            faiss_index = FAISS.deserialize_from_bytes(
+                serialized_index, 
+                embeddings,
+                allow_dangerous_deserialization=True
+            )
+            
+            indexes[db_name] = faiss_index
 
         return indexes
-
+    
     async def save_all_indexes(self):
         folder_content = {}
         for db_name, db in self.vector_stores.items():
-            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-                faiss.write_index(db.index, temp_file.name)
-                with open(temp_file.name, "rb") as f:
-                    index_data = f.read()
-
-                # store the binary data in the folder_content dictionary
-                folder_content[db_name] = index_data.decode("latin-1")
-
-            os.unlink(temp_file.name)
-
-        # serialize and compress the folder content
+            serialized_data = db.serialize_to_bytes()
+            folder_content[db_name] = serialized_data.decode("latin-1")
+            
         json_data = json.dumps(folder_content)
         compressed_data = zlib.compress(json_data.encode("utf-8"))
-
-        # Save the compressed data
-        await self.save_compressed_embeddings_folder(compressed_data)
+        await Embedding.create(compressedData=compressed_data)
 
     async def save_raw_topics_as_embedded(self, data):
         urls = []
@@ -131,18 +125,26 @@ class IncrementalIndexerService:
         await asyncio.sleep(1)
         return urls
 
-    async def update_index(self, db_name, contexts):        
+    def update_index(self, db_name, contexts):        
         if db_name in self.vector_stores:
             # Skip updating documentation index as it's hardcoded
             if db_name == "documentation":
                 return False
+            
+            vector_store = self.vector_stores[db_name]
+            
+            # Update existing index by adding new documents or updating existing ones
+            for document in contexts:
+                if not isinstance(vector_store.docstore.search(document.metadata["url"]), str):
+                    vector_store.delete(ids=[document.metadata["url"]])
+                    vector_store.add_documents([document], ids = [document.metadata["url"]])
+                else:
+                    vector_store.add_documents([document], ids = [document.metadata["url"]])
 
-            # Add new documents to existing index
-            self.vector_stores[db_name].add_documents(contexts)
         else:
             # Create new index if it doesn't exist
             self.vector_stores[db_name] = FAISS.from_documents(
-                contexts, self.embeddings
+                contexts, self.embeddings, ids = [context.metadata["url"] for context in contexts]
             )
 
         self.should_save_update = True
@@ -187,36 +189,28 @@ class IncrementalIndexerService:
             self.embeddings
         )
         
-        # maybe does not makes sense to have self.vector_stores[db_name].add_documents(contexts)
-        # note that the langchain_process is divided by category name, so we need to rebuild and compare the documents
-        
-        # the ideal cenario: change the `divide`in optimism.langchain_process to the key be the topic id`
-
         data = await self.get_updated_documents()
 
         for db_name, contexts in data.items():
             if "archived" in db_name:
                 continue
 
-            index_updated = await self.update_index(db_name, contexts)
-            # if index_updated:
-            #     self.parse_index(contexts, self.llm)
+            index_updated = self.update_index(db_name, contexts)
+            if index_updated:
+                self.parse_index(contexts, self.llm)
         
-        import pdb; pdb.set_trace();
-                
-        # import pdb; pdb.set_trace();
-
         if not self.should_save_update:
             return
 
-        # # # import pdb; pdb.set_trace();
-        self.questions_index = QUESTIONS_INDEX
-        self.keywords_index = KEYWORDS_INDEX
+        # # import pdb; pdb.set_trace();
+        # self.questions_index = QUESTIONS_INDEX
+        # self.keywords_index = KEYWORDS_INDEX
 
         # # Save all indexes after update
         await asyncio.gather(
             self.save_all_indexes(),
-            self.save_embedding_index(self.questions_index, "questions"),
-            self.save_embedding_index(self.keywords_index, "keywords"),
+            # self.save_embedding_index(self.questions_index, "questions"),
+            # self.save_embedding_index(self.keywords_index, "keywords"),
             # self.save_raw_topics_as_embedded(data)
         )
+        # 
