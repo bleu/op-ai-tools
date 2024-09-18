@@ -23,21 +23,25 @@ register_tortoise(
     generate_schemas=False,
 )
 
+
 # Initialize Tortoise ORM
 async def init_db():
     await Tortoise.init(config=Config.get_tortoise_config())
+
 
 # Run the initialization
 loop = asyncio.get_event_loop()
 loop.run_until_complete(init_db())
 
+
 def run_async(coro):
     return loop.run_until_complete(coro)
 
+
 preloaded_objects = {
-    'app': app,
-    'IncrementalIndexerService': IncrementalIndexerService,
-    'run_async': run_async,
+    "app": app,
+    "IncrementalIndexerService": IncrementalIndexerService,
+    "run_async": run_async,
 }
 
 banner = """

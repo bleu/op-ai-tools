@@ -21,8 +21,10 @@ chat_sources = [
 class DataExporter:
     _dataframe_cache: Optional[pd.DataFrame] = None
     _dataframe_cache_time: Optional[float] = None
+    _dataframe_cache_with_embedded: Optional[bool] = None
     _langchain_documents_cache: Optional[Dict] = None
     _langchain_documents_cache_time: Optional[float] = None
+    _langchain_documents_with_embedded: Optional[bool] = None
     _cache_lock = asyncio.Lock()
     CACHE_TTL = 60 * 60 * 24  # day in seconds
 
@@ -33,34 +35,42 @@ class DataExporter:
             if (
                 cls._dataframe_cache is None
                 or (current_time - cls._dataframe_cache_time) > cls.CACHE_TTL
+                or cls._dataframe_cache_with_embedded != only_not_embedded
             ):
                 context_df = []
                 for priority_class in chat_sources:
                     dfs_class = await asyncio.gather(
-                        *[source.dataframe_process(only_not_embedded=only_not_embedded) for source in priority_class]
+                        *[
+                            source.dataframe_process(
+                                only_not_embedded=only_not_embedded
+                            )
+                            for source in priority_class
+                        ]
                     )
                     dfs_class = pd.concat(dfs_class)
                     dfs_class = dfs_class.sort_values(by="last_date", ascending=False)
                     context_df.append(dfs_class)
 
+                cls._dataframe_cache_with_embedded = only_not_embedded
                 cls._dataframe_cache = pd.concat(context_df)
                 cls._dataframe_cache_time = current_time
 
         return cls._dataframe_cache
 
     @classmethod
-    async def get_langchain_documents(cls):
+    async def get_langchain_documents(cls, only_not_embedded=False):
         async with cls._cache_lock:
             current_time = time.time()
             if (
                 cls._langchain_documents_cache is None
                 or (current_time - cls._langchain_documents_cache_time) > cls.CACHE_TTL
+                or cls._langchain_documents_with_embedded != only_not_embedded
             ):
                 out = {}
                 async with aiohttp.ClientSession() as session:
                     tasks = []
                     for source in [x for xs in chat_sources for x in xs]:
-                        tasks.append(cls._fetch_documents(session, source))
+                        tasks.append(cls._fetch_documents(session, source, only_not_embedded))
                     results = await asyncio.gather(*tasks)
 
                     for result in results:
@@ -68,12 +78,13 @@ class DataExporter:
 
                 cls._langchain_documents_cache = out
                 cls._langchain_documents_cache_time = current_time
+                cls._langchain_documents_with_embedded = only_not_embedded
 
         return cls._langchain_documents_cache
 
     @staticmethod
-    async def _fetch_documents(session, source):
-        documents = await source.langchain_process()
+    async def _fetch_documents(session, source, only_not_embedded):
+        documents = await source.langchain_process(only_not_embedded=only_not_embedded)
         if isinstance(documents, dict):
             return {
                 f"{source.name_source}_{key}": value for key, value in documents.items()
@@ -88,8 +99,10 @@ class DataExporter:
         async with cls._cache_lock:
             cls._dataframe_cache = None
             cls._dataframe_cache_time = None
+            cls._dataframe_cache_with_embedded = None
             cls._langchain_documents_cache = None
             cls._langchain_documents_cache_time = None
+            cls._langchain_documents_with_embedded = None
 
     @classmethod
     async def refresh_data(cls):

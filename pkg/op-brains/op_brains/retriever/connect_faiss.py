@@ -1,11 +1,11 @@
 from typing import Tuple
 import os
 
-from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
 from op_brains.config import DB_STORAGE_PATH, EMBEDDING_MODEL
 import asyncio
+from op_brains.chat import model_utils
 
 from typing import Optional
 import time
@@ -14,7 +14,7 @@ import time
 class DatabaseLoader:
     @staticmethod
     def load_db(dbs: Tuple[str, ...], vectorstore: str = "faiss") -> FAISS:
-        embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
+        embeddings = model_utils.access_APIs.get_embedding(EMBEDDING_MODEL)
         if vectorstore == "faiss":
             db_paths = [
                 os.path.join(DB_STORAGE_PATH, f"{name}_db/faiss/{EMBEDDING_MODEL}")
@@ -40,7 +40,7 @@ class CachedDatabaseLoader:
     CACHE_TTL = 60 * 60 * 24  # day in seconds
 
     @classmethod
-    async def load_db(cls, dbs: Tuple[str, ...], vectorstore: str = "faiss") -> FAISS:
+    async def load_db(cls, vectorstore: str = "faiss") -> FAISS:
         if vectorstore == "faiss":
             async with cls._cache_lock:
                 current_time = time.time()
@@ -48,7 +48,7 @@ class CachedDatabaseLoader:
                     cls._db_cache is None
                     or (current_time - cls._db_cache_time) > cls.CACHE_TTL
                 ):
-                    embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
+                    embeddings = model_utils.access_APIs.get_embedding(EMBEDDING_MODEL)
                     loaded_dbs = IncrementalIndexerService.load_all_indexes(embeddings)
 
                     merged_db = None

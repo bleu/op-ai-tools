@@ -3,6 +3,9 @@ from op_brains.chat import model_utils
 from op_brains.chat.system_structure import RAGSystem
 from typing import Dict, Any, List, Tuple
 from op_brains.documents import DataExporter
+import numpy as np
+import io
+from op_data.db.models import EmbeddingIndex
 
 from op_brains.config import DB_STORAGE_PATH, CHAT_MODEL
 
@@ -21,6 +24,35 @@ def transform_memory_entries(entries: List[Dict[str, str]]) -> List[Tuple[str, s
     return [
         (entry["name"], entry["message"]) for entry in entries if "message" in entry
     ]
+
+
+async def build_questions_index(k_max=2, treshold=0.9):
+    index = (
+        await EmbeddingIndex.filter(indexType="questions")
+        .order_by("-createdAt")
+        .first()
+    )
+
+    buffer = io.BytesIO(index.embedData)
+    loaded_data = np.load(buffer)
+    embed_index = loaded_data["index_embed"]
+
+    return model_utils.RetrieverBuilder.build_index(
+        index.data, embed_index, k_max, treshold
+    )
+
+
+async def build_keywords_index(k_max=5, treshold=0.95):
+    index = (
+        await EmbeddingIndex.filter(indexType="keywords").order_by("-createdAt").first()
+    )
+    buffer = io.BytesIO(index.embedData)
+    loaded_data = np.load(buffer)
+    embed_index = loaded_data["index_embed"]
+
+    return model_utils.RetrieverBuilder.build_index(
+        index.data, embed_index, k_max, treshold
+    )
 
 
 async def process_question(
@@ -50,7 +82,7 @@ async def process_question(
             is caught and logged, with a user-friendly error message returned in the dictionary.
     """
 
-    contexts_df = await DataExporter.get_dataframe()
+    contexts_df = await DataExporter.get_dataframe(only_not_embedded=False)
 
     chat_model = (
         CHAT_MODEL,
@@ -63,24 +95,14 @@ async def process_question(
     )
 
     try:
-        list_dbs = os.listdir(DB_STORAGE_PATH)
-        list_dbs = [db[:-3] for db in list_dbs if db[-3:] == "_db"]
-        filter_out_dbs = ["summary_archived___old_missions"]
-        dbs = [db for db in list_dbs if db not in filter_out_dbs]
+        questions_index_retriever = await build_questions_index(k_max=5, treshold=0.93)
 
-        questions_index_retriever = model_utils.RetrieverBuilder.build_questions_index(
-            k_max=5, treshold=0.93
-        )
-
-        keywords_index_retriever = model_utils.RetrieverBuilder.build_keywords_index(
-            k_max=5, treshold=0.95
-        )
+        keywords_index_retriever = await build_keywords_index(k_max=5, treshold=0.95)
 
         def contains(must_contain):
             return lambda similar: [s for s in similar if must_contain in s]
 
         default_retriever = model_utils.RetrieverBuilder.build_faiss_retriever(
-            dbs,
             k=5,
         )
 

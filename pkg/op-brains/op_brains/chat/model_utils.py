@@ -3,12 +3,14 @@ import time
 import json
 import faiss
 import numpy as np
+import io
 import pandas as pd
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_core.pydantic_v1 import BaseModel, Field
-
+from langchain.embeddings import HuggingFaceEmbeddings
+from .test_chat_model import TestChatModel
 from op_brains.retriever import connect_faiss
 from op_brains.config import (
     QUESTIONS_INDEX_JSON,
@@ -17,6 +19,7 @@ from op_brains.config import (
     KEYWORDS_INDEX_JSON,
     KEYWORDS_INDEX_NPZ,
     EMBEDDING_MODEL,
+    CHAT_MODEL,
 )
 from op_brains.documents import DataExporter
 
@@ -275,26 +278,18 @@ class ContextHandling:
 class RetrieverBuilder:
     @staticmethod
     def build_faiss_retriever(
-        dbs_name: List[str],
         **retriever_pars,
     ):
-        db = connect_faiss.DatabaseLoader.load_db(dbs_name)
+        db = connect_faiss.CachedDatabaseLoader.load_db()
         return lambda query: db.similarity_search(query, **retriever_pars)
 
     @staticmethod
-    def build_index(json_file, npz_file, k_max, treshold):
-        embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
+    def build_index(index, index_embed, k_max, treshold):
+        embeddings = access_APIs.get_embedding(EMBEDDING_MODEL)
 
-        with open(json_file, "r") as f:
-            index = json.load(f)
         index_keys = list(index.keys())
 
         if treshold < 1 and treshold > 0:
-            if not npz_file.suffix == ".npz":
-                raise ValueError("npz_file must be a .npz file")
-            with npz_file.open("rb") as f:
-                index_embed = next(x for x in np.load(f).items())
-            index_embed = index_embed[1]
             index_faiss = faiss.IndexFlatIP(index_embed.shape[1])
             index_faiss.add(index_embed)
 
@@ -334,24 +329,23 @@ class RetrieverBuilder:
 
         return find_similar
 
-    @staticmethod
-    def build_questions_index(k_max=2, treshold=0.9):
-        return RetrieverBuilder.build_index(
-            QUESTIONS_INDEX_JSON, QUESTIONS_INDEX_NPZ, k_max, treshold
-        )
-
-    @staticmethod
-    def build_keywords_index(k_max=5, treshold=0.95):
-        return RetrieverBuilder.build_index(
-            KEYWORDS_INDEX_JSON, KEYWORDS_INDEX_NPZ, k_max, treshold
-        )
-
 
 class access_APIs:
-    def get_llm(model: str = "gpt-4o-mini", **kwargs):
+    def get_llm(model: str = CHAT_MODEL, **kwargs):
         if "gpt" in model:
             return ChatOpenAI(model=model, **kwargs)
         elif "claude" in model:
             return ChatAnthropic(model=model, **kwargs)
+        elif "free" in model:
+            return TestChatModel(n=10, model_name="testing")
         else:
             raise ValueError(f"Model {model} not recognized")
+
+    @staticmethod
+    def get_embedding(model: str = EMBEDDING_MODEL, **kwargs):
+        # return HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+
+        if "free" in model:
+            return HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+        else:
+            return OpenAIEmbeddings(model=model, **kwargs)

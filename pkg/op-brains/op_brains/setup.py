@@ -10,12 +10,11 @@ from op_brains.chat import model_utils
 from op_brains.config import SCOPE, EMBEDDING_MODEL
 import importlib.resources
 from langchain_community.vectorstores import FAISS
-from langchain_openai import OpenAIEmbeddings
 from langchain_voyageai import VoyageAIRerank
 import datetime as dt
 from op_data.db.models import RawTopic, Embedding
 
-# reranker_voyager = VoyageAIRerank(model="rerank-1")
+reranker_voyager = VoyageAIRerank(model="rerank-1")
 
 
 prompt_question_generation = """
@@ -136,8 +135,7 @@ def generate_indexes_from_fragment(list_contexts: Iterable, llm: Any) -> dict:
 
 
 async def reorder_index(index_dict):
-    # not_embedded_contexts_df = await DataExporter.get_dataframe(only_not_embedded=True)
-    all_contexts_df =  await DataExporter.get_dataframe(only_not_embedded=False)
+    all_contexts_df = await DataExporter.get_dataframe(only_not_embedded=False)
 
     output_dict = {}
     for key, urls in index_dict.items():
@@ -168,7 +166,7 @@ async def main(model: str):
     data = await DataExporter.get_langchain_documents()
 
     llm = model_utils.access_APIs.get_llm(model)
-    embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
+    embeddings = model_utils.access_APIs.get_embedding(EMBEDDING_MODEL)
 
     questions_index = {}
     keywords_index = {}
@@ -208,6 +206,3 @@ async def main(model: str):
     await reorder_file(op_artifacts_pkg.joinpath("index_questions.json"))
     await reorder_file(op_artifacts_pkg.joinpath("index_keywords.json"))
 
-    # await RawTopic.filter(url__in=urls).update(
-    #     lastEmbeddedAt=dt.datetime.now(dt.UTC)
-    # )
