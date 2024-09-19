@@ -134,21 +134,23 @@ def generate_indexes_from_fragment(list_contexts: Iterable, llm: Any) -> dict:
     return q_index, kw_index
 
 
-async def reorder_index(index_dict):
+async def reorder_index(index_dict, updated_urls=[]):
     all_contexts_df = await DataExporter.get_dataframe(only_not_embedded=False)
 
     output_dict = {}
     for key, urls in index_dict.items():
-        print(key)
-        print(urls)
-        contexts = all_contexts_df[all_contexts_df["url"].isin(urls)].content.tolist()
-        k = len(contexts)
-        if k > 1:
-            contexts = reranker_voyager.compress_documents(
-                query=key, documents=contexts
-            )
-            urls = [context.metadata["url"] for context in contexts]
-            print(urls)
+        if any(url in updated_urls for url in urls):
+            contexts = all_contexts_df[all_contexts_df["url"].isin(urls)].content.tolist()
+            k = len(contexts)
+            if k > 1:
+                contexts = reranker_voyager.compress_documents(
+                    query=key, documents=contexts
+                )
+                urls = [context.metadata["url"] for context in contexts]
+                print(f"Reranked urls for key '{key}': {urls}")
+        else:
+            print(f"Skipping reranking for key '{key}' as no updated URLs are present.")
+        
         output_dict[key] = urls
 
     return output_dict

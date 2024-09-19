@@ -112,14 +112,12 @@ def after_request(response):
 
 @tasks.cron("0 */6 * * *")
 async def sync_all():
-    await asyncio.gather(
-        sync_categories(),
-        sync_raw_topics(),
-        sync_topics(),
-        sync_summaries(),
-        sync_snapshot(),
-        sync_agora(),
-    )
+    await sync_categories()
+    await sync_raw_topics()
+    await sync_topics()
+    await sync_summaries()
+    await sync_snapshot()
+    await sync_agora()
 
 
 if __name__ == "__main__":

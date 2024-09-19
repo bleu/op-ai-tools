@@ -10,7 +10,7 @@ from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain.embeddings import HuggingFaceEmbeddings
-from .test_chat_model import TestChatModel
+from .test_chat_model import GroqLLM
 from op_brains.retriever import connect_faiss
 from op_brains.config import (
     QUESTIONS_INDEX_JSON,
@@ -337,14 +337,12 @@ class access_APIs:
         elif "claude" in model:
             return ChatAnthropic(model=model, **kwargs)
         elif "free" in model:
-            return TestChatModel(n=10, model_name="testing")
+            return GroqLLM()
         else:
             raise ValueError(f"Model {model} not recognized")
 
     @staticmethod
     def get_embedding(model: str = EMBEDDING_MODEL, **kwargs):
-        # return HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-
         if "free" in model:
             return HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
         else:

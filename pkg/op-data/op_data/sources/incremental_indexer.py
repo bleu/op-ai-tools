@@ -29,14 +29,14 @@ class IncrementalIndexerService:
     async def get_updated_documents(self):
         return await DataExporter.get_langchain_documents(only_not_embedded=True)
 
-    async def save_embedding_index(self, index, index_type):
+    async def save_embedding_index(self, index, index_type, updated_documents_urls):
         index_questions = list(index.keys())
         index_embed = np.array(self.embeddings.embed_documents(index_questions))
         buffer = io.BytesIO()
         np.savez_compressed(buffer, index_embed=index_embed)
         embed_bytes = buffer.getvalue()
 
-        reorded_index = await reorder_index(index)
+        reorded_index = await reorder_index(index, updated_documents_urls)
 
         await EmbeddingIndex.create(
             data=reorded_index,
@@ -112,13 +112,15 @@ class IncrementalIndexerService:
         compressed_data = zlib.compress(json_data.encode("utf-8"))
         await Embedding.create(compressedData=compressed_data)
 
-    async def save_raw_topics_as_embedded(self, data):
+    def get_updated_documents_urls(self, data):
         urls = []
         for db_name, contexts in data.items():
             for context in contexts:
                 url = context.dict()["metadata"]["url"]
                 urls.append(url)
-
+        return urls
+    
+    async def save_raw_topics_as_embedded(self, urls):
         # await RawTopic.filter(url__in=urls).update(
         #     lastEmbeddedAt=dt.datetime.now(dt.UTC)
         # )
@@ -156,12 +158,12 @@ class IncrementalIndexerService:
         for q, urls in q_index.items():
             if q not in self.questions_index:
                 self.questions_index[q] = []
-            self.questions_index[q].extend(urls)
+            self.questions_index[q].extend([url for url in urls if url not in self.questions_index[q]])
 
         for k, urls in kw_index.items():
             if k not in self.keywords_index:
                 self.keywords_index[k] = []
-            self.keywords_index[k].extend(urls)
+            self.keywords_index[k].extend([url for url in urls if url not in self.keywords_index[k]])
 
     async def acquire_and_save(self):
         """
@@ -183,13 +185,13 @@ class IncrementalIndexerService:
         Note:
             This method sets the `should_save_update` flag to True if any updates are made to the indexes.
         """  
+        data = await self.get_updated_documents()
+
         self.questions_index = await self.get_embedding_index("questions")
         self.keywords_index = await self.get_embedding_index("keywords")
         self.vector_stores = await IncrementalIndexerService.load_all_indexes(
             self.embeddings
         )
-        
-        data = await self.get_updated_documents()
 
         for db_name, contexts in data.items():
             if "archived" in db_name:
@@ -201,16 +203,13 @@ class IncrementalIndexerService:
         
         if not self.should_save_update:
             return
+        
+        updated_documents_urls = self.get_updated_documents_urls(data)
 
-        # # import pdb; pdb.set_trace();
-        # self.questions_index = QUESTIONS_INDEX
-        # self.keywords_index = KEYWORDS_INDEX
-
-        # # Save all indexes after update
+        # Save updated indexes and set the raw topics as embedded
         await asyncio.gather(
             self.save_all_indexes(),
-            # self.save_embedding_index(self.questions_index, "questions"),
-            # self.save_embedding_index(self.keywords_index, "keywords"),
-            # self.save_raw_topics_as_embedded(data)
+            self.save_embedding_index(self.questions_index, "questions", updated_documents_urls),
+            self.save_embedding_index(self.keywords_index, "keywords", updated_documents_urls),
+            # self.save_raw_topics_as_embedded(updated_documents_urls)
         )
-        # 
