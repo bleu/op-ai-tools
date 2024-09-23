@@ -9,9 +9,9 @@ import aiohttp
 import time
 
 chat_sources = [
-    # [
-    #     FragmentsProcessingStrategy,
-    # ],
+    [
+        FragmentsProcessingStrategy,
+    ],
     [
         SummaryProcessingStrategy,
     ],
