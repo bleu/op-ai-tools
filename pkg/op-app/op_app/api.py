@@ -22,7 +22,7 @@ from op_data.cli import (
     sync_agora,
 )
 from honeybadger import honeybadger
-
+from op_data.sources.incremental_indexer import IncrementalIndexerService
 
 app = Quart(__name__)
 app.config["SECRET_KEY"] = os.getenv("FLASK_API_SECRET_KEY")
@@ -65,12 +65,12 @@ def handle_question(func):
     return wrapper
 
 
-@app.errorhandler(Exception)
-def handle_exception(e):
-    honeybadger.notify(e)
-    if isinstance(e, UnsupportedVectorstoreError):
-        return jsonify({"error": str(e)}), 400
-    return jsonify({"error": "An unexpected error occurred during prediction"}), 500
+# @app.errorhandler(Exception)
+# def handle_exception(e):
+#     honeybadger.notify(e)
+#     if isinstance(e, UnsupportedVectorstoreError):
+#         return jsonify({"error": str(e)}), 400
+#     return jsonify({"error": "An unexpected error occurred during prediction"}), 500
 
 
 @app.route("/predict", methods=["POST"])
@@ -119,6 +119,10 @@ async def sync_all():
     await sync_snapshot()
     await sync_agora()
 
+@tasks.cron("0 0 1 * *")
+async def sync_indexes():
+    indexer = IncrementalIndexerService()
+    await indexer.acquire_and_save()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0")

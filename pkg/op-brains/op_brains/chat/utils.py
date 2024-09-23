@@ -96,15 +96,13 @@ async def process_question(
 
     try:
         questions_index_retriever = await build_questions_index(k_max=5, treshold=0.93)
-
         keywords_index_retriever = await build_keywords_index(k_max=5, treshold=0.95)
-
-        def contains(must_contain):
-            return lambda similar: [s for s in similar if must_contain in s]
-
         default_retriever = model_utils.RetrieverBuilder.build_faiss_retriever(
             k=5,
         )
+
+        def contains(must_contain):
+            return lambda similar: [s for s in similar if must_contain in s]        
 
         async def retriever(query: dict, reasoning_level: int) -> list:
             if reasoning_level < 1 and "keyword" in query:

@@ -6,7 +6,7 @@ import io
 import faiss
 from langchain_community.vectorstores import FAISS
 from tortoise.exceptions import DoesNotExist
-from op_data.db.models import Embedding, EmbeddingIndex
+from op_data.db.models import Embedding, EmbeddingIndex, RawTopic
 import asyncio
 from op_brains.documents import DataExporter
 from langchain.docstore.in_memory import InMemoryDocstore
@@ -15,7 +15,7 @@ from op_brains.chat import model_utils
 import numpy as np
 from op_brains.config import CHAT_MODEL, EMBEDDING_MODEL
 from .mock import QUESTIONS_INDEX, KEYWORDS_INDEX
-
+import datetime as dt
 
 class IncrementalIndexerService:
     def __init__(self):
@@ -121,10 +121,9 @@ class IncrementalIndexerService:
         return urls
     
     async def save_raw_topics_as_embedded(self, urls):
-        # await RawTopic.filter(url__in=urls).update(
-        #     lastEmbeddedAt=dt.datetime.now(dt.UTC)
-        # )
-        await asyncio.sleep(1)
+        await RawTopic.filter(url__in=urls).update(
+            lastEmbeddedAt=dt.datetime.now(dt.UTC)
+        )
         return urls
 
     def update_index(self, db_name, contexts):        
@@ -152,8 +151,8 @@ class IncrementalIndexerService:
         self.should_save_update = True
         return True
 
-    def parse_index(self, contexts, llm):
-        q_index, kw_index = generate_indexes_from_fragment(contexts, llm)
+    async def parse_index(self, contexts, llm):
+        q_index, kw_index = await generate_indexes_from_fragment(contexts, llm)
 
         for q, urls in q_index.items():
             if q not in self.questions_index:
@@ -199,7 +198,7 @@ class IncrementalIndexerService:
 
             index_updated = self.update_index(db_name, contexts)
             if index_updated:
-                self.parse_index(contexts, self.llm)
+                await self.parse_index(contexts, self.llm)
         
         if not self.should_save_update:
             return
@@ -211,5 +210,5 @@ class IncrementalIndexerService:
             self.save_all_indexes(),
             self.save_embedding_index(self.questions_index, "questions", updated_documents_urls),
             self.save_embedding_index(self.keywords_index, "keywords", updated_documents_urls),
-            # self.save_raw_topics_as_embedded(updated_documents_urls)
+            self.save_raw_topics_as_embedded(updated_documents_urls)
         )
