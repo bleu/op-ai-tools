@@ -65,12 +65,12 @@ def handle_question(func):
     return wrapper
 
 
-# @app.errorhandler(Exception)
-# def handle_exception(e):
-#     honeybadger.notify(e)
-#     if isinstance(e, UnsupportedVectorstoreError):
-#         return jsonify({"error": str(e)}), 400
-#     return jsonify({"error": "An unexpected error occurred during prediction"}), 500
+@app.errorhandler(Exception)
+def handle_exception(e):
+    honeybadger.notify(e)
+    if isinstance(e, UnsupportedVectorstoreError):
+        return jsonify({"error": str(e)}), 400
+    return jsonify({"error": "An unexpected error occurred during prediction"}), 500
 
 
 @app.route("/predict", methods=["POST"])
