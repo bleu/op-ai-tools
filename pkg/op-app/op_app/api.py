@@ -22,7 +22,7 @@ from op_data.cli import (
     sync_agora,
 )
 from honeybadger import honeybadger
-
+from op_data.sources.incremental_indexer import IncrementalIndexerService
 
 app = Quart(__name__)
 app.config["SECRET_KEY"] = os.getenv("FLASK_API_SECRET_KEY")
@@ -112,15 +112,17 @@ def after_request(response):
 
 @tasks.cron("0 */6 * * *")
 async def sync_all():
-    await asyncio.gather(
-        sync_categories(),
-        sync_raw_topics(),
-        sync_topics(),
-        sync_summaries(),
-        sync_snapshot(),
-        sync_agora(),
-    )
+    await sync_categories()
+    await sync_raw_topics()
+    await sync_topics()
+    await sync_summaries()
+    await sync_snapshot()
+    await sync_agora()
 
+@tasks.cron("0 0 1 * *")
+async def sync_indexes():
+    indexer = IncrementalIndexerService()
+    await indexer.acquire_and_save()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0")

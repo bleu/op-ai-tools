@@ -3,6 +3,9 @@ from op_brains.documents import DataExporter
 from typing import Any, Iterable
 import json
 import re
+import asyncio
+import re
+import random
 import numpy as np
 
 import op_artifacts
@@ -10,10 +13,16 @@ from op_brains.chat import model_utils
 from op_brains.config import SCOPE, EMBEDDING_MODEL
 import importlib.resources
 from langchain_community.vectorstores import FAISS
-from langchain_openai import OpenAIEmbeddings
 from langchain_voyageai import VoyageAIRerank
+import datetime as dt
+from op_data.db.models import RawTopic, Embedding
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+from voyageai.error import RateLimitError
+from voyageai.client import Client as VoyageClient
 
 reranker_voyager = VoyageAIRerank(model="rerank-1")
+lite_reranker_voyager = VoyageAIRerank(model="rerank-lite-1")
+vo = VoyageClient()
 
 
 prompt_question_generation = """
@@ -86,125 +95,110 @@ Additional guidelines:
 Remember, your goal is to create questions that a non-specialist user would find interesting and relevant based on the given fragment. Do not make questions that require knowledge beyond what's provided in the text.
 """
 
+@retry(
+    stop=stop_after_attempt(10),
+    wait=wait_exponential(multiplier=1, min=10, max=320),
+    retry=retry_if_exception_type(RateLimitError)
+)
+async def rate_limited_llm_invoke(llm, prompt):
+    try:
+        await asyncio.sleep(random.uniform(0.1, 0.5))  # Add some jitter
+        return await llm.ainvoke(prompt)
+    except Exception as e:
+        if '429' in str(exception):
+            raise RateLimitError(str(e))
+        raise e
 
-def generate_indexes_from_fragment(list_contexts: Iterable, llm: Any) -> dict:
-    kw_index = {}
-    q_index = {}
-    for context in list_contexts:
+async def process_context(context, llm, semaphore):
+    async with semaphore:  # Limit concurrency
         type_db = context.metadata["type_db_info"]
 
         if type_db == "docs_fragment":
             TYPE_GUIDELINES = "It is a post from the Optimism Governance Documentation. As the documentation is a place for official information, the content should be relevant and important. Try to encapsulate the whole content in your questions. Aim to generate at least 5 questions, depending on the complexity and richness of the fragment."
-        if type_db == "forum_thread_summary":
+        elif type_db == "forum_thread_summary":
             TYPE_GUIDELINES = "It is a summary of a forum thread from the Optimism Governance Forum. As the forum is a place for community discussion, the content may vary. If you understand that the content is unimportant or irrelevant, return <nothing>."
 
         prompt = prompt_question_generation.format(
             CONTEXT=context.page_content, SCOPE=SCOPE, TYPE_GUIDELINES=TYPE_GUIDELINES
         )
 
-        out = llm.invoke(prompt).content
+        try:
+            out = await rate_limited_llm_invoke(llm, prompt)
+            return out.content, context.metadata["url"]
+        except RateLimitError as e:
+            print(f"Rate limit exceeded after all retries. Error: {str(e)}")
+            raise
+        except Exception as e:
+            print(f"An unexpected error occurred: {str(e)}")
+            raise
 
+async def generate_indexes_from_fragment(list_contexts: Iterable, llm: Any, max_concurrency=20) -> dict:
+    kw_index = {}
+    q_index = {}
+
+    semaphore = asyncio.Semaphore(max_concurrency)
+    tasks = [process_context(context, llm, semaphore) for context in list_contexts]
+    results = await asyncio.gather(*tasks)
+
+    for out, url in results:
         xml_tag_pattern = re.compile(r"<(\w+)(\s[^>]*)?>(.*?)</\1>", re.DOTALL)
         xml_tags = xml_tag_pattern.findall(out)
         tags = {tag[0]: tag[2] for tag in xml_tags}
 
-        if "questions" in tags.keys():
-            questions = tags["questions"]
-            questions = [(q[2], q[1]) for q in xml_tag_pattern.findall(questions)]
-
+        if "questions" in tags:
+            questions = [(q[2], q[1]) for q in xml_tag_pattern.findall(tags["questions"])]
             for q in questions:
                 q = q[0]
-                if q not in q_index:
-                    q_index[q] = []
-                q_index[q].append(context.metadata["url"])
-                print(q, q_index[q])
+                q_index.setdefault(q, []).append(url)
 
-        if "keywords" in tags.keys():
-            keywords = tags["keywords"]
-            keywords = [k.strip().lower() for k in keywords.split(",")]
+        if "keywords" in tags:
+            keywords = [k.strip().lower() for k in tags["keywords"].split(",")]
             keywords = [re.sub(r"[^\w\s]", "", k) for k in keywords]
-
             for k in keywords:
-                if k not in kw_index:
-                    kw_index[k] = []
-                kw_index[k].append(context.metadata["url"])
-                print(k, kw_index[k])
+                kw_index.setdefault(k, []).append(url)
+                
+        print("done for ", url)
 
     return q_index, kw_index
 
 
-async def reorder_index(index_dict):
-    all_contexts_df = await DataExporter.get_dataframe()
-
+async def reorder_index(index_dict, updated_urls=[]):
+    all_contexts_df = await DataExporter.get_dataframe(only_not_embedded=False)
     output_dict = {}
-    for key, urls in index_dict.items():
-        print(key)
-        print(urls)
-        contexts = all_contexts_df[all_contexts_df["url"].isin(urls)].content.tolist()
-        k = len(contexts)
-        if k > 1:
-            contexts = reranker_voyager.compress_documents(
-                query=key, documents=contexts
-            )
-            urls = [context.metadata["url"] for context in contexts]
-            print(urls)
+    
+    semaphore = asyncio.Semaphore(15)
+
+    @retry(
+        stop=stop_after_attempt(15),
+        wait=wait_exponential(multiplier=1, min=15, max=320),
+        retry=retry_if_exception_type(RateLimitError)
+    )
+    async def rate_limited_reranker(query, documents, check_count=False):
+        reranker = reranker_voyager
+        if check_count:
+            count = vo.count_tokens([doc.page_content for doc in documents], "rerank-1")
+            if count > 100000:
+                reranker = lite_reranker_voyager
+
+        return await reranker.acompress_documents(query=query, documents=documents)
+
+    async def process_key(key, urls):
+        async with semaphore:
+            if any(url in updated_urls for url in urls):  # Check if the URLs are updated
+                contexts = all_contexts_df[all_contexts_df["url"].isin(urls)].content.tolist()
+                k = len(contexts)
+                if k > 1:
+                    try:
+                        check_count = True if k > 250 else False
+                        contexts = await rate_limited_reranker(query=key, documents=contexts, check_count=check_count)
+                        urls = [context.metadata["url"] for context in contexts]
+                    except Exception as e:
+                        print(f"Keu: {key} Error: {str(e)}")
+            
+            return key, urls
+
+    tasks = [process_key(key, urls) for key, urls in index_dict.items()]
+    results = await asyncio.gather(*tasks)
+    for key, urls in results:
         output_dict[key] = urls
-
     return output_dict
-
-
-async def reorder_file(path):
-    with open(path, "r") as f:
-        index = json.load(f)
-    index = await reorder_index(index)
-    with open(path, "w") as f:
-        json.dump(index, f, indent=4)
-
-
-async def main(model: str):
-    data = await DataExporter.get_langchain_documents()
-
-    llm = model_utils.access_APIs.get_llm(model)
-    embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
-
-    questions_index = {}
-    keywords_index = {}
-    for db_name, contexts in data.items():
-        db = FAISS.from_documents(contexts, embeddings)
-        db.save_local(f"dbs/{db_name}_db/faiss/{EMBEDDING_MODEL}")
-
-        q_index, kw_index = generate_indexes_from_fragment(contexts, llm)
-
-        for q, urls in q_index.items():
-            if q not in questions_index:
-                questions_index[q] = []
-            questions_index[q].extend(urls)
-
-        for k, urls in kw_index.items():
-            if k not in keywords_index:
-                keywords_index[k] = []
-            keywords_index[k].extend(urls)
-
-    op_artifacts_pkg = importlib.resources.files(op_artifacts)
-    with open(op_artifacts_pkg.joinpath("index_questions.json"), "w") as f:
-        json.dump(questions_index, f, indent=4)
-    index_questions = list(questions_index.keys())
-    index_questions_embed = np.array(embeddings.embed_documents(index_questions))
-    np.savez_compressed(
-        op_artifacts_pkg.joinpath("index_questions.npz"), index_questions_embed
-    )
-
-    with open(op_artifacts_pkg.joinpath("index_keywords.json"), "w") as f:
-        json.dump(keywords_index, f, indent=4)
-    index_keywords = list(keywords_index.keys())
-    index_keywords_embed = np.array(embeddings.embed_documents(index_keywords))
-    np.savez_compressed(
-        op_artifacts_pkg.joinpath("index_keywords.npz"), index_keywords_embed
-    )
-
-    await reorder_file(op_artifacts_pkg.joinpath("index_questions.json"))
-    await reorder_file(op_artifacts_pkg.joinpath("index_keywords.json"))
-
-
-if __name__ == "__main__":
-    main("gpt-4o-mini")

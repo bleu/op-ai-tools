@@ -19,7 +19,7 @@ class FragmentsProcessingStrategy:
 
     @staticmethod
     async def langchain_process(
-        file_path: str = DOCS_PATH, headers_to_split_on: List | None = []
+        file_path: str = DOCS_PATH, headers_to_split_on: List | None = [], **kwargs
     ) -> List[Document]:
         async with aiofiles.open(file_path, "r") as f:
             docs_read = await f.read()
@@ -83,11 +83,18 @@ class FragmentsProcessingStrategy:
 
 class ForumPostsProcessingStrategy:
     @staticmethod
-    async def retrieve(only_not_summarized: bool = False) -> Tuple[Dict, Dict]:
+    async def retrieve(
+        only_not_summarized: bool = False, only_not_embedded: bool = False
+    ) -> Tuple[Dict, Dict]:
         if only_not_summarized:
             raw_topics = await RawTopic.filter(
                 Q(lastSummarizedAt__lt=F("lastUpdatedAt"))
                 | Q(lastSummarizedAt__isnull=True)
+            ).values("rawData", "url", "type", "externalId")
+        elif only_not_embedded:
+            raw_topics = await RawTopic.filter(
+                Q(lastEmbeddedAt__lt=F("lastUpdatedAt"))
+                | Q(lastEmbeddedAt__isnull=True)
             ).values("rawData", "url", "type", "externalId")
         else:
             raw_topics = await RawTopic.all().values(
@@ -234,9 +241,12 @@ trust_level (0-4): {TRUST_LEVEL}
     """
 
     @staticmethod
-    async def return_threads(only_not_summarized: bool = False) -> List:
+    async def return_threads(
+        only_not_summarized: bool = False, only_not_embedded: bool = False
+    ) -> List:
         posts, threads_info = await ForumPostsProcessingStrategy.retrieve(
-            only_not_summarized=only_not_summarized
+            only_not_summarized=only_not_summarized,
+            only_not_embedded=only_not_embedded,
         )
 
         if not threads_info:
@@ -310,7 +320,7 @@ trust_level (0-4): {TRUST_LEVEL}
     @staticmethod
     async def get_threads_documents() -> List[Document]:
         threads = await ForumPostsProcessingStrategy.return_threads()
-        threads_forum = [Document(page_content=t[0], metadata=t[1]) for t in threads]
+        threads_forum = [Document(page_content=t[0], metadata=t[1], id=t[1]['thread_id']) for t in threads]
 
         return threads_forum
 
@@ -319,7 +329,7 @@ trust_level (0-4): {TRUST_LEVEL}
         threads = await ForumPostsProcessingStrategy.return_threads(
             only_not_summarized=True
         )
-        threads_forum = [Document(page_content=t[0], metadata=t[1]) for t in threads]
+        threads_forum = [Document(page_content=t[0], metadata=t[1], id=t[1]['thread_id']) for t in threads]
 
         return threads_forum
 
@@ -338,7 +348,7 @@ class SummaryProcessingStrategy:
     """
 
     @staticmethod
-    async def retrieve() -> List[dict]:
+    async def retrieve(only_not_embedded: bool = False) -> List[dict]:
         out_db = await Topic.all().values(
             "url", "tldr", "about", "overview", "reaction"
         )
@@ -354,7 +364,9 @@ class SummaryProcessingStrategy:
             item = {"content": str_summary, "url": o["url"], "classification": ""}
             ret.append(item)
 
-        threads = await ForumPostsProcessingStrategy.return_threads()
+        threads = await ForumPostsProcessingStrategy.return_threads(
+            only_not_embedded=only_not_embedded
+        )
 
         for entry in ret:
             url = entry["url"]
@@ -373,8 +385,11 @@ class SummaryProcessingStrategy:
     @staticmethod
     async def langchain_process(
         divide: str | None = "category_name",
+        only_not_embedded: bool = False,
     ) -> Dict[str, List[Document]]:
-        data = await SummaryProcessingStrategy.retrieve()
+        data = await SummaryProcessingStrategy.retrieve(
+            only_not_embedded=only_not_embedded
+        )
 
         if isinstance(divide, str):
             classes = set([entry["metadata"][divide] for entry in data])
@@ -382,12 +397,12 @@ class SummaryProcessingStrategy:
             for entry in data:
                 c = entry["metadata"][divide]
                 docs[c].append(
-                    Document(page_content=entry["content"], metadata=entry["metadata"])
+                    Document(page_content=entry["content"], metadata=entry["metadata"], id=entry["metadata"]["thread_id"])
                 )
             return docs
         else:
             docs = [
-                Document(page_content=entry["content"], metadata=entry["metadata"])
+                Document(page_content=entry["content"], metadata=entry["metadata"], id=entry["metadata"]["thread_id"])
                 for entry in data
             ]
 
