@@ -81,7 +81,7 @@ class Embedding(Model):
 
 class EmbeddingIndex(Model):
     id = fields.IntField(pk=True)
-    data = fields.JSONField()
+    data = fields.BinaryField()
     embedData = fields.BinaryField(required=True)
     indexType = fields.CharField(max_length=255)
     createdAt = NaiveDatetimeField(auto_now_add=True)

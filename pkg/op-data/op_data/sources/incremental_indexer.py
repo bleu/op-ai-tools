@@ -15,6 +15,7 @@ from op_brains.chat import model_utils
 import numpy as np
 from op_brains.config import CHAT_MODEL, EMBEDDING_MODEL
 import datetime as dt
+import pickle
 
 class IncrementalIndexerService:
     def __init__(self):
@@ -35,10 +36,12 @@ class IncrementalIndexerService:
         np.savez_compressed(buffer, index_embed=index_embed)
         embed_bytes = buffer.getvalue()
 
-        reorded_index = await reorder_index(index, updated_documents_urls)
-
+        reordered_index = await reorder_index(index, updated_documents_urls)
+        reordered_index_bytes = pickle.dumps(reordered_index)
+        compressed_index = zlib.compress(reordered_index_bytes)
+        
         await EmbeddingIndex.create(
-            data=reorded_index,
+            data=compressed_index,
             embedData=embed_bytes,
             indexType=index_type
         )
@@ -63,7 +66,12 @@ class IncrementalIndexerService:
             )
             if questions_index is None:
                 return {}
-            return questions_index.data
+
+            compressed_data = questions_index.data
+            decompressed_data = zlib.decompress(compressed_data)
+            index_dict = pickle.loads(decompressed_data)
+
+            return index_dict
         except DoesNotExist:
             return {}
     

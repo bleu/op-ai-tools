@@ -79,7 +79,7 @@ model Embeddings {
 // todo: rename to ManagedIndex or ManualIndex
 model EmbeddingIndex {
   id        Int      @id @default(autoincrement())
-  data      Json
+  data      Bytes?
   embedData Bytes
   indexType String
   createdAt DateTime @default(now())

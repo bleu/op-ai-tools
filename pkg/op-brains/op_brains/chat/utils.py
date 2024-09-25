@@ -6,7 +6,8 @@ from op_brains.documents import DataExporter
 import numpy as np
 import io
 from op_data.db.models import EmbeddingIndex
-
+import pickle
+import zlib
 from op_brains.config import DB_STORAGE_PATH, CHAT_MODEL
 
 
@@ -39,8 +40,12 @@ async def build_questions_index(k_max=2, treshold=0.9, ttl_hash=None):
     loaded_data = np.load(buffer)
     embed_index = loaded_data["index_embed"]
 
+    compressed_data = index.data
+    decompressed_data = zlib.decompress(compressed_data)
+    index_dict = pickle.loads(decompressed_data)
+
     return model_utils.RetrieverBuilder.build_index(
-        index.data, embed_index, k_max, treshold
+        index_dict, embed_index, k_max, treshold
     )
 
 # TODO: cache this function
@@ -51,9 +56,13 @@ async def build_keywords_index(k_max=5, treshold=0.95):
     buffer = io.BytesIO(index.embedData)
     loaded_data = np.load(buffer)
     embed_index = loaded_data["index_embed"]
+    
+    compressed_data = index.data
+    decompressed_data = zlib.decompress(compressed_data)
+    index_dict = pickle.loads(decompressed_data)
 
     return model_utils.RetrieverBuilder.build_index(
-        index.data, embed_index, k_max, treshold
+        index_dict, embed_index, k_max, treshold
     )
 
 
