@@ -15,8 +15,13 @@ import importlib.resources
 from langchain_community.vectorstores import FAISS
 from langchain_voyageai import VoyageAIRerank
 import datetime as dt
-from op_data.db.models import RawTopic, Embedding
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+from op_data.db.models import RawTopic
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_exponential,
+    retry_if_exception_type,
+)
 from voyageai.error import RateLimitError
 from voyageai.client import Client as VoyageClient
 
@@ -95,19 +100,21 @@ Additional guidelines:
 Remember, your goal is to create questions that a non-specialist user would find interesting and relevant based on the given fragment. Do not make questions that require knowledge beyond what's provided in the text.
 """
 
+
 @retry(
     stop=stop_after_attempt(10),
     wait=wait_exponential(multiplier=1, min=10, max=320),
-    retry=retry_if_exception_type(RateLimitError)
+    retry=retry_if_exception_type(RateLimitError),
 )
 async def rate_limited_llm_invoke(llm, prompt):
     try:
         await asyncio.sleep(random.uniform(0.1, 0.5))  # Add some jitter
         return await llm.ainvoke(prompt)
     except Exception as e:
-        if '429' in str(exception):
+        if "429" in str(exception):
             raise RateLimitError(str(e))
         raise e
+
 
 async def process_context(context, llm, semaphore):
     async with semaphore:  # Limit concurrency
@@ -132,7 +139,10 @@ async def process_context(context, llm, semaphore):
             print(f"An unexpected error occurred: {str(e)}")
             raise
 
-async def generate_indexes_from_fragment(list_contexts: Iterable, llm: Any, max_concurrency=20) -> dict:
+
+async def generate_indexes_from_fragment(
+    list_contexts: Iterable, llm: Any, max_concurrency=20
+) -> dict:
     kw_index = {}
     q_index = {}
 
@@ -146,7 +156,9 @@ async def generate_indexes_from_fragment(list_contexts: Iterable, llm: Any, max_
         tags = {tag[0]: tag[2] for tag in xml_tags}
 
         if "questions" in tags:
-            questions = [(q[2], q[1]) for q in xml_tag_pattern.findall(tags["questions"])]
+            questions = [
+                (q[2], q[1]) for q in xml_tag_pattern.findall(tags["questions"])
+            ]
             for q in questions:
                 q = q[0]
                 q_index.setdefault(q, []).append(url)
@@ -156,7 +168,7 @@ async def generate_indexes_from_fragment(list_contexts: Iterable, llm: Any, max_
             keywords = [re.sub(r"[^\w\s]", "", k) for k in keywords]
             for k in keywords:
                 kw_index.setdefault(k, []).append(url)
-                
+
         print("done for ", url)
 
     return q_index, kw_index
@@ -165,13 +177,13 @@ async def generate_indexes_from_fragment(list_contexts: Iterable, llm: Any, max_
 async def reorder_index(index_dict, updated_urls=[]):
     all_contexts_df = await DataExporter.get_dataframe(only_not_embedded=False)
     output_dict = {}
-    
+
     semaphore = asyncio.Semaphore(15)
 
     @retry(
         stop=stop_after_attempt(15),
         wait=wait_exponential(multiplier=1, min=15, max=320),
-        retry=retry_if_exception_type(RateLimitError)
+        retry=retry_if_exception_type(RateLimitError),
     )
     async def rate_limited_reranker(query, documents, check_count=False):
         reranker = reranker_voyager
@@ -184,17 +196,23 @@ async def reorder_index(index_dict, updated_urls=[]):
 
     async def process_key(key, urls):
         async with semaphore:
-            if any(url in updated_urls for url in urls):  # Check if the URLs are updated
-                contexts = all_contexts_df[all_contexts_df["url"].isin(urls)].content.tolist()
+            if any(
+                url in updated_urls for url in urls
+            ):  # Check if the URLs are updated
+                contexts = all_contexts_df[
+                    all_contexts_df["url"].isin(urls)
+                ].content.tolist()
                 k = len(contexts)
                 if k > 1:
                     try:
                         check_count = True if k > 250 else False
-                        contexts = await rate_limited_reranker(query=key, documents=contexts, check_count=check_count)
+                        contexts = await rate_limited_reranker(
+                            query=key, documents=contexts, check_count=check_count
+                        )
                         urls = [context.metadata["url"] for context in contexts]
                     except Exception as e:
                         print(f"Keu: {key} Error: {str(e)}")
-            
+
             return key, urls
 
     tasks = [process_key(key, urls) for key, urls in index_dict.items()]

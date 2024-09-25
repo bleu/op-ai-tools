@@ -119,10 +119,12 @@ async def sync_all():
     await sync_snapshot()
     await sync_agora()
 
+
 @tasks.cron("0 0 1 * *")
 async def sync_indexes():
     indexer = IncrementalIndexerService()
     await indexer.acquire_and_save()
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0")

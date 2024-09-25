@@ -320,7 +320,10 @@ trust_level (0-4): {TRUST_LEVEL}
     @staticmethod
     async def get_threads_documents() -> List[Document]:
         threads = await ForumPostsProcessingStrategy.return_threads()
-        threads_forum = [Document(page_content=t[0], metadata=t[1], id=t[1]['thread_id']) for t in threads]
+        threads_forum = [
+            Document(page_content=t[0], metadata=t[1], id=t[1]["thread_id"])
+            for t in threads
+        ]
 
         return threads_forum
 
@@ -329,7 +332,10 @@ trust_level (0-4): {TRUST_LEVEL}
         threads = await ForumPostsProcessingStrategy.return_threads(
             only_not_summarized=True
         )
-        threads_forum = [Document(page_content=t[0], metadata=t[1], id=t[1]['thread_id']) for t in threads]
+        threads_forum = [
+            Document(page_content=t[0], metadata=t[1], id=t[1]["thread_id"])
+            for t in threads
+        ]
 
         return threads_forum
 
@@ -397,12 +403,20 @@ class SummaryProcessingStrategy:
             for entry in data:
                 c = entry["metadata"][divide]
                 docs[c].append(
-                    Document(page_content=entry["content"], metadata=entry["metadata"], id=entry["metadata"]["thread_id"])
+                    Document(
+                        page_content=entry["content"],
+                        metadata=entry["metadata"],
+                        id=entry["metadata"]["thread_id"],
+                    )
                 )
             return docs
         else:
             docs = [
-                Document(page_content=entry["content"], metadata=entry["metadata"], id=entry["metadata"]["thread_id"])
+                Document(
+                    page_content=entry["content"],
+                    metadata=entry["metadata"],
+                    id=entry["metadata"]["thread_id"],
+                )
                 for entry in data
             ]
 

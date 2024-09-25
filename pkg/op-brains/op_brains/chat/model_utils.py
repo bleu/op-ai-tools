@@ -273,10 +273,10 @@ class ContextHandling:
 
 class RetrieverBuilder:
     @staticmethod
-    def build_faiss_retriever(
+    async def build_faiss_retriever(
         **retriever_pars,
     ):
-        db = connect_faiss.CachedDatabaseLoader.load_db()
+        db = await connect_faiss.CachedDatabaseLoader.load_db()
         return lambda query: db.similarity_search(query, **retriever_pars)
 
     @staticmethod

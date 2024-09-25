@@ -69,26 +69,26 @@ class RawTopic(Model):
         table = "RawTopic"
 
 
-class Embedding(Model):
+class FaissIndex(Model):
     id = fields.IntField(pk=True)
-    compressedData = fields.BinaryField(required=True)
+    objectKey = fields.CharField(max_length=255, unique=True)
     createdAt = NaiveDatetimeField(auto_now_add=True)
     updatedAt = NaiveDatetimeField(auto_now=True)
 
     class Meta:
-        table = "Embeddings"
+        table = "FaissIndex"
 
 
-class EmbeddingIndex(Model):
+class ManagedIndex(Model):
     id = fields.IntField(pk=True)
-    data = fields.BinaryField()
-    embedData = fields.BinaryField(required=True)
+    jsonObjectKey = fields.CharField(max_length=255, unique=True)
+    compressedObjectKey = fields.CharField(max_length=255, unique=True)
     indexType = fields.CharField(max_length=255)
     createdAt = NaiveDatetimeField(auto_now_add=True)
     updatedAt = NaiveDatetimeField(auto_now=True)
 
     class Meta:
-        table = "EmbeddingIndex"
+        table = "ManagedIndex"
 
 
 class RelatedTopics(Model):

@@ -5,10 +5,14 @@ from typing import Dict, Any, List, Tuple
 from op_brains.documents import DataExporter
 import numpy as np
 import io
-from op_data.db.models import EmbeddingIndex
+from op_data.db.models import ManagedIndex
 import pickle
 import zlib
 from op_brains.config import DB_STORAGE_PATH, CHAT_MODEL
+from op_data.sources.incremental_indexer import IncrementalIndexerService
+import json
+import asyncio
+from aiocache import cached
 
 
 def transform_memory_entries(entries: List[Dict[str, str]]) -> List[Tuple[str, str]]:
@@ -27,43 +31,41 @@ def transform_memory_entries(entries: List[Dict[str, str]]) -> List[Tuple[str, s
     ]
 
 
-# TODO: cache this function
-async def build_questions_index(k_max=2, treshold=0.9, ttl_hash=None):
-    del ttl_hash # to emphasize we don't use it and to shut pylint up
+async def build_managed_index(k_max=5, treshold=0.95, indexType="questions"):
     index = (
-        await EmbeddingIndex.filter(indexType="questions")
-        .order_by("-createdAt")
-        .first()
+        await ManagedIndex.filter(indexType=indexType).order_by("-createdAt").first()
     )
 
-    buffer = io.BytesIO(index.embedData)
-    loaded_data = np.load(buffer)
-    embed_index = loaded_data["index_embed"]
+    managed_index_json = IncrementalIndexerService.retrieve_object_from_s3(
+        index.jsonObjectKey
+    )
+    managed_index_npz = IncrementalIndexerService.retrieve_object_from_s3(
+        index.compressedObjectKey
+    )
+    managed_index_npz_bytes = io.BytesIO(managed_index_npz)
+    loaded_data = np.load(managed_index_npz_bytes)
 
-    compressed_data = index.data
-    decompressed_data = zlib.decompress(compressed_data)
-    index_dict = pickle.loads(decompressed_data)
+    embed_index = loaded_data["index_embed"]
+    index_dict = json.loads(managed_index_json)
 
     return model_utils.RetrieverBuilder.build_index(
         index_dict, embed_index, k_max, treshold
     )
 
-# TODO: cache this function
-async def build_keywords_index(k_max=5, treshold=0.95):
-    index = (
-        await EmbeddingIndex.filter(indexType="keywords").order_by("-createdAt").first()
-    )
-    buffer = io.BytesIO(index.embedData)
-    loaded_data = np.load(buffer)
-    embed_index = loaded_data["index_embed"]
-    
-    compressed_data = index.data
-    decompressed_data = zlib.decompress(compressed_data)
-    index_dict = pickle.loads(decompressed_data)
 
-    return model_utils.RetrieverBuilder.build_index(
-        index_dict, embed_index, k_max, treshold
-    )
+@cached(ttl=60 * 60 * 24)
+async def get_indexes():
+    questions_task = build_managed_index(k_max=5, treshold=0.93, indexType="questions")
+    keywords_task = build_managed_index(k_max=5, treshold=0.95, indexType="keywords")
+    default_task = model_utils.RetrieverBuilder.build_faiss_retriever(k=5)
+
+    (
+        questions_index_retriever,
+        keywords_index_retriever,
+        default_retriever,
+    ) = await asyncio.gather(questions_task, keywords_task, default_task)
+
+    return questions_index_retriever, keywords_index_retriever, default_retriever
 
 
 async def process_question(
@@ -106,14 +108,14 @@ async def process_question(
     )
 
     try:
-        questions_index_retriever = await build_questions_index(k_max=5, treshold=0.93)
-        keywords_index_retriever = await build_keywords_index(k_max=5, treshold=0.95)
-        default_retriever = model_utils.RetrieverBuilder.build_faiss_retriever(
-            k=5,
-        )
+        (
+            questions_index_retriever,
+            keywords_index_retriever,
+            default_retriever,
+        ) = await get_indexes()
 
         def contains(must_contain):
-            return lambda similar: [s for s in similar if must_contain in s]        
+            return lambda similar: [s for s in similar if must_contain in s]
 
         async def retriever(query: dict, reasoning_level: int) -> list:
             if reasoning_level < 1 and "keyword" in query:
@@ -159,7 +161,8 @@ async def process_question(
 
         # logger.log_query(question, result)
         return {"data": result["answer"], "error": None}
-    except Exception:
+    except Exception as e:
+        print(e)
         return {
             "data": None,
             "error": "An unexpected error occurred during prediction",

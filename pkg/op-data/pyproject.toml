@@ -12,6 +12,7 @@ psycopg = "^3.2.1"
 aiofiles = "^24.1.0"
 importlib-resources = "^6.4.0"
 op-artifacts = { path = "../op-artifacts", develop = true }
+boto3 = "^1.35.26"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.5.7"

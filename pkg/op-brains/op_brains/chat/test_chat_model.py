@@ -1,8 +1,9 @@
 import groq
 import asyncio
 
+
 class GroqLLM:
-    def __init__(self, model_name='llama3-8b-8192', api_key=None):
+    def __init__(self, model_name="llama3-8b-8192", api_key=None):
         self.client = groq.Groq(api_key=None)
         self.model_name = model_name
 
@@ -15,7 +16,7 @@ class GroqLLM:
                 }
             ],
             model=self.model_name,
-            max_tokens=max_tokens
+            max_tokens=max_tokens,
         )
         return self.Response(response.choices[0].message.content)
 
@@ -29,7 +30,7 @@ class GroqLLM:
                 }
             ],
             model=self.model_name,
-            max_tokens=max_tokens
+            max_tokens=max_tokens,
         )
         return self.Response(response.choices[0].message.content)
 

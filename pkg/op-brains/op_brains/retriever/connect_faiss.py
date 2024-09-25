@@ -9,6 +9,7 @@ from op_brains.chat import model_utils
 
 from typing import Optional
 import time
+from op_data.sources.incremental_indexer import IncrementalIndexerService
 
 
 class DatabaseLoader:
@@ -49,7 +50,9 @@ class CachedDatabaseLoader:
                     or (current_time - cls._db_cache_time) > cls.CACHE_TTL
                 ):
                     embeddings = model_utils.access_APIs.get_embedding(EMBEDDING_MODEL)
-                    loaded_dbs = IncrementalIndexerService.load_all_indexes(embeddings)
+                    loaded_dbs = await IncrementalIndexerService.load_faiss_indexes(
+                        embeddings
+                    )
 
                     merged_db = None
                     for key, faiss_index in loaded_dbs.items():
