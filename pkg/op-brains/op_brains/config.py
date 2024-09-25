@@ -31,10 +31,4 @@ FORUM_SUMMARY_DB = "Topic"
 USE_SUMMARY_MOCK_DATA = os.getenv("USE_SUMMARY_MOCK_DATA", "False") == "True"
 SNAPSHOT_DB = "SnapshotProposal"
 
-QUESTIONS_INDEX_JSON = importlib.resources.files(op_artifacts) / "index_questions.json"
-QUESTIONS_INDEX_NPZ = importlib.resources.files(op_artifacts) / "index_questions.npz"
-
-KEYWORDS_INDEX_JSON = importlib.resources.files(op_artifacts) / "index_keywords.json"
-KEYWORDS_INDEX_NPZ = importlib.resources.files(op_artifacts) / "index_keywords.npz"
-
 SCOPE = "OPTIMISM GOVERNANCE/OPTIMISM COLLECTIVE/OPTIMISM L2"

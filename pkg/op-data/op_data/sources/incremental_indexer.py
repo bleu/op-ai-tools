@@ -14,7 +14,6 @@ from op_brains.setup import reorder_index, generate_indexes_from_fragment
 from op_brains.chat import model_utils
 import numpy as np
 from op_brains.config import CHAT_MODEL, EMBEDDING_MODEL
-from .mock import QUESTIONS_INDEX, KEYWORDS_INDEX
 import datetime as dt
 
 class IncrementalIndexerService:
@@ -206,9 +205,7 @@ class IncrementalIndexerService:
         updated_documents_urls = self.get_updated_documents_urls(data)
 
         # Save updated indexes and set the raw topics as embedded
-        await asyncio.gather(
-            self.save_all_indexes(),
-            self.save_embedding_index(self.questions_index, "questions", updated_documents_urls),
-            self.save_embedding_index(self.keywords_index, "keywords", updated_documents_urls),
-            self.save_raw_topics_as_embedded(updated_documents_urls)
-        )
+        await self.save_all_indexes()
+        await self.save_embedding_index(self.questions_index, "questions", updated_documents_urls)
+        await self.save_embedding_index(self.keywords_index, "keywords", updated_documents_urls)
+        await self.save_raw_topics_as_embedded(updated_documents_urls)

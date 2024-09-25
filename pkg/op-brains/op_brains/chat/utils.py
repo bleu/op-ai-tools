@@ -26,7 +26,9 @@ def transform_memory_entries(entries: List[Dict[str, str]]) -> List[Tuple[str, s
     ]
 
 
-async def build_questions_index(k_max=2, treshold=0.9):
+# TODO: cache this function
+async def build_questions_index(k_max=2, treshold=0.9, ttl_hash=None):
+    del ttl_hash # to emphasize we don't use it and to shut pylint up
     index = (
         await EmbeddingIndex.filter(indexType="questions")
         .order_by("-createdAt")
@@ -41,7 +43,7 @@ async def build_questions_index(k_max=2, treshold=0.9):
         index.data, embed_index, k_max, treshold
     )
 
-
+# TODO: cache this function
 async def build_keywords_index(k_max=5, treshold=0.95):
     index = (
         await EmbeddingIndex.filter(indexType="keywords").order_by("-createdAt").first()

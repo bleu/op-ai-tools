@@ -13,11 +13,7 @@ from langchain.embeddings import HuggingFaceEmbeddings
 from .test_chat_model import GroqLLM
 from op_brains.retriever import connect_faiss
 from op_brains.config import (
-    QUESTIONS_INDEX_JSON,
-    QUESTIONS_INDEX_NPZ,
     SCOPE,
-    KEYWORDS_INDEX_JSON,
-    KEYWORDS_INDEX_NPZ,
     EMBEDDING_MODEL,
     CHAT_MODEL,
 )

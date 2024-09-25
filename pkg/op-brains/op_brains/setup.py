@@ -18,8 +18,11 @@ import datetime as dt
 from op_data.db.models import RawTopic, Embedding
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 from voyageai.error import RateLimitError
+from voyageai.client import Client as VoyageClient
 
 reranker_voyager = VoyageAIRerank(model="rerank-1")
+lite_reranker_voyager = VoyageAIRerank(model="rerank-lite-1")
+vo = VoyageClient()
 
 
 prompt_question_generation = """
@@ -163,16 +166,21 @@ async def reorder_index(index_dict, updated_urls=[]):
     all_contexts_df = await DataExporter.get_dataframe(only_not_embedded=False)
     output_dict = {}
     
-    semaphore = asyncio.Semaphore(10)
+    semaphore = asyncio.Semaphore(15)
 
     @retry(
-        stop=stop_after_attempt(10),
-        wait=wait_exponential(multiplier=1, min=10, max=320),
+        stop=stop_after_attempt(15),
+        wait=wait_exponential(multiplier=1, min=15, max=320),
         retry=retry_if_exception_type(RateLimitError)
     )
-    async def rate_limited_reranker(query, documents):
-        await asyncio.sleep(random.uniform(0.1, 0.5))  # Add some jitter
-        return await reranker_voyager.acompress_documents(query=query, documents=documents)
+    async def rate_limited_reranker(query, documents, check_count=False):
+        reranker = reranker_voyager
+        if check_count:
+            count = vo.count_tokens([doc.page_content for doc in documents], "rerank-1")
+            if count > 100000:
+                reranker = lite_reranker_voyager
+
+        return await reranker.acompress_documents(query=query, documents=documents)
 
     async def process_key(key, urls):
         async with semaphore:
@@ -181,11 +189,11 @@ async def reorder_index(index_dict, updated_urls=[]):
                 k = len(contexts)
                 if k > 1:
                     try:
-                        contexts = await rate_limited_reranker(query=key, documents=contexts)
+                        check_count = True if k > 250 else False
+                        contexts = await rate_limited_reranker(query=key, documents=contexts, check_count=check_count)
                         urls = [context.metadata["url"] for context in contexts]
-                    except RateLimitError as e:
-                        print(f"Rate limit exceeded for key {key} after all retries. Error: {str(e)}")
-                        raise e
+                    except Exception as e:
+                        print(f"Keu: {key} Error: {str(e)}")
             
             return key, urls
 

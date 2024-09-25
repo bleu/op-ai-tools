@@ -68,6 +68,7 @@ model RawTopic {
   lastEmbeddedAt   DateTime?
 }
 
+// todo: rename to FaissIndex
 model Embeddings {
   id             Int      @id @default(autoincrement())
   compressedData Bytes
@@ -75,6 +76,7 @@ model Embeddings {
   updatedAt      DateTime @updatedAt
 }
 
+// todo: rename to ManagedIndex or ManualIndex
 model EmbeddingIndex {
   id        Int      @id @default(autoincrement())
   data      Json
