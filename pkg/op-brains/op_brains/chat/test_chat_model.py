@@ -2,8 +2,8 @@ import groq
 import asyncio
 
 class GroqLLM:
-    def __init__(self, model_name='llama3-8b-8192'):
-        self.client = groq.Groq(api_key="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")
+    def __init__(self, model_name='llama3-8b-8192', api_key=None):
+        self.client = groq.Groq(api_key=None)
         self.model_name = model_name
 
     def invoke(self, prompt, max_tokens=2000):
