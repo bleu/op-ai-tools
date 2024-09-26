@@ -22,10 +22,6 @@ async def load_faiss_indexes(vectorstore: str = "faiss") -> FAISS:
         loaded_dbs = await IncrementalIndexerService.load_faiss_indexes(
             embeddings
         )
-        
-        logger.info(f"Embedding model: {EMBEDDING_MODEL}")
-        logger.info(f"Merging databases: {len(loaded_dbs.keys())}")
-        # logger.info(f"Loaded databases: {loaded_dbs}")
 
         merged_db = None
         for key, faiss_index in loaded_dbs.items():
@@ -40,7 +36,7 @@ async def load_faiss_indexes(vectorstore: str = "faiss") -> FAISS:
                     logger.error(f"Failed to merge faiss databases")
                     raise e
         
-        logger.info(f"Successfully merged databases: {len(loaded_dbs.keys())}")
+        logger.info(f"Successfully merged faiss databases")
 
         return merged_db
     raise ValueError(f"Unsupported vectorstore: {vectorstore}")
