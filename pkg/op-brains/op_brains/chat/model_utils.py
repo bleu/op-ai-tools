@@ -276,7 +276,7 @@ class RetrieverBuilder:
     async def build_faiss_retriever(
         **retriever_pars,
     ):
-        db = await connect_faiss.CachedDatabaseLoader.load_db()
+        db = await connect_faiss.load_faiss_indexes()
         return lambda query: db.similarity_search(query, **retriever_pars)
 
     @staticmethod
