@@ -5,18 +5,16 @@ import faiss
 import numpy as np
 import io
 import pandas as pd
-from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_core.pydantic_v1 import BaseModel, Field
-from langchain.embeddings import HuggingFaceEmbeddings
-from .test_chat_model import GroqLLM
-from op_brains.retriever import connect_faiss
+from op_brains.retriever.connect_faiss import load_faiss_indexes
 from op_brains.config import (
     SCOPE,
     EMBEDDING_MODEL,
     CHAT_MODEL,
 )
+from .apis import access_APIs
 from op_brains.documents import DataExporter
 
 TODAY = time.strftime("%Y-%m-%d")
@@ -276,7 +274,7 @@ class RetrieverBuilder:
     async def build_faiss_retriever(
         **retriever_pars,
     ):
-        db = await connect_faiss.load_faiss_indexes()
+        db = await load_faiss_indexes()
         return lambda query: db.similarity_search(query, **retriever_pars)
 
     @staticmethod
@@ -324,22 +322,3 @@ class RetrieverBuilder:
             return [contexts[contexts["url"] == u].content.tolist()[0] for u in urls]
 
         return find_similar
-
-
-class access_APIs:
-    def get_llm(model: str = CHAT_MODEL, **kwargs):
-        if "gpt" in model:
-            return ChatOpenAI(model=model, **kwargs)
-        elif "claude" in model:
-            return ChatAnthropic(model=model, **kwargs)
-        elif "free" in model:
-            return GroqLLM()
-        else:
-            raise ValueError(f"Model {model} not recognized")
-
-    @staticmethod
-    def get_embedding(model: str = EMBEDDING_MODEL, **kwargs):
-        if "free" in model:
-            return HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-        else:
-            return OpenAIEmbeddings(model=model, **kwargs)

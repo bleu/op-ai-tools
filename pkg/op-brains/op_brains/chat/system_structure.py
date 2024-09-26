@@ -1,5 +1,5 @@
 from typing import Tuple, Any, Callable
-from op_brains.chat import model_utils
+from op_brains.chat.apis import access_APIs
 import pandas as pd
 
 import re
@@ -28,7 +28,7 @@ class RAGSystem:
 
         for m in self.models_to_use:
             m, pars = m
-            self.llm += [model_utils.access_APIs.get_llm(m, **pars)]
+            self.llm += [access_APIs.get_llm(m, **pars)]
 
     def query_preprocessing_LLM(
         self, query: str, memory: list, LLM: Any = None

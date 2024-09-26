@@ -57,7 +57,7 @@ async def build_managed_index(k_max=5, treshold=0.95, indexType="questions"):
     )
 
 
-# @cached(ttl=60 * 60 * 24)
+@cached(ttl=60 * 60 * 24)
 async def get_indexes():
     questions_task = build_managed_index(k_max=5, treshold=0.93, indexType="questions")
     keywords_task = build_managed_index(k_max=5, treshold=0.95, indexType="keywords")

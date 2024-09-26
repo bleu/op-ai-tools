@@ -5,7 +5,7 @@ from langchain_community.vectorstores import FAISS
 
 from op_brains.config import DB_STORAGE_PATH, EMBEDDING_MODEL
 import asyncio
-from op_brains.chat import model_utils
+from op_brains.chat.apis import access_APIs
 
 from typing import Optional
 import time
@@ -15,10 +15,10 @@ from aiocache import cached
 
 logger = get_logger(__name__)
 
-# @cached(ttl=10)
+@cached(ttl=60 * 60 * 24)
 async def load_faiss_indexes(vectorstore: str = "faiss") -> FAISS:
     if vectorstore == "faiss":
-        embeddings = model_utils.access_APIs.get_embedding(EMBEDDING_MODEL)
+        embeddings = access_APIs.get_embedding(EMBEDDING_MODEL)
         loaded_dbs = await IncrementalIndexerService.load_faiss_indexes(
             embeddings
         )

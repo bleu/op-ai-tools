@@ -11,7 +11,7 @@ import asyncio
 from op_brains.documents import DataExporter
 from langchain.docstore.in_memory import InMemoryDocstore
 from op_brains.setup import reorder_index, generate_indexes_from_fragment
-from op_brains.chat import model_utils
+from op_brains.chat.apis import access_APIs
 import numpy as np
 from op_brains.config import CHAT_MODEL, EMBEDDING_MODEL
 import datetime as dt
@@ -31,8 +31,8 @@ class IncrementalIndexerService:
     )
 
     def __init__(self):
-        self.embeddings = model_utils.access_APIs.get_embedding(EMBEDDING_MODEL)
-        self.llm = model_utils.access_APIs.get_llm(CHAT_MODEL)
+        self.embeddings = access_APIs.get_embedding(EMBEDDING_MODEL)
+        self.llm = access_APIs.get_llm(CHAT_MODEL)
         self.vector_stores = {}
         self.questions_index = {}
         self.keywords_index = {}
