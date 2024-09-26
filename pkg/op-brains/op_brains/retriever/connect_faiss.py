@@ -10,7 +10,10 @@ from op_brains.chat import model_utils
 from typing import Optional
 import time
 from op_data.sources.incremental_indexer import IncrementalIndexerService
-import logging
+from op_core.logger import get_logger
+
+logger = get_logger(__name__)
+
 
 class CachedDatabaseLoader:
     _db_cache: Optional[FAISS] = None
@@ -33,9 +36,9 @@ class CachedDatabaseLoader:
                         embeddings
                     )
                     
-                    logging.info("embedding model", EMBEDDING_MODEL)
-                    logging.info("Merging databases", len(loaded_dbs.keys()))
-                    logging.info(loaded_dbs)
+                    logger.info(f"Embedding model: {EMBEDDING_MODEL}")
+                    logger.info(f"Merging databases: {len(loaded_dbs.keys())}")
+                    logger.info(f"Loaded databases: {loaded_dbs}")
 
                     merged_db = None
                     for key, faiss_index in loaded_dbs.items():

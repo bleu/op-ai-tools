@@ -13,7 +13,9 @@ from op_data.sources.incremental_indexer import IncrementalIndexerService
 import json
 import asyncio
 from aiocache import cached
-import logging
+from op_core.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def transform_memory_entries(entries: List[Dict[str, str]]) -> List[Tuple[str, str]]:
@@ -49,7 +51,7 @@ async def build_managed_index(k_max=5, treshold=0.95, indexType="questions"):
     embed_index = loaded_data["index_embed"]
     index_dict = json.loads(managed_index_json)
 
-    logging.info("Building managed index", indexType, len(index_dict.keys()))
+    logger.info(f"Building managed index, {indexType}, {len(index_dict.keys())}")
     return model_utils.RetrieverBuilder.build_index(
         index_dict, embed_index, k_max, treshold
     )
@@ -164,7 +166,7 @@ async def process_question(
         # logger.log_query(question, result)
         return {"data": result["answer"], "error": None}
     except Exception as e:
-        logging.error(f"An unexpected error occurred during prediction: {e}")
+        logger.error(f"Error. An unexpected error occurred during prediction: {str(e)}")
         return {
             "data": None,
             "error": "An unexpected error occurred during prediction",
