@@ -9,7 +9,6 @@ import random
 import numpy as np
 
 import op_artifacts
-from op_brains.chat import model_utils
 from op_brains.config import SCOPE, EMBEDDING_MODEL
 import importlib.resources
 from langchain_community.vectorstores import FAISS
