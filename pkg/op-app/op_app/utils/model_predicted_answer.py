@@ -8,7 +8,7 @@ def model_predicted_answer(answer: str) -> bool:
     Returns:
         bool: `True` if the answer is a valid prediction, `False` otherwise.
     """
-    if "I'm sorry, but I can only answer questions about" in answer:
-        return False
+    if "I'm sorry, but I can only answer questions about" in answer or answer == "":
+        return False    
 
     return True

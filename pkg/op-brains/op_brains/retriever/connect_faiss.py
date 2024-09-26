@@ -10,35 +10,13 @@ from op_brains.chat import model_utils
 from typing import Optional
 import time
 from op_data.sources.incremental_indexer import IncrementalIndexerService
-
-
-class DatabaseLoader:
-    @staticmethod
-    def load_db(dbs: Tuple[str, ...], vectorstore: str = "faiss") -> FAISS:
-        embeddings = model_utils.access_APIs.get_embedding(EMBEDDING_MODEL)
-        if vectorstore == "faiss":
-            db_paths = [
-                os.path.join(DB_STORAGE_PATH, f"{name}_db/faiss/{EMBEDDING_MODEL}")
-                for name in dbs
-            ]
-            loaded_dbs = [
-                FAISS.load_local(
-                    db_path, embeddings, allow_dangerous_deserialization=True
-                )
-                for db_path in db_paths
-            ]
-            merged_db = loaded_dbs[0]
-            for db in loaded_dbs[1:]:
-                merged_db.merge_from(db)
-            return merged_db
-        raise ValueError(f"Unsupported vectorstore: {vectorstore}")
-
+import logging
 
 class CachedDatabaseLoader:
     _db_cache: Optional[FAISS] = None
     _db_cache_time: Optional[float] = None
     _cache_lock = asyncio.Lock()
-    CACHE_TTL = 60 * 60 * 24  # day in seconds
+    CACHE_TTL = 10 # * 60 * 24  # day in seconds
 
     @classmethod
     async def load_db(cls, vectorstore: str = "faiss") -> FAISS:
@@ -49,10 +27,15 @@ class CachedDatabaseLoader:
                     cls._db_cache is None
                     or (current_time - cls._db_cache_time) > cls.CACHE_TTL
                 ):
+                    
                     embeddings = model_utils.access_APIs.get_embedding(EMBEDDING_MODEL)
                     loaded_dbs = await IncrementalIndexerService.load_faiss_indexes(
                         embeddings
                     )
+                    
+                    logging.info("embedding model", EMBEDDING_MODEL)
+                    logging.info("Merging databases", len(loaded_dbs.keys()))
+                    logging.info(loaded_dbs)
 
                     merged_db = None
                     for key, faiss_index in loaded_dbs.items():
