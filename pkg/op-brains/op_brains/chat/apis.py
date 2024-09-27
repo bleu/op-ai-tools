@@ -1,12 +1,13 @@
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from .test_chat_model import GroqLLM
 from op_brains.config import (
     EMBEDDING_MODEL,
     CHAT_MODEL,
 )
+
 
 class access_APIs:
     def get_llm(model: str = CHAT_MODEL, **kwargs):

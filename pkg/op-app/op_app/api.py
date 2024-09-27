@@ -23,6 +23,7 @@ from op_data.cli import (
 )
 from honeybadger import honeybadger
 from op_data.sources.incremental_indexer import IncrementalIndexerService
+from op_brains.chat.classify import classify_question
 
 app = Quart(__name__)
 app.config["SECRET_KEY"] = os.getenv("FLASK_API_SECRET_KEY")
@@ -73,13 +74,9 @@ def handle_exception(e):
     return jsonify({"error": "An unexpected error occurred during prediction"}), 500
 
 
-@app.route("/predict", methods=["POST"])
-@rate_limit(100, timedelta(minutes=1))
-@handle_question
-async def predict(question, memory):
-    result = await process_question(question, memory)
-
+async def capture_predict_event(question, result, user_token):
     answer = result["data"]["answer"] if result["data"] else ""
+    classifications = await classify_question(result)
 
     posthog_event = (
         "MODEL_PREDICTED_ANSWER"
@@ -87,19 +84,28 @@ async def predict(question, memory):
         else "MODEL_FAILED_TO_PREDICT"
     )
 
-    print(f"Posthog event: {posthog_event}")
-
-    user_token = request.headers.get("x-user-id")
     posthog.capture(
         user_token,
         posthog_event,
         {
             "endpoint": "predict",
             "question": question,
-            "answer": result["data"]["answer"] if result["data"] else "",
+            "classifications": classifications,
+            "answer": answer,
             "error": result.get("error"),
         },
     )
+
+
+@app.route("/predict", methods=["POST"])
+@rate_limit(100, timedelta(minutes=1))
+@handle_question
+async def predict(question, memory):
+    user_token = request.headers.get("x-user-id")
+    result = await process_question(question, memory)
+
+    # enqueue background task to capture predict event
+    app.add_background_task(capture_predict_event, question, result, user_token)
 
     return jsonify(result)
 

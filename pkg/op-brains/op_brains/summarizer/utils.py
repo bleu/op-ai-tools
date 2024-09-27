@@ -1,7 +1,6 @@
 import pandas as pd
 
-
-from typing import Dict, Any, Union, Optional
+from typing import Dict, Any, Union, Optional, List, Tuple
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.documents.base import Document
 
