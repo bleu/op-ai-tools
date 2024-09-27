@@ -74,23 +74,9 @@ def handle_exception(e):
     return jsonify({"error": "An unexpected error occurred during prediction"}), 500
 
 
-async def capture_question_classification(question, memory, user_token):
-    result = await classify_question(question, memory)
-    classification = result["classification"]
-
-    posthog.capture(
-        user_token,
-        "QUESTION_CLASSIFICATION",
-        {
-            "endpoint": "predict",
-            "question": question,
-            "classification": classification,
-        },
-    )
-
-
 async def capture_predict_event(question, result, user_token):
     answer = result["data"]["answer"] if result["data"] else ""
+    classifications = await classify_question(result)
 
     posthog_event = (
         "MODEL_PREDICTED_ANSWER"
@@ -104,6 +90,7 @@ async def capture_predict_event(question, result, user_token):
         {
             "endpoint": "predict",
             "question": question,
+            "classifications": classifications,
             "answer": answer,
             "error": result.get("error"),
         },
@@ -117,10 +104,7 @@ async def predict(question, memory):
     user_token = request.headers.get("x-user-id")
     result = await process_question(question, memory)
 
-    # enqueue background tasks
-    app.add_background_task(
-        capture_question_classification, question, memory, user_token
-    )
+    # enqueue background task to capture predict event
     app.add_background_task(capture_predict_event, question, result, user_token)
 
     return jsonify(result)
