@@ -9,7 +9,6 @@ from tortoise.exceptions import DoesNotExist
 from op_data.db.models import FaissIndex, ManagedIndex, RawTopic
 import asyncio
 from op_brains.documents import DataExporter
-from langchain.docstore.in_memory import InMemoryDocstore
 from op_brains.setup import reorder_index, generate_indexes_from_fragment
 from op_brains.chat.apis import access_APIs
 import numpy as np

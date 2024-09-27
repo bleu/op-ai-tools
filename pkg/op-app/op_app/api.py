@@ -23,6 +23,7 @@ from op_data.cli import (
 )
 from honeybadger import honeybadger
 from op_data.sources.incremental_indexer import IncrementalIndexerService
+from op_brains.chat.classify import classify_question
 
 app = Quart(__name__)
 app.config["SECRET_KEY"] = os.getenv("FLASK_API_SECRET_KEY")
@@ -73,12 +74,22 @@ def handle_exception(e):
     return jsonify({"error": "An unexpected error occurred during prediction"}), 500
 
 
-@app.route("/predict", methods=["POST"])
-@rate_limit(100, timedelta(minutes=1))
-@handle_question
-async def predict(question, memory):
-    result = await process_question(question, memory)
+async def capture_question_classification(question, memory, user_token):
+    result = await classify_question(question, memory)
+    classification = result["classification"]
 
+    posthog.capture(
+        user_token,
+        "QUESTION_CLASSIFICATION",
+        {
+            "endpoint": "predict",
+            "question": question,
+            "classification": classification,
+        },
+    )
+
+
+async def capture_predict_event(question, result, user_token):
     answer = result["data"]["answer"] if result["data"] else ""
 
     posthog_event = (
@@ -87,19 +98,30 @@ async def predict(question, memory):
         else "MODEL_FAILED_TO_PREDICT"
     )
 
-    print(f"Posthog event: {posthog_event}")
-
-    user_token = request.headers.get("x-user-id")
     posthog.capture(
         user_token,
         posthog_event,
         {
             "endpoint": "predict",
             "question": question,
-            "answer": result["data"]["answer"] if result["data"] else "",
+            "answer": answer,
             "error": result.get("error"),
         },
     )
+
+
+@app.route("/predict", methods=["POST"])
+@rate_limit(100, timedelta(minutes=1))
+@handle_question
+async def predict(question, memory):
+    user_token = request.headers.get("x-user-id")
+    result = await process_question(question, memory)
+
+    # enqueue background tasks
+    app.add_background_task(
+        capture_question_classification, question, memory, user_token
+    )
+    app.add_background_task(capture_predict_event, question, result, user_token)
 
     return jsonify(result)
 

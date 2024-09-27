@@ -1,7 +1,6 @@
 import pandas as pd
 
-
-from typing import Dict, Any, Union, Optional
+from typing import Dict, Any, Union, Optional, List, Tuple
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.documents.base import Document
 
@@ -44,6 +43,22 @@ class Prompt:
     """
     )
 
+    question_classifier = """
+        You are tasked with classifying a question from the Optimism documentation forum. The content of the question is provided below:
+        
+        Previous conversation thread:
+        {THREAD_CONTENT}
+        
+        Current question:
+        <question_content>
+        {QUESTION_CONTENT}
+        </question_content>
+        
+        Formatting guidelines:
+        - Just classify the question. Do not provide a summary.
+        - Do not use complete sentences; instead, use concise classification.
+    """
+
     @staticmethod
     def proposal(llm: Any, thread: Document, snapshot_proposals: Dict[str, Any]):
         url = thread.metadata["url"]
@@ -59,6 +74,30 @@ class Prompt:
         )
 
         return summary.dict()
+
+    @staticmethod
+    def format_chat_thread(thread: List) -> str:
+        """
+        Format the thread (conversation history) for the prompt.
+
+        Args:
+            thread: A list of tuples where the first element is either 'user' or 'chat'
+                    and the second element is the respective content.
+
+        Returns:
+            A formatted string that can be injected into the prompt.
+        """
+
+        formatted_thread = ""
+        for entry in thread:
+            if entry["name"] == "user":
+                formatted_thread += f"User: {entry["message"]}\n"
+            elif entry["name"] == "chat":
+                formatted_thread += f"Chat: {entry["message"]}\n"
+
+        if formatted_thread == "":
+            return "Empty thread."
+        return formatted_thread.strip()
 
 
 class SummaryStructured(BaseModel):
@@ -91,4 +130,25 @@ class SummaryStructured(BaseModel):
 
     tldr: str = Field(
         description="A short and concise paragraph that encompasses the most important information from what you wrote. If this is an old thread (and its information can be outdated), open the text with 'This is an old thread and the information may be outdated'."
+    )
+
+
+class QuestionClassificationStructured(BaseModel):
+    classification: str = Field(
+        description="""The classification of the question. Determine the type of question and provide a single-word classification:
+    - "delegates": if the question is about info and discussions on voting, delegation, and the Token House.
+    - "general_discussions": if the question is about topics that don't need a category, or don't fit into any other existing category.
+    - "mission_grants": if the question is about how to get a grant from the Governance Fund and keep up with key info.
+    - "updates_and_announcements": if the question is about updates and announcements.
+    - "retro_funding": if the question is about Retroactive Public Goods Funding rounds and related information.
+    - "citizens": if the question is about things relating to Citizens, or citizen-related activities.
+    - "elected_representatives": if the question is about any Elected Representative Structure, like info related to representatives or their responsibilities.
+    - "technical_proposals": if the question is about non-grant related structural, technical, or governance proposals.
+    - "policies_and_templates": if the question is about governance policies or finding proposal templates.
+    - "collective_strategy": if the question relates to collective strategy, intent, or future planning for the collective.
+    - "governance_design": if the question is about the collective's metagovernance strategy or structural design.
+    - "accountability": if the question is related to posts that increase transparency or ensure accountability within the system.
+    - "feedback": if the question seeks feedback or suggestions on specific topics.
+    - "get_started": if the question is about initial information or how to get started with the governance forum or platform.
+"""
     )
