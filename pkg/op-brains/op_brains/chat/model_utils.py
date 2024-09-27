@@ -189,7 +189,7 @@ class ContextHandling:
 """
 
     @staticmethod
-    def filter(
+    async def filter(
         question_context: dict,
         explored_contexts: list,
         contexts_df: pd.DataFrame,
@@ -206,7 +206,7 @@ class ContextHandling:
             if query is not None:
                 k_i = min(k, len(new_contexts))
                 if k_i > 0:
-                    new_contexts = ContextHandling.reordering(
+                    new_contexts = await ContextHandling.reordering(
                         new_contexts,
                         query,
                         contexts_df=contexts_df,
@@ -258,12 +258,13 @@ class ContextHandling:
         return "".join(out), urls
 
     @staticmethod
-    def reordering(
+    async def reordering(
         context: list, query: str, k: int, type_search: str, contexts_df: pd.DataFrame
     ) -> list:
         if type_search == "factual" or type_search == "ocurrence":
             return context[:k]
         elif type_search == "recent":
+            all_contexts_df = await DataExporter.get_dataframe(only_not_embedded=False)
             urls = [c.metadata["url"] for c in context]
             contexts = all_contexts_df[all_contexts_df["url"].isin(urls)].iloc[:k]
             return contexts.content.tolist()

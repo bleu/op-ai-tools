@@ -140,7 +140,7 @@ class RAGSystem:
                 }
                 # context_dict = {c.metadata['url']:c for cc in context_list for c in cc}
 
-                context, context_urls = self.context_filter(
+                context, context_urls = await self.context_filter(
                     context_dict,
                     explored_contexts_urls,
                     contexts_df,

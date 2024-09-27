@@ -75,7 +75,7 @@ def handle_exception(e):
 
 
 async def capture_predict_event(question, result, user_token):
-    answer = result["data"]["answer"] if result["data"] else ""
+    answer = result["data"].get("answer", "") if result["data"] else ""
     classifications = await classify_question(result)
 
     posthog_event = (

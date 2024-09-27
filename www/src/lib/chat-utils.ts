@@ -115,6 +115,8 @@ export const formatDate = (timestamp: number) => {
 export const formatAnswerWithReferences = (data: Data): string => {
   const { answer, url_supporting } = data;
 
+  if (!answer) return "An error occurred while fetching the answer.";
+
   const references = url_supporting
     .map((url, index) => `<a href="${url}" target="_blank">[${index + 1}]</a>`)
     .join(" ");

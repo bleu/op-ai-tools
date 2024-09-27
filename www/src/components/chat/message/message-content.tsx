@@ -37,7 +37,7 @@ export const MessageContent: React.FC<MessageContentProps> = ({
   };
 
   const messageContent = (data: Data) => {
-    if (data.url_supporting.length === 0) return data.answer;
+    if (data.url_supporting?.length === 0) return data.answer;
     const formattedMessage = formatAnswerWithReferences(data);
     return formattedMessage.replace(/\n/g, "<br />");
   };

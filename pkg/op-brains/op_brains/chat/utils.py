@@ -168,7 +168,7 @@ async def process_question(
     except Exception as e:
         logger.error(f"Error. An unexpected error occurred during prediction: {str(e)}")
         return {
-            "data": None,
+            "data": {},
             "error": "An unexpected error occurred during prediction",
         }
 
