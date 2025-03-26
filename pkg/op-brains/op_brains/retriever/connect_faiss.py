@@ -16,7 +16,7 @@ from aiocache import cached
 logger = get_logger(__name__)
 
 
-# @cached(ttl=60 * 60 * 24)
+@cached(ttl=60 * 60 * 24)
 async def load_faiss_indexes(vectorstore: str = "faiss") -> FAISS:
     if vectorstore == "faiss":
         embeddings = access_APIs.get_embedding(EMBEDDING_MODEL)
