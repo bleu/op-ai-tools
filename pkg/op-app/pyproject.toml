@@ -15,7 +15,7 @@ python-dotenv = "^1.0.1"
 op-artifacts = { path = "../op-artifacts", develop = true }
 honeybadger = "^0.20.2"
 uvicorn = "^0.30.6"
-quart = "^0.19.6"
+quart = "^0.19.7"
 quart-cors = "^0.7.0"
 quart-rate-limiter = "^0.10.0"
 quart-tasks = "^0.2.2"
